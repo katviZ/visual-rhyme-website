@@ -499,6 +499,16 @@ img {
   background: radial-gradient(ellipse 80% 60% at 50% 30%, var(--purple-950) 0%, var(--bg-primary) 70%);
 }
 
+.hero--cinematic {
+  min-height: 200vh;
+}
+
+.hero--cinematic .hero__content {
+  position: sticky;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
 .hero__content {
   position: relative;
   z-index: 2;

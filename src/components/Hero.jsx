@@ -1,5 +1,6 @@
 import { useRef, lazy, Suspense } from 'react';
-import { motion, useScroll, useTransform } from 'framer-motion';
+import { motion, useScroll, useTransform, useMotionValueEvent } from 'framer-motion';
+import { useState } from 'react';
 import FloatingOrbs from './ui/FloatingOrbs';
 import GlowGrid from './ui/GlowGrid';
 
@@ -8,20 +9,28 @@ const HeroScene = lazy(() => import('./three/HeroScene'));
 export default function Hero({ onOpenQuote }) {
   const ref = useRef(null);
   const { scrollYProgress } = useScroll({ target: ref, offset: ['start start', 'end start'] });
+  const [scrollVal, setScrollVal] = useState(0);
+
+  // Track scroll for the 3D scene
+  useMotionValueEvent(scrollYProgress, 'change', (v) => setScrollVal(v));
+
+  // Content fades/moves with scroll
   const y = useTransform(scrollYProgress, [0, 1], [0, 300]);
-  const opacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
   const scale = useTransform(scrollYProgress, [0, 1], [1, 0.8]);
   const rotateX = useTransform(scrollYProgress, [0, 1], [0, 25]);
 
+  // Text fades in after zoom-out starts, fades out at bottom
+  const contentOpacity = useTransform(scrollYProgress, [0, 0.15, 0.35, 0.85], [0, 0, 1, 0]);
+
   return (
-    <section id="hero" ref={ref} className="hero">
+    <section id="hero" ref={ref} className="hero hero--cinematic">
       <Suspense fallback={null}>
-        <HeroScene />
+        <HeroScene scrollProgress={scrollVal} />
       </Suspense>
       <FloatingOrbs />
       <GlowGrid />
 
-      <motion.div className="hero__content" style={{ y, opacity, scale, rotateX, perspective: 1200 }}>
+      <motion.div className="hero__content" style={{ y, opacity: contentOpacity, scale, rotateX, perspective: 1200 }}>
         <motion.div
           className="hero__eyebrow"
           initial={{ opacity: 0, x: -30 }}
