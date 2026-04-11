@@ -1,86 +1,116 @@
 import { useRef, useMemo, useEffect } from 'react';
-import { Canvas, useFrame, useThree } from '@react-three/fiber';
+import { Canvas, useFrame, useThree, extend } from '@react-three/fiber';
 import { Float, MeshDistortMaterial } from '@react-three/drei';
 import * as THREE from 'three';
 
-/* ─── Shared scroll value (set from outside React Three) ─── */
 const scrollState = { progress: 0 };
 
-/* ─── Dense LED Pixel Grid — fills the screen when zoomed in ─── */
-function LEDPixels({ width, height, density }) {
-  const meshRef = useRef();
-  const count = density * density;
-
-  const { positions, colors, scales } = useMemo(() => {
-    const pos = new Float32Array(count * 3);
-    const col = new Float32Array(count * 3);
-    const sc = new Float32Array(count);
-    const purple = new THREE.Color('#9333EA');
-    const blue = new THREE.Color('#A855F7');
-    const white = new THREE.Color('#E9D5FF');
-
-    for (let i = 0; i < density; i++) {
-      for (let j = 0; j < density; j++) {
-        const idx = i * density + j;
-        pos[idx * 3] = (i / density - 0.5) * width * 0.92;
-        pos[idx * 3 + 1] = (j / density - 0.5) * height * 0.92;
-        pos[idx * 3 + 2] = 0.06;
-
-        const r = Math.random();
-        const c = r < 0.4 ? purple : r < 0.7 ? blue : white;
-        col[idx * 3] = c.r;
-        col[idx * 3 + 1] = c.g;
-        col[idx * 3 + 2] = c.b;
-
-        sc[idx] = 0.3 + Math.random() * 0.7;
-      }
+/* ─── Custom Shader: Seamless liquid purple MicroLED surface ─── */
+const LiquidScreenMaterial = {
+  uniforms: {
+    uTime: { value: 0 },
+  },
+  vertexShader: `
+    varying vec2 vUv;
+    void main() {
+      vUv = uv;
+      gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
     }
-    return { positions: pos, colors: col, scales: sc };
-  }, [width, height, density, count]);
+  `,
+  fragmentShader: `
+    uniform float uTime;
+    varying vec2 vUv;
+
+    // Simplex-style noise for organic flow
+    vec3 permute(vec3 x) { return mod(((x*34.0)+1.0)*x, 289.0); }
+    float snoise(vec2 v) {
+      const vec4 C = vec4(0.211324865405187, 0.366025403784439,
+                         -0.577350269189626, 0.024390243902439);
+      vec2 i  = floor(v + dot(v, C.yy));
+      vec2 x0 = v -   i + dot(i, C.xx);
+      vec2 i1 = (x0.x > x0.y) ? vec2(1.0, 0.0) : vec2(0.0, 1.0);
+      vec4 x12 = x0.xyxy + C.xxzz;
+      x12.xy -= i1;
+      i = mod(i, 289.0);
+      vec3 p = permute(permute(i.y + vec3(0.0, i1.y, 1.0)) + i.x + vec3(0.0, i1.x, 1.0));
+      vec3 m = max(0.5 - vec3(dot(x0,x0), dot(x12.xy,x12.xy), dot(x12.zw,x12.zw)), 0.0);
+      m = m*m; m = m*m;
+      vec3 x = 2.0 * fract(p * C.www) - 1.0;
+      vec3 h = abs(x) - 0.5;
+      vec3 a0 = x - floor(x + 0.5);
+      m *= 1.79284291400159 - 0.85373472095314 * (a0*a0 + h*h);
+      vec3 g;
+      g.x = a0.x * x0.x + h.x * x0.y;
+      g.yz = a0.yz * x12.xz + h.yz * x12.yw;
+      return 130.0 * dot(m, g);
+    }
+
+    void main() {
+      vec2 uv = vUv;
+      float t = uTime;
+
+      // Multiple noise layers for rich liquid flow
+      float n1 = snoise(uv * 3.0 + vec2(t * 0.15, t * 0.1));
+      float n2 = snoise(uv * 5.0 - vec2(t * 0.12, -t * 0.08));
+      float n3 = snoise(uv * 8.0 + vec2(-t * 0.08, t * 0.15));
+      float n4 = snoise(uv * 2.0 + vec2(t * 0.05, t * 0.05));
+
+      // Combine for smooth organic motion
+      float flow = n1 * 0.4 + n2 * 0.3 + n3 * 0.15 + n4 * 0.15;
+      flow = flow * 0.5 + 0.5; // normalize to 0-1
+
+      // Purple palette — deep blacks to bright lavender
+      vec3 deepBlack  = vec3(0.02, 0.0, 0.05);
+      vec3 deepPurple = vec3(0.14, 0.02, 0.30);
+      vec3 purple     = vec3(0.29, 0.11, 0.58);
+      vec3 violet     = vec3(0.49, 0.22, 0.91);
+      vec3 lavender   = vec3(0.66, 0.33, 0.97);
+      vec3 bright     = vec3(0.75, 0.52, 0.99);
+      vec3 glow       = vec3(0.85, 0.71, 1.0);
+
+      // Smooth color stops
+      vec3 col;
+      if (flow < 0.12)      col = mix(deepBlack, deepPurple, flow / 0.12);
+      else if (flow < 0.28) col = mix(deepPurple, purple, (flow - 0.12) / 0.16);
+      else if (flow < 0.45) col = mix(purple, violet, (flow - 0.28) / 0.17);
+      else if (flow < 0.62) col = mix(violet, lavender, (flow - 0.45) / 0.17);
+      else if (flow < 0.78) col = mix(lavender, bright, (flow - 0.62) / 0.16);
+      else                  col = mix(bright, glow, (flow - 0.78) / 0.22);
+
+      // Subtle vignette — darker at edges
+      float vignette = 1.0 - smoothstep(0.3, 0.85, length(uv - 0.5) * 1.4);
+      col *= 0.7 + vignette * 0.5;
+
+      // Slight emissive bloom in bright areas
+      float bloom = smoothstep(0.6, 1.0, flow) * 0.15;
+      col += vec3(0.4, 0.2, 0.8) * bloom;
+
+      gl_FragColor = vec4(col, 1.0);
+    }
+  `,
+};
+
+/* ─── Animated Screen Surface ─── */
+function MicroLEDScreen({ width, height }) {
+  const matRef = useRef();
 
   useFrame(({ clock }) => {
-    if (!meshRef.current) return;
-    const t = clock.getElapsedTime();
-    const colAttr = meshRef.current.geometry.getAttribute('color');
-    // Liquid purple palette — flows like molten violet
-    const deep = new THREE.Color('#3B0764');
-    const purple = new THREE.Color('#7C3AED');
-    const violet = new THREE.Color('#A855F7');
-    const lavender = new THREE.Color('#C084FC');
-    const pink = new THREE.Color('#D8B4FE');
-    const white = new THREE.Color('#F3E8FF');
-
-    for (let i = 0; i < count; i++) {
-      const x = positions[i * 3];
-      const y = positions[i * 3 + 1];
-      // Organic liquid flow — multiple overlapping sine waves
-      const flow1 = Math.sin(t * 0.8 + x * 2.0 + y * 1.5) * 0.5 + 0.5;
-      const flow2 = Math.sin(t * 0.5 - x * 1.2 + y * 2.8 + 1.5) * 0.5 + 0.5;
-      const flow3 = Math.sin(t * 1.1 + x * 0.8 - y * 1.8 + 3.0) * 0.5 + 0.5;
-      const swirl = Math.sin(t * 0.3 + Math.sqrt(x * x + y * y) * 3.0) * 0.5 + 0.5;
-      const wave = (flow1 * 0.35 + flow2 * 0.25 + flow3 * 0.2 + swirl * 0.2);
-
-      let c;
-      if (wave < 0.15) c = deep.clone().lerp(purple, wave / 0.15);
-      else if (wave < 0.35) c = purple.clone().lerp(violet, (wave - 0.15) / 0.2);
-      else if (wave < 0.55) c = violet.clone().lerp(lavender, (wave - 0.35) / 0.2);
-      else if (wave < 0.75) c = lavender.clone().lerp(pink, (wave - 0.55) / 0.2);
-      else c = pink.clone().lerp(white, (wave - 0.75) / 0.25);
-
-      const brightness = 0.7 + scales[i] * 0.3;
-      colAttr.setXYZ(i, c.r * brightness, c.g * brightness, c.b * brightness);
+    if (matRef.current) {
+      matRef.current.uniforms.uTime.value = clock.getElapsedTime();
     }
-    colAttr.needsUpdate = true;
   });
 
   return (
-    <points ref={meshRef}>
-      <bufferGeometry>
-        <bufferAttribute attach="attributes-position" array={positions} count={count} itemSize={3} />
-        <bufferAttribute attach="attributes-color" array={colors} count={count} itemSize={3} />
-      </bufferGeometry>
-      <pointsMaterial size={0.065} vertexColors sizeAttenuation transparent opacity={0.95} blending={THREE.AdditiveBlending} />
-    </points>
+    <mesh position={[0, 0, 0.045]}>
+      <planeGeometry args={[width, height]} />
+      <shaderMaterial
+        ref={matRef}
+        attach="material"
+        uniforms={LiquidScreenMaterial.uniforms}
+        vertexShader={LiquidScreenMaterial.vertexShader}
+        fragmentShader={LiquidScreenMaterial.fragmentShader}
+      />
+    </mesh>
   );
 }
 
@@ -102,7 +132,6 @@ function LEDPanel() {
   useFrame(() => {
     if (!groupRef.current) return;
     const p = scrollState.progress;
-    // Only apply mouse rotation when zoomed out enough
     const mouseInfluence = Math.max(0, p - 0.3) / 0.7;
     const targetRotY = mouse.current.x * 0.12 * mouseInfluence;
     const targetRotX = mouse.current.y * 0.08 * mouseInfluence;
@@ -113,39 +142,32 @@ function LEDPanel() {
   useFrame(({ clock }) => {
     if (!glowRef.current) return;
     const p = scrollState.progress;
-    // Glow intensifies as it zooms out
-    glowRef.current.material.opacity = (0.1 + Math.sin(clock.getElapsedTime() * 1.5) * 0.05) * Math.min(1, p * 2);
+    glowRef.current.material.opacity = (0.12 + Math.sin(clock.getElapsedTime() * 1.5) * 0.05) * Math.min(1, p * 2);
   });
 
   return (
     <group ref={groupRef}>
-      {/* Panel body — sleek black frame */}
+      {/* Panel body */}
       <mesh position={[0, 0, 0]}>
         <boxGeometry args={[3.6, 2.05, 0.08]} />
         <meshStandardMaterial color="#0a0a0a" metalness={0.95} roughness={0.05} />
       </mesh>
 
-      {/* Thin bezel accent line — top */}
+      {/* Bezel accent — top */}
       <mesh position={[0, 1.025, 0.041]}>
         <boxGeometry args={[3.62, 0.015, 0.003]} />
         <meshBasicMaterial color="#9333EA" transparent opacity={0.7} />
       </mesh>
-      {/* Thin bezel accent line — bottom */}
+      {/* Bezel accent — bottom */}
       <mesh position={[0, -1.025, 0.041]}>
         <boxGeometry args={[3.62, 0.015, 0.003]} />
         <meshBasicMaterial color="#9333EA" transparent opacity={0.4} />
       </mesh>
 
-      {/* Screen surface */}
-      <mesh position={[0, 0, 0.041]}>
-        <planeGeometry args={[3.4, 1.9]} />
-        <meshStandardMaterial color="#050507" metalness={0.3} roughness={0.4} emissive="#2e1065" emissiveIntensity={0.15} />
-      </mesh>
+      {/* Seamless MicroLED screen with liquid shader */}
+      <MicroLEDScreen width={3.4} height={1.9} />
 
-      {/* LED pixel grid */}
-      <LEDPixels width={3.4} height={1.9} density={48} />
-
-      {/* Glow behind panel — visible on zoom-out */}
+      {/* Glow behind panel */}
       <mesh ref={glowRef} position={[0, 0, -0.2]}>
         <planeGeometry args={[5, 3.5]} />
         <meshBasicMaterial color="#7C3AED" transparent opacity={0} side={THREE.DoubleSide} blending={THREE.AdditiveBlending} />
@@ -161,8 +183,8 @@ function LEDPanel() {
         <meshStandardMaterial color="#18181b" metalness={0.9} roughness={0.1} />
       </mesh>
 
-      {/* Small logo dot on bezel */}
-      <mesh position={[0, -0.97, 0.045]}>
+      {/* Logo dot */}
+      <mesh position={[0, -0.97, 0.046]}>
         <circleGeometry args={[0.02, 16]} />
         <meshBasicMaterial color="#A855F7" transparent opacity={0.8} />
       </mesh>
@@ -170,7 +192,7 @@ function LEDPanel() {
   );
 }
 
-/* ─── Ambient Particles — only visible on zoom-out ─── */
+/* ─── Ambient Particles ─── */
 function ParticleField({ count = 500 }) {
   const meshRef = useRef();
 
@@ -196,7 +218,6 @@ function ParticleField({ count = 500 }) {
       posAttr.array[ix] += Math.cos(t * particles.speeds[i] * 0.3 + i) * 0.0004;
     }
     posAttr.needsUpdate = true;
-    // Fade in particles as we zoom out
     const p = scrollState.progress;
     meshRef.current.material.opacity = Math.max(0, (p - 0.2) * 1.5) * 0.5;
   });
@@ -211,7 +232,7 @@ function ParticleField({ count = 500 }) {
   );
 }
 
-/* ─── Floating Wireframe Shapes — fade in on zoom-out ─── */
+/* ─── Floating Wireframe Shapes ─── */
 function FloatingShapes() {
   const groupRef = useRef();
   const shapes = useMemo(() => [
@@ -247,17 +268,14 @@ function FloatingShapes() {
   );
 }
 
-/* ─── Camera Controller — drives the zoom-out ─── */
+/* ─── Camera Rig ─── */
 function CameraRig() {
   const { camera } = useThree();
 
   useFrame(() => {
     const p = scrollState.progress;
-    // Zoom: start at z=1.2 (deep in the pixels) → end at z=6 (full panel view)
     const targetZ = 1.2 + p * 4.8;
-    // Slight upward drift as we zoom out
     const targetY = p * 0.3;
-    // Gentle tilt
     const targetRotX = -p * 0.05;
 
     camera.position.z += (targetZ - camera.position.z) * 0.08;
@@ -283,7 +301,6 @@ function Lighting() {
 
 /* ─── Main Export ─── */
 export default function HeroScene({ scrollProgress = 0 }) {
-  // Sync scroll from React/Framer Motion into Three.js
   useEffect(() => {
     scrollState.progress = scrollProgress;
   }, [scrollProgress]);
