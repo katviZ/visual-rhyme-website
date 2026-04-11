@@ -42,19 +42,33 @@ function LEDPixels({ width, height, density }) {
     if (!meshRef.current) return;
     const t = clock.getElapsedTime();
     const colAttr = meshRef.current.geometry.getAttribute('color');
-    const dark = new THREE.Color('#6D28D9');
-    const bright = new THREE.Color('#E9D5FF');
-    const mid = new THREE.Color('#A855F7');
+    // Liquid purple palette — flows like molten violet
+    const deep = new THREE.Color('#3B0764');
+    const purple = new THREE.Color('#7C3AED');
+    const violet = new THREE.Color('#A855F7');
+    const lavender = new THREE.Color('#C084FC');
+    const pink = new THREE.Color('#D8B4FE');
+    const white = new THREE.Color('#F3E8FF');
 
     for (let i = 0; i < count; i++) {
       const x = positions[i * 3];
       const y = positions[i * 3 + 1];
-      // Multiple waves for a richer pattern
-      const wave1 = Math.sin(t * 1.8 + x * 3.5 + y * 2.5) * 0.5 + 0.5;
-      const wave2 = Math.sin(t * 1.2 + x * 1.5 - y * 4) * 0.5 + 0.5;
-      const wave = (wave1 + wave2) * 0.5;
-      const c = wave < 0.4 ? dark.clone().lerp(mid, wave * 2.5) : mid.clone().lerp(bright, (wave - 0.4) * 1.6);
-      colAttr.setXYZ(i, c.r * scales[i] + 0.1, c.g * scales[i], c.b * scales[i]);
+      // Organic liquid flow — multiple overlapping sine waves
+      const flow1 = Math.sin(t * 0.8 + x * 2.0 + y * 1.5) * 0.5 + 0.5;
+      const flow2 = Math.sin(t * 0.5 - x * 1.2 + y * 2.8 + 1.5) * 0.5 + 0.5;
+      const flow3 = Math.sin(t * 1.1 + x * 0.8 - y * 1.8 + 3.0) * 0.5 + 0.5;
+      const swirl = Math.sin(t * 0.3 + Math.sqrt(x * x + y * y) * 3.0) * 0.5 + 0.5;
+      const wave = (flow1 * 0.35 + flow2 * 0.25 + flow3 * 0.2 + swirl * 0.2);
+
+      let c;
+      if (wave < 0.15) c = deep.clone().lerp(purple, wave / 0.15);
+      else if (wave < 0.35) c = purple.clone().lerp(violet, (wave - 0.15) / 0.2);
+      else if (wave < 0.55) c = violet.clone().lerp(lavender, (wave - 0.35) / 0.2);
+      else if (wave < 0.75) c = lavender.clone().lerp(pink, (wave - 0.55) / 0.2);
+      else c = pink.clone().lerp(white, (wave - 0.75) / 0.25);
+
+      const brightness = 0.7 + scales[i] * 0.3;
+      colAttr.setXYZ(i, c.r * brightness, c.g * brightness, c.b * brightness);
     }
     colAttr.needsUpdate = true;
   });
@@ -65,7 +79,7 @@ function LEDPixels({ width, height, density }) {
         <bufferAttribute attach="attributes-position" array={positions} count={count} itemSize={3} />
         <bufferAttribute attach="attributes-color" array={colors} count={count} itemSize={3} />
       </bufferGeometry>
-      <pointsMaterial size={0.055} vertexColors sizeAttenuation transparent opacity={0.95} blending={THREE.AdditiveBlending} />
+      <pointsMaterial size={0.065} vertexColors sizeAttenuation transparent opacity={0.95} blending={THREE.AdditiveBlending} />
     </points>
   );
 }
@@ -129,7 +143,7 @@ function LEDPanel() {
       </mesh>
 
       {/* LED pixel grid */}
-      <LEDPixels width={3.4} height={1.9} density={40} />
+      <LEDPixels width={3.4} height={1.9} density={48} />
 
       {/* Glow behind panel — visible on zoom-out */}
       <mesh ref={glowRef} position={[0, 0, -0.2]}>
