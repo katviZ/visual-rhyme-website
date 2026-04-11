@@ -505,6 +505,8 @@ img {
   text-align: center;
   max-width: 900px;
   padding: 0 24px;
+  padding-top: 100px;
+  padding-bottom: 80px;
 }
 
 .hero__eyebrow {
@@ -590,6 +592,26 @@ img {
   flex-direction: column;
   align-items: center;
   gap: 8px;
+}
+
+@media (max-width: 768px) {
+  .hero__scroll-indicator {
+    display: none;
+  }
+
+  .hero__content {
+    padding-top: 110px;
+    padding-bottom: 40px;
+  }
+
+  .hero__trust {
+    gap: 8px;
+    font-size: 0.75rem;
+  }
+
+  .hero__ctas {
+    margin-bottom: 32px;
+  }
 }
 
 .hero__scroll-line {
