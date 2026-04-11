@@ -1,5 +1,8 @@
+import { lazy, Suspense } from 'react';
 import { motion } from 'framer-motion';
 import RevealSection from './ui/RevealSection';
+
+const FloatingGeo = lazy(() => import('./three/FloatingGeo'));
 
 const DiamondIcon = () => (
   <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
@@ -86,8 +89,11 @@ const techFeatures = [
 
 export default function Technology() {
   return (
-    <RevealSection className="why-us">
-      <div id="technology" className="why-us__inner">
+    <RevealSection className="why-us" style={{ position: 'relative' }}>
+      <Suspense fallback={null}>
+        <FloatingGeo variant="tech" />
+      </Suspense>
+      <div id="technology" className="why-us__inner" style={{ position: 'relative', zIndex: 1 }}>
         <span className="section-label">Technology & Features</span>
         <h2 className="section-title">
           Engineered with

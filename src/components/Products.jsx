@@ -1,8 +1,10 @@
-import { useState } from 'react';
+import { useState, lazy, Suspense } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import RevealSection from './ui/RevealSection';
 import TiltCard from './ui/TiltCard';
 import LogoIcon from './ui/LogoIcon';
+
+const ProductScene = lazy(() => import('./three/ProductScene'));
 
 const products = [
   {
@@ -18,6 +20,7 @@ const products = [
     ],
     useCases: ['Luxury Residences', 'Boardrooms', 'Experience Centers', 'Museums'],
     gradient: 'linear-gradient(135deg, #1A0025 0%, #5B2C8E 50%, #7C3AED 100%)',
+    sceneColors: ['#7C3AED', '#C084FC'],
   },
   {
     id: 'leynna-cosmo',
@@ -32,6 +35,7 @@ const products = [
     ],
     useCases: ['Corporate Lobbies', 'Control Centers', 'Branding Walls', 'Indoor DOOH'],
     gradient: 'linear-gradient(135deg, #2D0A4E 0%, #7B2FBE 100%)',
+    sceneColors: ['#9333EA', '#A855F7'],
   },
   {
     id: 'reyansh-outdoor',
@@ -46,6 +50,7 @@ const products = [
     ],
     useCases: ['Stadiums & Arenas', 'Highway Billboards', 'Concert Stages', 'Building Facades'],
     gradient: 'linear-gradient(135deg, #1a0533 0%, #6C3483 100%)',
+    sceneColors: ['#6C3483', '#A855F7'],
   },
   {
     id: 'reyansh-indoor',
@@ -60,6 +65,7 @@ const products = [
     ],
     useCases: ['Shopping Malls', 'Airport Lounges', 'Hotel Lobbies', 'Showrooms'],
     gradient: 'linear-gradient(135deg, #0D0015 0%, #4A148C 100%)',
+    sceneColors: ['#4A148C', '#9333EA'],
   },
 ];
 
@@ -137,7 +143,9 @@ export default function Products({ onOpenQuote }) {
                     ))}
                   </div>
                   <div className="products__image-placeholder">
-                    <LogoIcon size={60} color="rgba(147, 51, 234, 0.2)" />
+                    <Suspense fallback={<LogoIcon size={60} color="rgba(147, 51, 234, 0.2)" />}>
+                      <ProductScene gradient={products[activeProduct].sceneColors} />
+                    </Suspense>
                   </div>
                 </div>
               </div>

@@ -1,7 +1,9 @@
-import { useRef } from 'react';
+import { useRef, lazy, Suspense } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import FloatingOrbs from './ui/FloatingOrbs';
 import GlowGrid from './ui/GlowGrid';
+
+const HeroScene = lazy(() => import('./three/HeroScene'));
 
 export default function Hero({ onOpenQuote }) {
   const ref = useRef(null);
@@ -13,6 +15,9 @@ export default function Hero({ onOpenQuote }) {
 
   return (
     <section id="hero" ref={ref} className="hero">
+      <Suspense fallback={null}>
+        <HeroScene />
+      </Suspense>
       <FloatingOrbs />
       <GlowGrid />
 
