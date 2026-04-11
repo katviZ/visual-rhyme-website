@@ -1,6 +1,5 @@
-import { useRef, lazy, Suspense } from 'react';
+import { useRef, lazy, Suspense, useState } from 'react';
 import { motion, useScroll, useTransform, useMotionValueEvent } from 'framer-motion';
-import { useState } from 'react';
 import FloatingOrbs from './ui/FloatingOrbs';
 import GlowGrid from './ui/GlowGrid';
 
@@ -11,16 +10,28 @@ export default function Hero({ onOpenQuote }) {
   const { scrollYProgress } = useScroll({ target: ref, offset: ['start start', 'end start'] });
   const [scrollVal, setScrollVal] = useState(0);
 
-  // Track scroll for the 3D scene
   useMotionValueEvent(scrollYProgress, 'change', (v) => setScrollVal(v));
 
-  // Content fades/moves with scroll
+  // Content movement on scroll
   const y = useTransform(scrollYProgress, [0, 1], [0, 300]);
   const scale = useTransform(scrollYProgress, [0, 1], [1, 0.8]);
   const rotateX = useTransform(scrollYProgress, [0, 1], [0, 25]);
 
-  // Text fades in after zoom-out starts, fades out at bottom
-  const contentOpacity = useTransform(scrollYProgress, [0, 0.15, 0.35, 0.85], [0, 0, 1, 0]);
+  // Text hidden at top, fades in as camera zooms out, fades out at bottom
+  const contentOpacity = useTransform(scrollYProgress, [0, 0.18, 0.35, 0.82], [0, 0, 1, 0]);
+
+  // Staggered fade for individual elements (relative to when content becomes visible)
+  const badgeOpacity = useTransform(scrollYProgress, [0.18, 0.28], [0, 1]);
+  const titleOpacity = useTransform(scrollYProgress, [0.22, 0.32], [0, 1]);
+  const titleY = useTransform(scrollYProgress, [0.22, 0.32], [40, 0]);
+  const subtitleOpacity = useTransform(scrollYProgress, [0.26, 0.36], [0, 1]);
+  const subtitleY = useTransform(scrollYProgress, [0.26, 0.36], [30, 0]);
+  const ctaOpacity = useTransform(scrollYProgress, [0.30, 0.40], [0, 1]);
+  const ctaY = useTransform(scrollYProgress, [0.30, 0.40], [20, 0]);
+  const trustOpacity = useTransform(scrollYProgress, [0.34, 0.44], [0, 1]);
+
+  // Scroll indicator visible only at very top
+  const scrollIndicatorOpacity = useTransform(scrollYProgress, [0, 0.05, 0.15], [1, 1, 0]);
 
   return (
     <section id="hero" ref={ref} className="hero hero--cinematic">
@@ -31,43 +42,23 @@ export default function Hero({ onOpenQuote }) {
       <GlowGrid />
 
       <motion.div className="hero__content" style={{ y, opacity: contentOpacity, scale, rotateX, perspective: 1200 }}>
-        <motion.div
-          className="hero__eyebrow"
-          initial={{ opacity: 0, x: -30 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.3, duration: 0.8 }}
-        >
+        <motion.div className="hero__eyebrow" style={{ opacity: badgeOpacity }}>
           <span className="hero__badge">India's Pioneering Display Technology Brand</span>
         </motion.div>
 
-        <motion.h1
-          className="hero__title"
-          initial={{ opacity: 0, y: 60 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5, duration: 1, ease: [0.25, 0.46, 0.45, 0.94] }}
-        >
+        <motion.h1 className="hero__title" style={{ opacity: titleOpacity, y: titleY }}>
           We Don't Build Screens.
           <br />
           <span className="hero__title-accent">We Engineer Emotions.</span>
         </motion.h1>
 
-        <motion.p
-          className="hero__subtitle"
-          initial={{ opacity: 0, y: 40 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.8, duration: 0.8 }}
-        >
+        <motion.p className="hero__subtitle" style={{ opacity: subtitleOpacity, y: subtitleY }}>
           MicroLED & TrueHue MiniLED displays with up to 281 trillion colors —
           crafted for stadiums, luxury residences, corporate command centers,
           and everywhere that demands awe.
         </motion.p>
 
-        <motion.div
-          className="hero__ctas"
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 1.1, duration: 0.8 }}
-        >
+        <motion.div className="hero__ctas" style={{ opacity: ctaOpacity, y: ctaY }}>
           <button className="btn btn--primary btn--lg" onClick={onOpenQuote}>
             <span>Pixel Quote Pro</span>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
@@ -77,12 +68,7 @@ export default function Hero({ onOpenQuote }) {
           </a>
         </motion.div>
 
-        <motion.div
-          className="hero__trust"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 1.5, duration: 1 }}
-        >
+        <motion.div className="hero__trust" style={{ opacity: trustOpacity }}>
           <span>Up to 5-Year Warranty</span>
           <span className="hero__trust-dot" aria-hidden="true" />
           <span>Pan-India Installation</span>
@@ -93,9 +79,7 @@ export default function Hero({ onOpenQuote }) {
 
       <motion.div
         className="hero__scroll-indicator"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 2 }}
+        style={{ opacity: scrollIndicatorOpacity }}
         aria-hidden="true"
       >
         <motion.div
