@@ -1,7 +1,7 @@
 import { lazy, Suspense } from 'react';
-import { motion } from 'framer-motion';
 import RevealSection from './ui/RevealSection';
 import LineReveal from './ui/LineReveal';
+import ClipReveal from './ui/ClipReveal';
 
 const FloatingGeo = lazy(() => import('./three/FloatingGeo'));
 
@@ -107,19 +107,17 @@ export default function Technology() {
 
         <div className="why-us__grid">
           {techFeatures.map((item, i) => (
-            <motion.div
+            <ClipReveal
               key={item.title}
               className="why-us__card"
-              initial={{ opacity: 0, y: 50 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.1, duration: 0.6 }}
+              delay={i * 0.12}
+              duration={1.15}
               whileHover={{ y: -8, transition: { duration: 0.3 } }}
             >
               <span className="why-us__icon">{item.icon}</span>
               <h3 className="why-us__card-title">{item.title}</h3>
               <p className="why-us__card-desc">{item.description}</p>
-            </motion.div>
+            </ClipReveal>
           ))}
         </div>
       </div>

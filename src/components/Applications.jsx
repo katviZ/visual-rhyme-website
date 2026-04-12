@@ -1,5 +1,6 @@
-import { motion } from 'framer-motion';
 import RevealSection from './ui/RevealSection';
+import ClipReveal from './ui/ClipReveal';
+import LineReveal from './ui/LineReveal';
 
 const applicationItems = [
   {
@@ -39,10 +40,10 @@ export default function Applications() {
     <RevealSection className="portfolio">
       <div id="applications" className="portfolio__inner">
         <span className="section-label">Applications</span>
-        <h2 className="section-title">
+        <LineReveal as="h2" className="section-title">
           Built For Spaces That
           <span className="text-gradient"> Demand Extraordinary</span>
-        </h2>
+        </LineReveal>
         <p className="section-subtitle">
           From daylight-visible outdoor billboards to ultra-premium living rooms — our
           displays are engineered for every environment.
@@ -50,14 +51,11 @@ export default function Applications() {
 
         <div className="portfolio__grid">
           {applicationItems.map((item, i) => (
-            <motion.div
+            <ClipReveal
               key={item.title}
               className="portfolio__item"
-              initial={{ opacity: 0, scale: 0.9 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.1, duration: 0.6 }}
-              whileHover={{ scale: 1.03, transition: { duration: 0.3 } }}
+              delay={i * 0.12}
+              duration={1.15}
             >
               <div className="portfolio__image-placeholder">
                 <span>{item.category}</span>
@@ -67,7 +65,7 @@ export default function Applications() {
                 <h3 className="portfolio__item-title">{item.title}</h3>
                 <p className="portfolio__item-desc">{item.description}</p>
               </div>
-            </motion.div>
+            </ClipReveal>
           ))}
         </div>
       </div>
