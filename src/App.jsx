@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react';
+import CustomCursor from './components/ui/CustomCursor';
 import ScrollProgress from './components/ScrollProgress';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
@@ -21,6 +22,7 @@ export default function App() {
 
   return (
     <>
+      <CustomCursor />
       <a href="#main-content" className="skip-to-content">
         Skip to main content
       </a>
