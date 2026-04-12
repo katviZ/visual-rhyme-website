@@ -1529,6 +1529,172 @@ img {
   opacity: 0.3;
 }
 
+/* ─── Process Pinned Horizontal Carousel ─── */
+.process-pin {
+  position: relative;
+  background: linear-gradient(180deg, #050012 0%, #0a0215 50%, #050012 100%);
+  overflow: clip;
+}
+.process-pin__sticky {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.process-pin__header {
+  flex: 0 0 auto;
+  padding: 96px 48px 24px;
+  max-width: var(--container-width);
+  margin: 0 auto;
+  width: 100%;
+  text-align: center;
+}
+.process-pin__viewport {
+  flex: 1 1 auto;
+  position: relative;
+  overflow: hidden;
+}
+.process-pin__strip {
+  display: flex;
+  height: 100%;
+  will-change: transform;
+}
+.process-pin__card {
+  flex: 0 0 100vw;
+  height: 100%;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  gap: 48px;
+  padding: 0 96px;
+  position: relative;
+}
+.process-pin__number {
+  font-family: var(--font-display);
+  font-size: clamp(12rem, 32vw, 28rem);
+  font-weight: 900;
+  line-height: 0.82;
+  letter-spacing: -0.05em;
+  background: linear-gradient(180deg, rgba(192, 132, 252, 0.95) 0%, rgba(124, 58, 237, 0.4) 55%, rgba(10, 2, 21, 0) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-align: center;
+  filter: drop-shadow(0 0 48px rgba(168, 85, 247, 0.35));
+  user-select: none;
+}
+.process-pin__body {
+  max-width: 540px;
+}
+.process-pin__kicker {
+  display: inline-block;
+  font-family: var(--font-mono, 'Courier New', monospace);
+  font-size: 0.72rem;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: rgba(192, 132, 252, 0.75);
+  padding: 6px 14px;
+  border: 1px solid rgba(192, 132, 252, 0.35);
+  border-radius: 100px;
+  margin-bottom: 22px;
+}
+.process-pin__title {
+  font-family: var(--font-display);
+  font-size: clamp(3rem, 6vw, 5rem);
+  font-weight: 800;
+  line-height: 1.02;
+  letter-spacing: -0.02em;
+  margin: 0 0 20px;
+  color: #f4f4f5;
+}
+.process-pin__desc {
+  font-size: clamp(1rem, 1.2vw, 1.15rem);
+  line-height: 1.75;
+  color: rgba(244, 244, 245, 0.72);
+  margin: 0;
+}
+.process-pin__frame {
+  position: absolute;
+  inset: 48px 64px;
+  pointer-events: none;
+}
+.process-pin__frame-corner {
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  border: 1px solid rgba(192, 132, 252, 0.4);
+}
+.process-pin__frame-corner--tl { top: 0; left: 0; border-right: none; border-bottom: none; }
+.process-pin__frame-corner--tr { top: 0; right: 0; border-left: none; border-bottom: none; }
+.process-pin__frame-corner--bl { bottom: 0; left: 0; border-right: none; border-top: none; }
+.process-pin__frame-corner--br { bottom: 0; right: 0; border-left: none; border-top: none; }
+
+.process-pin__hud {
+  flex: 0 0 auto;
+  padding: 0 48px 48px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  max-width: var(--container-width);
+  margin: 0 auto;
+  width: 100%;
+}
+.process-pin__steps {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: var(--font-mono, 'Courier New', monospace);
+  font-size: 0.72rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+.process-pin__step {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: #e9d5ff;
+  transform-origin: center;
+  will-change: opacity, transform;
+}
+.process-pin__step-dot {
+  width: 6px;
+  height: 6px;
+  background: #c084fc;
+  border-radius: 50%;
+  box-shadow: 0 0 10px rgba(192, 132, 252, 0.8);
+}
+.process-pin__bar {
+  position: relative;
+  height: 2px;
+  background: rgba(192, 132, 252, 0.12);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.process-pin__bar-fill {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, #7c3aed, #c084fc, #a855f7);
+  transform-origin: left center;
+  box-shadow: 0 0 12px rgba(192, 132, 252, 0.6);
+}
+
+@media (max-width: 900px) {
+  .process-pin__card {
+    grid-template-columns: 1fr;
+    padding: 0 32px;
+    gap: 16px;
+    text-align: center;
+  }
+  .process-pin__body { margin: 0 auto; }
+  .process-pin__number { font-size: clamp(8rem, 42vw, 18rem); }
+  .process-pin__frame { inset: 24px; }
+  .process-pin__header { padding: 88px 24px 16px; }
+  .process-pin__hud { padding: 0 24px 24px; }
+  .process-pin__steps { font-size: 0.56rem; letter-spacing: 0.12em; }
+}
+
 @media (max-width: 768px) {
   .process__timeline {
     grid-template-columns: 1fr 1fr;
