@@ -4,6 +4,7 @@ import RevealSection from './ui/RevealSection';
 import TiltCard from './ui/TiltCard';
 import LogoIcon from './ui/LogoIcon';
 import MagneticWrapper from './ui/MagneticWrapper';
+import LineReveal from './ui/LineReveal';
 
 const ProductScene = lazy(() => import('./three/ProductScene'));
 
@@ -77,10 +78,10 @@ export default function Products({ onOpenQuote }) {
     <RevealSection className="products" delay={0} zoom>
       <div id="products" className="products__inner">
         <span className="section-label">Our Products</span>
-        <h2 className="section-title">
+        <LineReveal as="h2" className="section-title">
           Displays That
           <span className="text-gradient"> Defy Ordinary</span>
-        </h2>
+        </LineReveal>
 
         <div className="products__tabs" role="tablist" aria-label="Product categories">
           {products.map((p, i) => (

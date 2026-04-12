@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
 import RevealSection from './ui/RevealSection';
+import LineReveal from './ui/LineReveal';
 
 const processSteps = [
   {
@@ -29,10 +30,10 @@ export default function Process() {
     <RevealSection className="process" zoom>
       <div id="process" className="process__inner">
         <span className="section-label">How We Work</span>
-        <h2 className="section-title">
+        <LineReveal as="h2" className="section-title">
           From Vision to
           <span className="text-gradient"> Reality in 4 Steps</span>
-        </h2>
+        </LineReveal>
 
         <div className="process__timeline">
           {processSteps.map((step, i) => (

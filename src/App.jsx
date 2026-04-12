@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import CustomCursor from './components/ui/CustomCursor';
 import SmoothScroll from './components/ui/SmoothScroll';
+import Preloader from './components/ui/Preloader';
 import ScrollProgress from './components/ScrollProgress';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
@@ -23,6 +24,7 @@ export default function App() {
 
   return (
     <>
+      <Preloader />
       <SmoothScroll />
       <CustomCursor />
       <a href="#main-content" className="skip-to-content">

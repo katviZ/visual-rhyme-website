@@ -3,6 +3,7 @@ import { motion, useScroll, useTransform } from 'framer-motion';
 import RevealSection from './ui/RevealSection';
 import AnimatedCounter from './ui/AnimatedCounter';
 import LogoIcon from './ui/LogoIcon';
+import LineReveal from './ui/LineReveal';
 
 export default function About() {
   const ref = useRef(null);
@@ -14,10 +15,10 @@ export default function About() {
       <div id="about" className="about__inner" ref={ref}>
         <div className="about__text">
           <motion.span className="section-label">Our Story</motion.span>
-          <h2 className="section-title">
+          <LineReveal as="h2" className="section-title">
             Born From a Vision to
             <span className="text-gradient"> Redefine Display</span>
-          </h2>
+          </LineReveal>
           <p className="about__description">
             Visual Rhyme was founded in 2025 with a singular obsession — to bring
             world-class MicroLED and MiniLED technology to India. We saw a market

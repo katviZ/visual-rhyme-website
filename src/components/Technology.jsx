@@ -1,6 +1,7 @@
 import { lazy, Suspense } from 'react';
 import { motion } from 'framer-motion';
 import RevealSection from './ui/RevealSection';
+import LineReveal from './ui/LineReveal';
 
 const FloatingGeo = lazy(() => import('./three/FloatingGeo'));
 
@@ -95,10 +96,10 @@ export default function Technology() {
       </Suspense>
       <div id="technology" className="why-us__inner" style={{ position: 'relative', zIndex: 1 }}>
         <span className="section-label">Technology & Features</span>
-        <h2 className="section-title">
+        <LineReveal as="h2" className="section-title">
           Engineered with
           <span className="text-gradient"> Proprietary Innovation</span>
-        </h2>
+        </LineReveal>
         <p className="section-subtitle">
           Every component, every algorithm, every surface treatment — designed in-house
           to deliver visuals no one else can.
