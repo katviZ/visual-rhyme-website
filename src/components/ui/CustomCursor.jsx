@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { motion, useMotionValue, useSpring } from 'framer-motion';
+import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
 
 const INTERACTIVE_SELECTOR = 'a, button, [role="button"], .btn, .products__tab, .navbar__link, input, textarea, select, label';
 
@@ -9,9 +9,16 @@ export default function CustomCursor() {
   const cursorX = useMotionValue(-100);
   const cursorY = useMotionValue(-100);
 
-  // Dot: no spring — tracks mouse 1:1 for pixel-perfect instant feel
   const ringX = useSpring(cursorX, { damping: 22, stiffness: 180, mass: 0.5 });
   const ringY = useSpring(cursorY, { damping: 22, stiffness: 180, mass: 0.5 });
+
+  // Scroll-velocity driven stretch
+  const velRaw = useMotionValue(0);
+  const velSmooth = useSpring(velRaw, { damping: 26, stiffness: 220, mass: 0.4 });
+  const ringScaleY = useTransform(velSmooth, (v) => 1 + Math.min(Math.abs(v), 1) * 1.5);
+  const ringScaleX = useTransform(velSmooth, (v) => 1 - Math.min(Math.abs(v), 1) * 0.55);
+  const dotScaleY = useTransform(velSmooth, (v) => 1 + Math.min(Math.abs(v), 1) * 1.0);
+  const dotScaleX = useTransform(velSmooth, (v) => 1 - Math.min(Math.abs(v), 1) * 0.4);
 
   const ringRef = useRef(null);
 
@@ -56,9 +63,34 @@ export default function CustomCursor() {
 
     window.addEventListener('mousemove', onMove, { passive: true });
 
+    // Scroll-velocity tracking
+    let lastScrollY = window.scrollY;
+    let lastTime = performance.now();
+    let rafId;
+
+    const tick = () => {
+      const now = performance.now();
+      const dt = now - lastTime;
+      const dy = window.scrollY - lastScrollY;
+      if (dt > 0) {
+        // px/ms normalized — a fast scroll is ~3-5 px/ms
+        const instant = Math.max(-1, Math.min(1, dy / dt / 2.2));
+        // Bias toward the larger of (instant, current * decay) so we ramp quickly, decay gently
+        const decayed = velRaw.get() * 0.93;
+        velRaw.set(Math.abs(instant) > Math.abs(decayed) ? instant : decayed);
+      }
+      lastScrollY = window.scrollY;
+      lastTime = now;
+      document.documentElement.style.setProperty('--scroll-v', String(velRaw.get().toFixed(4)));
+      rafId = requestAnimationFrame(tick);
+    };
+    rafId = requestAnimationFrame(tick);
+
     return () => {
       window.removeEventListener('mousemove', onMove);
       observer.disconnect();
+      cancelAnimationFrame(rafId);
+      document.documentElement.style.removeProperty('--scroll-v');
       document.body.classList.remove('custom-cursor-active');
       document.querySelectorAll('[data-cursor-bound]').forEach((el) => {
         el.removeEventListener('mouseenter', onEnter);
@@ -66,7 +98,7 @@ export default function CustomCursor() {
         delete el.dataset.cursorBound;
       });
     };
-  }, [cursorX, cursorY]);
+  }, [cursorX, cursorY, velRaw]);
 
   if (!enabled) return null;
 
@@ -74,13 +106,23 @@ export default function CustomCursor() {
     <>
       <motion.div
         className="custom-cursor__dot"
-        style={{ translateX: cursorX, translateY: cursorY }}
+        style={{
+          translateX: cursorX,
+          translateY: cursorY,
+          scaleX: dotScaleX,
+          scaleY: dotScaleY,
+        }}
         aria-hidden="true"
       />
       <motion.div
         ref={ringRef}
         className="custom-cursor__ring"
-        style={{ translateX: ringX, translateY: ringY }}
+        style={{
+          translateX: ringX,
+          translateY: ringY,
+          scaleX: ringScaleX,
+          scaleY: ringScaleY,
+        }}
         aria-hidden="true"
       />
     </>
