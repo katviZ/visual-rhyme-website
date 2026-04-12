@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import RevealSection from './ui/RevealSection';
+import MagneticWrapper from './ui/MagneticWrapper';
 
 // Configure your form submission endpoint here.
 // Options:
@@ -230,18 +231,19 @@ export default function Contact() {
             <textarea id="message" name="message" rows="4" value={formData.message} onChange={handleChange} placeholder="Venue size, use case, timeline, budget range..." />
           </div>
 
-          <motion.button
-            type="submit"
-            className="btn btn--primary btn--lg btn--full"
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            disabled={status === 'submitting'}
-          >
-            {status === 'submitting' ? 'Sending...' : 'Send Inquiry'}
-            {status !== 'submitting' && (
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-            )}
-          </motion.button>
+          <MagneticWrapper fullWidth>
+            <motion.button
+              type="submit"
+              className="btn btn--primary btn--lg btn--full"
+              whileTap={{ scale: 0.98 }}
+              disabled={status === 'submitting'}
+            >
+              {status === 'submitting' ? 'Sending...' : 'Send Inquiry'}
+              {status !== 'submitting' && (
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+              )}
+            </motion.button>
+          </MagneticWrapper>
         </motion.form>
       </div>
     </RevealSection>

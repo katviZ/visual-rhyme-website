@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
 import RevealSection from './ui/RevealSection';
 import FloatingOrbs from './ui/FloatingOrbs';
+import MagneticWrapper from './ui/MagneticWrapper';
 
 export default function LeadCTA({ onOpenQuote }) {
   return (
@@ -20,13 +21,17 @@ export default function LeadCTA({ onOpenQuote }) {
           Tell us your vision. We'll engineer the experience.
         </p>
         <div className="lead-cta__buttons">
-          <button className="btn btn--primary btn--lg" onClick={onOpenQuote}>
-            Pixel Quote Pro
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-          </button>
-          <a href="tel:+919974531845" className="btn btn--ghost btn--lg">
-            Call: +91 99745 31845
-          </a>
+          <MagneticWrapper>
+            <button className="btn btn--primary btn--lg" onClick={onOpenQuote}>
+              Pixel Quote Pro
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </button>
+          </MagneticWrapper>
+          <MagneticWrapper>
+            <a href="tel:+919974531845" className="btn btn--ghost btn--lg">
+              Call: +91 99745 31845
+            </a>
+          </MagneticWrapper>
         </div>
       </div>
     </RevealSection>

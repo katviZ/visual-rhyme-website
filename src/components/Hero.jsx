@@ -1,5 +1,6 @@
 import { useRef, lazy, Suspense, useState } from 'react';
 import { motion, useScroll, useTransform, useMotionValueEvent } from 'framer-motion';
+import MagneticWrapper from './ui/MagneticWrapper';
 
 const HeroScene = lazy(() => import('./three/HeroScene'));
 
@@ -56,13 +57,17 @@ export default function Hero({ onOpenQuote }) {
           </motion.p>
 
           <motion.div className="hero__ctas" style={{ opacity: ctaOpacity, y: ctaY }}>
-            <button className="btn btn--primary btn--lg" onClick={onOpenQuote}>
-              <span>Pixel Quote Pro</span>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-            </button>
-            <a href="#products" className="btn btn--ghost btn--lg">
-              Explore Products
-            </a>
+            <MagneticWrapper>
+              <button className="btn btn--primary btn--lg" onClick={onOpenQuote}>
+                <span>Pixel Quote Pro</span>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+              </button>
+            </MagneticWrapper>
+            <MagneticWrapper>
+              <a href="#products" className="btn btn--ghost btn--lg">
+                Explore Products
+              </a>
+            </MagneticWrapper>
           </motion.div>
 
           <motion.div className="hero__trust" style={{ opacity: trustOpacity }}>

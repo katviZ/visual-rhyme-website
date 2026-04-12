@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import LogoIcon from './ui/LogoIcon';
+import MagneticWrapper from './ui/MagneticWrapper';
 
 const links = [
   { label: 'Home', href: '#hero' },
@@ -61,9 +62,11 @@ export default function Navbar({ onOpenQuote }) {
               {link.label}
             </motion.a>
           ))}
-          <button className="btn btn--primary btn--nav" onClick={() => { setMenuOpen(false); onOpenQuote(); }}>
-            Pixel Quote Pro
-          </button>
+          <MagneticWrapper>
+            <button className="btn btn--primary btn--nav" onClick={() => { setMenuOpen(false); onOpenQuote(); }}>
+              Pixel Quote Pro
+            </button>
+          </MagneticWrapper>
         </div>
 
         <button

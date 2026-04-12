@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import RevealSection from './ui/RevealSection';
 import TiltCard from './ui/TiltCard';
 import LogoIcon from './ui/LogoIcon';
+import MagneticWrapper from './ui/MagneticWrapper';
 
 const ProductScene = lazy(() => import('./three/ProductScene'));
 
@@ -127,10 +128,12 @@ export default function Products({ onOpenQuote }) {
                     </div>
                   </div>
 
-                  <button className="btn btn--primary" onClick={onOpenQuote}>
-                    Pixel Quote Pro
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                  </button>
+                  <MagneticWrapper>
+                    <button className="btn btn--primary" onClick={onOpenQuote}>
+                      Pixel Quote Pro
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                    </button>
+                  </MagneticWrapper>
                 </div>
 
                 <div className="products__card-right">
