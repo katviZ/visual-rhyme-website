@@ -1695,6 +1695,225 @@ img {
   .process-pin__steps { font-size: 0.56rem; letter-spacing: 0.12em; }
 }
 
+/* ═══════════════════════════════════════════════════════════════════════════
+   APPLICATIONS — PINNED HORIZONTAL CAROUSEL
+   ═══════════════════════════════════════════════════════════════════════════ */
+.apps-pin {
+  position: relative;
+  background: linear-gradient(180deg, #050012 0%, #0c0320 50%, #050012 100%);
+  overflow: clip;
+}
+.apps-pin__sticky {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.apps-pin__header {
+  flex: 0 0 auto;
+  padding: 96px 48px 24px;
+  max-width: var(--container-width);
+  margin: 0 auto;
+  width: 100%;
+  text-align: center;
+}
+.apps-pin__viewport {
+  flex: 1 1 auto;
+  position: relative;
+  overflow: hidden;
+}
+.apps-pin__strip {
+  display: flex;
+  height: 100%;
+  will-change: transform;
+}
+.apps-pin__card {
+  flex: 0 0 100vw;
+  height: 100%;
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  align-items: center;
+  gap: 64px;
+  padding: 0 96px;
+  position: relative;
+}
+.apps-pin__media {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  max-height: 62vh;
+  border-radius: 24px;
+  background:
+    radial-gradient(120% 120% at 20% 0%, rgba(168, 85, 247, 0.28) 0%, rgba(5, 0, 18, 0) 55%),
+    linear-gradient(135deg, #1a0533 0%, #3d1269 50%, #0c0320 100%);
+  border: 1px solid rgba(192, 132, 252, 0.22);
+  box-shadow:
+    0 30px 80px -20px rgba(124, 58, 237, 0.4),
+    inset 0 0 120px rgba(168, 85, 247, 0.08);
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding: 32px;
+  overflow: hidden;
+}
+.apps-pin__media::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(192, 132, 252, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(192, 132, 252, 0.06) 1px, transparent 1px);
+  background-size: 40px 40px;
+  mask-image: radial-gradient(80% 80% at 50% 50%, #000 30%, transparent 100%);
+  -webkit-mask-image: radial-gradient(80% 80% at 50% 50%, #000 30%, transparent 100%);
+  pointer-events: none;
+}
+.apps-pin__media-index {
+  font-family: var(--font-display);
+  font-size: clamp(6rem, 12vw, 11rem);
+  font-weight: 900;
+  line-height: 0.82;
+  letter-spacing: -0.05em;
+  background: linear-gradient(180deg, rgba(233, 213, 255, 0.95) 0%, rgba(124, 58, 237, 0.35) 80%, rgba(10, 2, 21, 0) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  filter: drop-shadow(0 0 48px rgba(168, 85, 247, 0.4));
+  user-select: none;
+  position: relative;
+}
+.apps-pin__media-category {
+  position: relative;
+  font-family: var(--font-mono, 'Courier New', monospace);
+  font-size: 0.72rem;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: rgba(233, 213, 255, 0.85);
+  padding: 8px 14px;
+  border: 1px solid rgba(192, 132, 252, 0.4);
+  border-radius: 100px;
+  background: rgba(5, 0, 18, 0.6);
+  backdrop-filter: blur(6px);
+}
+.apps-pin__body {
+  max-width: 560px;
+}
+.apps-pin__kicker {
+  display: inline-block;
+  font-family: var(--font-mono, 'Courier New', monospace);
+  font-size: 0.72rem;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: rgba(192, 132, 252, 0.75);
+  padding: 6px 14px;
+  border: 1px solid rgba(192, 132, 252, 0.35);
+  border-radius: 100px;
+  margin-bottom: 22px;
+}
+.apps-pin__title {
+  font-family: var(--font-display);
+  font-size: clamp(2.6rem, 5.2vw, 4.4rem);
+  font-weight: 800;
+  line-height: 1.04;
+  letter-spacing: -0.02em;
+  margin: 0 0 20px;
+  color: #f4f4f5;
+}
+.apps-pin__desc {
+  font-size: clamp(1rem, 1.2vw, 1.15rem);
+  line-height: 1.75;
+  color: rgba(244, 244, 245, 0.72);
+  margin: 0;
+}
+.apps-pin__frame {
+  position: absolute;
+  inset: 48px 64px;
+  pointer-events: none;
+}
+.apps-pin__frame-corner {
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  border: 1px solid rgba(192, 132, 252, 0.4);
+}
+.apps-pin__frame-corner--tl { top: 0; left: 0; border-right: none; border-bottom: none; }
+.apps-pin__frame-corner--tr { top: 0; right: 0; border-left: none; border-bottom: none; }
+.apps-pin__frame-corner--bl { bottom: 0; left: 0; border-right: none; border-top: none; }
+.apps-pin__frame-corner--br { bottom: 0; right: 0; border-left: none; border-top: none; }
+
+.apps-pin__hud {
+  flex: 0 0 auto;
+  padding: 0 48px 48px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  max-width: var(--container-width);
+  margin: 0 auto;
+  width: 100%;
+}
+.apps-pin__steps {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: var(--font-mono, 'Courier New', monospace);
+  font-size: 0.66rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  gap: 12px;
+}
+.apps-pin__step {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #e9d5ff;
+  transform-origin: center;
+  will-change: opacity, transform;
+  white-space: nowrap;
+}
+.apps-pin__step-dot {
+  width: 6px;
+  height: 6px;
+  background: #c084fc;
+  border-radius: 50%;
+  box-shadow: 0 0 10px rgba(192, 132, 252, 0.8);
+}
+.apps-pin__bar {
+  position: relative;
+  height: 2px;
+  background: rgba(192, 132, 252, 0.12);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.apps-pin__bar-fill {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, #7c3aed, #c084fc, #a855f7);
+  transform-origin: left center;
+  box-shadow: 0 0 12px rgba(192, 132, 252, 0.6);
+}
+
+@media (max-width: 900px) {
+  .apps-pin__card {
+    grid-template-columns: 1fr;
+    padding: 0 28px;
+    gap: 24px;
+    text-align: center;
+  }
+  .apps-pin__body { margin: 0 auto; }
+  .apps-pin__media { max-height: 36vh; padding: 20px; }
+  .apps-pin__media-index { font-size: clamp(4rem, 18vw, 7rem); }
+  .apps-pin__frame { inset: 24px; }
+  .apps-pin__header { padding: 88px 24px 12px; }
+  .apps-pin__hud { padding: 0 24px 24px; }
+  .apps-pin__steps {
+    font-size: 0.5rem;
+    letter-spacing: 0.1em;
+    overflow-x: auto;
+    justify-content: flex-start;
+  }
+}
+
 @media (max-width: 768px) {
   .process__timeline {
     grid-template-columns: 1fr 1fr;
