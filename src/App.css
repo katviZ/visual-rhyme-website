@@ -590,6 +590,13 @@ img {
   padding-bottom: 80px;
 }
 
+.hero__scene-wrap {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  will-change: opacity, filter;
+}
+
 .hero__eyebrow {
   margin-bottom: 24px;
 }

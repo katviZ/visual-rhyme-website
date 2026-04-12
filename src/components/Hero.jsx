@@ -13,6 +13,19 @@ export default function Hero({ onOpenQuote }) {
 
   // Text hidden at start, fades in mid-scroll, fades out at end
   const contentOpacity = useTransform(scrollYProgress, [0, 0.2, 0.4, 0.75], [0, 0, 1, 0]);
+
+  // Scene dims + desaturates while text is reading, then brightens for pull-out
+  const sceneOpacity = useTransform(
+    scrollYProgress,
+    [0, 0.25, 0.4, 0.65, 0.85, 1],
+    [1, 1, 0.22, 0.22, 1, 1]
+  );
+  const sceneSaturate = useTransform(
+    scrollYProgress,
+    [0, 0.25, 0.4, 0.65, 0.85, 1],
+    [1, 1, 0.35, 0.35, 1, 1]
+  );
+  const sceneFilter = useTransform(sceneSaturate, (s) => `saturate(${s})`);
   const contentY = useTransform(scrollYProgress, [0.2, 0.4], [60, 0]);
 
   // Staggered reveals
@@ -32,9 +45,15 @@ export default function Hero({ onOpenQuote }) {
   return (
     <section id="hero" ref={ref} className="hero hero--cinematic">
       <div className="hero__sticky">
-        <Suspense fallback={null}>
-          <HeroScene scrollProgress={scrollVal} />
-        </Suspense>
+        <motion.div
+          className="hero__scene-wrap"
+          style={{ opacity: sceneOpacity, filter: sceneFilter }}
+          aria-hidden="true"
+        >
+          <Suspense fallback={null}>
+            <HeroScene scrollProgress={scrollVal} />
+          </Suspense>
+        </motion.div>
 
         <motion.div
           className="hero__content"

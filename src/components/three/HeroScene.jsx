@@ -268,19 +268,55 @@ function FloatingShapes() {
   );
 }
 
-/* ─── Camera Rig ─── */
+/* ─── Camera Rig — cinematic dolly-zoom ─── */
 function CameraRig() {
   const { camera } = useThree();
 
   useFrame(() => {
     const p = scrollState.progress;
-    const targetZ = 1.2 + p * 4.8;
-    const targetY = p * 0.3;
-    const targetRotX = -p * 0.05;
+
+    // Piecewise curve: rush-in → vertigo FOV swing → settle → dramatic pull-out
+    let targetZ, targetFov, targetY, targetRotX;
+
+    if (p < 0.15) {
+      // Phase A: rush in, panel gets huge
+      const t = p / 0.15;
+      targetZ = 1.2 + (0.45 - 1.2) * t;
+      targetFov = 50 + (65 - 50) * t;
+      targetY = 0;
+      targetRotX = 0;
+    } else if (p < 0.35) {
+      // Phase B: dolly-zoom vertigo — camera holds, FOV explodes
+      const t = (p - 0.15) / 0.20;
+      targetZ = 0.45 + (0.4 - 0.45) * t;
+      targetFov = 65 + (92 - 65) * t;
+      targetY = 0;
+      targetRotX = 0;
+    } else if (p < 0.58) {
+      // Phase C: settle — FOV pulls back so text is readable over scene
+      const t = (p - 0.35) / 0.23;
+      targetZ = 0.4 + (0.7 - 0.4) * t;
+      targetFov = 92 + (55 - 92) * t;
+      targetY = 0.1 * t;
+      targetRotX = -0.02 * t;
+    } else {
+      // Phase D: dramatic pull-out, long lens
+      const t = (p - 0.58) / 0.42;
+      targetZ = 0.7 + (10 - 0.7) * t;
+      targetFov = 55 + (34 - 55) * t;
+      targetY = 0.1 + 0.35 * t;
+      targetRotX = -0.02 + (-0.15) * t;
+    }
 
     camera.position.z += (targetZ - camera.position.z) * 0.08;
     camera.position.y += (targetY - camera.position.y) * 0.08;
     camera.rotation.x += (targetRotX - camera.rotation.x) * 0.06;
+
+    const fovDiff = targetFov - camera.fov;
+    if (Math.abs(fovDiff) > 0.01) {
+      camera.fov += fovDiff * 0.08;
+      camera.updateProjectionMatrix();
+    }
   });
 
   return null;
