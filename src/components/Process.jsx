@@ -26,7 +26,7 @@ const processSteps = [
 
 export default function Process() {
   return (
-    <RevealSection className="process">
+    <RevealSection className="process" zoom>
       <div id="process" className="process__inner">
         <span className="section-label">How We Work</span>
         <h2 className="section-title">

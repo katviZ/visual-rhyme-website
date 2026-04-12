@@ -10,7 +10,7 @@ export default function About() {
   const imgY = useTransform(scrollYProgress, [0, 1], [80, -80]);
 
   return (
-    <RevealSection className="about" delay={0}>
+    <RevealSection className="about" delay={0} zoom>
       <div id="about" className="about__inner" ref={ref}>
         <div className="about__text">
           <motion.span className="section-label">Our Story</motion.span>

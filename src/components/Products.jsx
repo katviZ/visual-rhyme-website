@@ -74,7 +74,7 @@ export default function Products({ onOpenQuote }) {
   const [activeProduct, setActiveProduct] = useState(0);
 
   return (
-    <RevealSection className="products" delay={0}>
+    <RevealSection className="products" delay={0} zoom>
       <div id="products" className="products__inner">
         <span className="section-label">Our Products</span>
         <h2 className="section-title">
