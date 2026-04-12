@@ -1696,6 +1696,99 @@ img {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
+   SCROLL RAIL — VERTICAL SECTION NAV
+   ═══════════════════════════════════════════════════════════════════════════ */
+.scroll-rail {
+  position: fixed;
+  top: 50%;
+  right: 28px;
+  transform: translateY(-50%);
+  z-index: 80;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  pointer-events: none;
+}
+.scroll-rail__track {
+  position: relative;
+  width: 1px;
+  height: 240px;
+  background: rgba(192, 132, 252, 0.16);
+  border-radius: 1px;
+  overflow: hidden;
+}
+.scroll-rail__fill {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, #c084fc 0%, #7c3aed 100%);
+  transform-origin: top;
+  box-shadow: 0 0 12px rgba(192, 132, 252, 0.65);
+}
+.scroll-rail__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  pointer-events: auto;
+}
+.scroll-rail__item {
+  display: flex;
+  justify-content: flex-end;
+}
+.scroll-rail__btn {
+  all: unset;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  font-family: var(--font-mono, 'Courier New', monospace);
+  font-size: 0.64rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(233, 213, 255, 0.55);
+  padding: 4px 2px 4px 10px;
+  transition: color 0.35s ease;
+  flex-direction: row-reverse;
+}
+.scroll-rail__btn:hover { color: #f4f4f5; }
+.scroll-rail__label {
+  opacity: 0;
+  transform: translateX(10px);
+  transition: opacity 0.35s ease, transform 0.35s ease;
+  white-space: nowrap;
+}
+.scroll-rail:hover .scroll-rail__label,
+.scroll-rail__btn--active .scroll-rail__label {
+  opacity: 1;
+  transform: translateX(0);
+}
+.scroll-rail__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(192, 132, 252, 0.35);
+  transition: background 0.35s ease, box-shadow 0.35s ease, transform 0.35s ease;
+}
+.scroll-rail__btn:hover .scroll-rail__dot {
+  background: #c084fc;
+  transform: scale(1.3);
+}
+.scroll-rail__btn--active .scroll-rail__dot {
+  background: #c084fc;
+  transform: scale(1.45);
+  box-shadow: 0 0 14px rgba(192, 132, 252, 0.9), 0 0 28px rgba(168, 85, 247, 0.5);
+}
+.scroll-rail__btn--active {
+  color: #f4f4f5;
+}
+
+@media (max-width: 900px) {
+  .scroll-rail { display: none; }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
    APPLICATIONS — PINNED HORIZONTAL CAROUSEL
    ═══════════════════════════════════════════════════════════════════════════ */
 .apps-pin {

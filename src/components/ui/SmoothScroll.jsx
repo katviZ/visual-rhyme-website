@@ -23,6 +23,7 @@ export default function SmoothScroll() {
       rafId = requestAnimationFrame(raf);
     };
     rafId = requestAnimationFrame(raf);
+    window.__lenis = lenis;
 
     const onAnchorClick = (e) => {
       const anchor = e.target.closest('a[href^="#"]');
@@ -39,6 +40,7 @@ export default function SmoothScroll() {
     return () => {
       cancelAnimationFrame(rafId);
       document.removeEventListener('click', onAnchorClick);
+      delete window.__lenis;
       lenis.destroy();
     };
   }, []);

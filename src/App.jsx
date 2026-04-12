@@ -3,6 +3,7 @@ import CustomCursor from './components/ui/CustomCursor';
 import SmoothScroll from './components/ui/SmoothScroll';
 import Preloader from './components/ui/Preloader';
 import ScrollProgress from './components/ScrollProgress';
+import ScrollRail from './components/ui/ScrollRail';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import StatsMarquee from './components/StatsMarquee';
@@ -31,6 +32,7 @@ export default function App() {
         Skip to main content
       </a>
       <ScrollProgress />
+      <ScrollRail />
       <Navbar onOpenQuote={openQuote} />
       <main id="main-content">
         <Hero onOpenQuote={openQuote} />
