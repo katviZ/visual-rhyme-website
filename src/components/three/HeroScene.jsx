@@ -4,6 +4,14 @@ import { Float, MeshDistortMaterial } from '@react-three/drei';
 import * as THREE from 'three';
 
 const scrollState = { progress: 0 };
+const mouseState = { x: 0, y: 0 };
+
+if (typeof window !== 'undefined') {
+  window.addEventListener('mousemove', (e) => {
+    mouseState.x = (e.clientX / window.innerWidth) * 2 - 1;
+    mouseState.y = -((e.clientY / window.innerHeight) * 2 - 1);
+  });
+}
 
 /* ─── Custom Shader: Seamless liquid purple MicroLED surface ─── */
 const LiquidScreenMaterial = {
@@ -118,35 +126,52 @@ function MicroLEDScreen({ width, height }) {
 function LEDPanel() {
   const groupRef = useRef();
   const glowRef = useRef();
-  const mouse = useRef({ x: 0, y: 0 });
+  const haloRef = useRef();
+  const ringRef = useRef();
 
-  useEffect(() => {
-    const handler = (e) => {
-      mouse.current.x = (e.clientX / window.innerWidth) * 2 - 1;
-      mouse.current.y = -(e.clientY / window.innerHeight) * 2 + 1;
-    };
-    window.addEventListener('mousemove', handler);
-    return () => window.removeEventListener('mousemove', handler);
-  }, []);
-
-  useFrame(() => {
+  useFrame(({ clock }) => {
     if (!groupRef.current) return;
+    const t = clock.getElapsedTime();
     const p = scrollState.progress;
     const mouseInfluence = Math.max(0, p - 0.3) / 0.7;
-    const targetRotY = mouse.current.x * 0.12 * mouseInfluence;
-    const targetRotX = mouse.current.y * 0.08 * mouseInfluence;
+    const targetRotY = mouseState.x * 0.12 * mouseInfluence;
+    const targetRotX = -mouseState.y * 0.08 * mouseInfluence;
     groupRef.current.rotation.y += (targetRotY - groupRef.current.rotation.y) * 0.04;
     groupRef.current.rotation.x += (targetRotX - groupRef.current.rotation.x) * 0.04;
+    // subtle float — only during pull-out when panel is visible small
+    groupRef.current.position.y = Math.sin(t * 0.6) * 0.06 * p;
   });
 
   useFrame(({ clock }) => {
-    if (!glowRef.current) return;
     const p = scrollState.progress;
-    glowRef.current.material.opacity = (0.12 + Math.sin(clock.getElapsedTime() * 1.5) * 0.05) * Math.min(1, p * 2);
+    const t = clock.getElapsedTime();
+    if (glowRef.current) {
+      glowRef.current.material.opacity = (0.22 + Math.sin(t * 1.5) * 0.06) * Math.min(1, p * 2);
+    }
+    if (haloRef.current) {
+      haloRef.current.rotation.z = t * 0.12;
+      const haloOpacity = Math.max(0, (p - 0.35) / 0.65) * (0.55 + Math.sin(t * 0.8) * 0.1);
+      haloRef.current.material.opacity = haloOpacity;
+    }
+    if (ringRef.current) {
+      ringRef.current.rotation.z = -t * 0.08;
+      ringRef.current.material.opacity = Math.max(0, (p - 0.45) / 0.55) * 0.7;
+    }
   });
 
   return (
     <group ref={groupRef}>
+      {/* Far glow halo — torus behind panel */}
+      <mesh ref={haloRef} position={[0, 0, -0.6]}>
+        <torusGeometry args={[3.0, 0.035, 24, 128]} />
+        <meshBasicMaterial color="#c084fc" transparent opacity={0} blending={THREE.AdditiveBlending} toneMapped={false} />
+      </mesh>
+      {/* Inner ring */}
+      <mesh ref={ringRef} position={[0, 0, -0.4]}>
+        <torusGeometry args={[2.4, 0.014, 16, 128]} />
+        <meshBasicMaterial color="#ffffff" transparent opacity={0} blending={THREE.AdditiveBlending} toneMapped={false} />
+      </mesh>
+
       {/* Panel body */}
       <mesh position={[0, 0, 0]}>
         <boxGeometry args={[3.6, 2.05, 0.08]} />
@@ -167,20 +192,10 @@ function LEDPanel() {
       {/* Seamless MicroLED screen with liquid shader */}
       <MicroLEDScreen width={3.4} height={1.9} />
 
-      {/* Glow behind panel */}
-      <mesh ref={glowRef} position={[0, 0, -0.2]}>
-        <planeGeometry args={[5, 3.5]} />
+      {/* Soft background glow plane */}
+      <mesh ref={glowRef} position={[0, 0, -0.25]}>
+        <planeGeometry args={[8.5, 5.8]} />
         <meshBasicMaterial color="#7C3AED" transparent opacity={0} side={THREE.DoubleSide} blending={THREE.AdditiveBlending} />
-      </mesh>
-
-      {/* Panel stand */}
-      <mesh position={[0, -1.2, 0]}>
-        <boxGeometry args={[0.8, 0.06, 0.12]} />
-        <meshStandardMaterial color="#18181b" metalness={0.9} roughness={0.1} />
-      </mesh>
-      <mesh position={[0, -1.25, 0.15]}>
-        <boxGeometry args={[0.5, 0.03, 0.35]} />
-        <meshStandardMaterial color="#18181b" metalness={0.9} roughness={0.1} />
       </mesh>
 
       {/* Logo dot */}
@@ -192,43 +207,211 @@ function LEDPanel() {
   );
 }
 
-/* ─── Ambient Particles ─── */
-function ParticleField({ count = 500 }) {
-  const meshRef = useRef();
+/* ─── GLSL Particle Field ─── */
+const ParticleVertexShader = `
+  attribute float aSeed;
+  attribute float aSize;
+  uniform float uTime;
+  uniform float uScroll;
+  uniform float uPixelRatio;
+  uniform vec2 uMouse;
+  varying float vAlpha;
+  varying float vDepth;
+  varying float vForce;
 
-  const particles = useMemo(() => {
-    const pos = new Float32Array(count * 3);
-    const speeds = new Float32Array(count);
+  void main() {
+    vec3 p = position;
+
+    // Curl-ish flow using layered sin/cos on per-particle seed
+    float t = uTime * 0.25;
+    float s = aSeed * 6.2831;
+    p.x += sin(t * 0.9 + s) * 0.35 + cos(t * 0.5 + aSeed * 11.0) * 0.22;
+    p.y += cos(t * 0.7 + s * 1.3) * 0.28 + sin(t * 0.45 + aSeed * 9.0) * 0.2;
+    p.z += sin(t * 0.6 + s * 0.8) * 0.3;
+
+    // Scroll streams particles toward camera + disperses outward
+    float push = uScroll * 6.0;
+    p.z += push;
+    p.xy *= 1.0 + uScroll * 0.55;
+
+    // Cursor repulsion bubble — probe NDC before final projection
+    vec4 mvEarly = modelViewMatrix * vec4(p, 1.0);
+    vec4 projEarly = projectionMatrix * mvEarly;
+    vec2 ndcEarly = projEarly.xy / max(projEarly.w, 0.0001);
+    vec2 toMouse = ndcEarly - uMouse;
+    float d = length(toMouse);
+    float force = smoothstep(0.42, 0.0, d);
+    vec2 dir = d > 0.001 ? toMouse / d : vec2(0.0);
+    p.xy += dir * force * 1.4;
+    // small swirl component so it feels alive
+    p.xy += vec2(-dir.y, dir.x) * force * 0.6;
+    vForce = force;
+
+    vec4 mv = modelViewMatrix * vec4(p, 1.0);
+    gl_Position = projectionMatrix * mv;
+
+    // Distance-based point size with subtle twinkle + cursor boost
+    float twinkle = 0.7 + 0.6 * sin(uTime * 2.0 + aSeed * 17.0);
+    gl_PointSize = aSize * twinkle * uPixelRatio * (40.0 / -mv.z) * (1.0 + force * 0.8);
+
+    // Opacity: ramp in with scroll, fade far depths
+    float depthFade = smoothstep(-20.0, -2.0, mv.z);
+    vAlpha = smoothstep(0.15, 0.6, uScroll) * depthFade;
+    vDepth = clamp((-mv.z) / 12.0, 0.0, 1.0);
+  }
+`;
+
+const ParticleFragmentShader = `
+  varying float vAlpha;
+  varying float vDepth;
+  varying float vForce;
+
+  void main() {
+    vec2 uv = gl_PointCoord - 0.5;
+    float d = length(uv);
+    if (d > 0.5) discard;
+    float falloff = smoothstep(0.5, 0.0, d);
+    float core = pow(falloff, 2.2);
+
+    vec3 near = vec3(0.82, 0.58, 1.0);
+    vec3 far  = vec3(0.35, 0.12, 0.68);
+    vec3 col = mix(near, far, vDepth);
+    col += core * 0.35;
+    // cursor-touched particles flare bright white
+    col += vec3(0.9, 0.75, 1.0) * vForce * 0.6;
+
+    gl_FragColor = vec4(col, core * vAlpha);
+  }
+`;
+
+function ParticleField({ count = 2400 }) {
+  const meshRef = useRef();
+  const matRef = useRef();
+
+  const { positions, seeds, sizes } = useMemo(() => {
+    const positions = new Float32Array(count * 3);
+    const seeds = new Float32Array(count);
+    const sizes = new Float32Array(count);
     for (let i = 0; i < count; i++) {
-      pos[i * 3] = (Math.random() - 0.5) * 18;
-      pos[i * 3 + 1] = (Math.random() - 0.5) * 10;
-      pos[i * 3 + 2] = (Math.random() - 0.5) * 8 - 3;
-      speeds[i] = Math.random() * 0.4 + 0.1;
+      // Spherical-ish distribution biased toward the camera volume
+      const r = Math.pow(Math.random(), 0.6) * 11;
+      const theta = Math.random() * Math.PI * 2;
+      const phi = Math.acos(2 * Math.random() - 1);
+      positions[i * 3] = r * Math.sin(phi) * Math.cos(theta);
+      positions[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta) * 0.65;
+      positions[i * 3 + 2] = r * Math.cos(phi) * 0.55 - 2.5;
+      seeds[i] = Math.random();
+      sizes[i] = 0.9 + Math.random() * 2.4;
     }
-    return { positions: pos, speeds };
+    return { positions, seeds, sizes };
   }, [count]);
 
+  const uniforms = useMemo(
+    () => ({
+      uTime: { value: 0 },
+      uScroll: { value: 0 },
+      uPixelRatio: { value: Math.min(window.devicePixelRatio || 1, 2) },
+      uMouse: { value: new THREE.Vector2(0, 0) },
+    }),
+    []
+  );
+
   useFrame(({ clock }) => {
-    if (!meshRef.current) return;
-    const t = clock.getElapsedTime();
-    const posAttr = meshRef.current.geometry.getAttribute('position');
-    for (let i = 0; i < count; i++) {
-      const ix = i * 3;
-      posAttr.array[ix + 1] += Math.sin(t * particles.speeds[i] + i) * 0.0008;
-      posAttr.array[ix] += Math.cos(t * particles.speeds[i] * 0.3 + i) * 0.0004;
+    if (matRef.current) {
+      const u = matRef.current.uniforms;
+      u.uTime.value = clock.getElapsedTime();
+      u.uScroll.value = scrollState.progress;
+      // smooth mouse toward target for lagged trail
+      u.uMouse.value.x += (mouseState.x - u.uMouse.value.x) * 0.08;
+      u.uMouse.value.y += (mouseState.y - u.uMouse.value.y) * 0.08;
     }
-    posAttr.needsUpdate = true;
-    const p = scrollState.progress;
-    meshRef.current.material.opacity = Math.max(0, (p - 0.2) * 1.5) * 0.5;
   });
 
   return (
-    <points ref={meshRef}>
+    <points ref={meshRef} frustumCulled={false}>
       <bufferGeometry>
-        <bufferAttribute attach="attributes-position" array={particles.positions} count={count} itemSize={3} />
+        <bufferAttribute attach="attributes-position" array={positions} count={count} itemSize={3} />
+        <bufferAttribute attach="attributes-aSeed" array={seeds} count={count} itemSize={1} />
+        <bufferAttribute attach="attributes-aSize" array={sizes} count={count} itemSize={1} />
       </bufferGeometry>
-      <pointsMaterial size={0.02} color="#A855F7" transparent opacity={0} sizeAttenuation blending={THREE.AdditiveBlending} depthWrite={false} />
+      <shaderMaterial
+        ref={matRef}
+        uniforms={uniforms}
+        vertexShader={ParticleVertexShader}
+        fragmentShader={ParticleFragmentShader}
+        transparent
+        depthWrite={false}
+        blending={THREE.AdditiveBlending}
+      />
     </points>
+  );
+}
+
+/* ─── Bokeh Orbs — soft glowing lights drifting in background ─── */
+function BokehOrbs() {
+  const groupRef = useRef();
+  const orbs = useMemo(
+    () =>
+      Array.from({ length: 8 }, (_, i) => ({
+        pos: [
+          (Math.random() - 0.5) * 14,
+          (Math.random() - 0.5) * 7,
+          -3 - Math.random() * 6,
+        ],
+        scale: 0.8 + Math.random() * 1.8,
+        speed: 0.15 + Math.random() * 0.35,
+        phase: Math.random() * Math.PI * 2,
+        color: i % 3 === 0 ? '#c084fc' : i % 3 === 1 ? '#7c3aed' : '#a855f7',
+      })),
+    []
+  );
+
+  useFrame(({ clock }) => {
+    if (!groupRef.current) return;
+    const t = clock.getElapsedTime();
+    const p = scrollState.progress;
+    groupRef.current.children.forEach((c, i) => {
+      const orb = orbs[i];
+      c.position.y = orb.pos[1] + Math.sin(t * orb.speed + orb.phase) * 0.45;
+      c.position.x = orb.pos[0] + Math.cos(t * orb.speed * 0.6 + orb.phase) * 0.35;
+      if (c.material) {
+        c.material.opacity = Math.max(0, (p - 0.3) / 0.7) * 0.6;
+      }
+    });
+  });
+
+  return (
+    <group ref={groupRef}>
+      {orbs.map((orb, i) => (
+        <mesh key={i} position={orb.pos} scale={orb.scale}>
+          <planeGeometry args={[1, 1]} />
+          <shaderMaterial
+            transparent
+            depthWrite={false}
+            blending={THREE.AdditiveBlending}
+            uniforms={{ uColor: { value: new THREE.Color(orb.color) } }}
+            vertexShader={`
+              varying vec2 vUv;
+              void main() {
+                vUv = uv;
+                gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+              }
+            `}
+            fragmentShader={`
+              uniform vec3 uColor;
+              varying vec2 vUv;
+              void main() {
+                vec2 uv = vUv - 0.5;
+                float d = length(uv);
+                float core = smoothstep(0.5, 0.0, d);
+                float bloom = pow(core, 2.5);
+                gl_FragColor = vec4(uColor * bloom, bloom);
+              }
+            `}
+          />
+        </mesh>
+      ))}
+    </group>
   );
 }
 
@@ -300,12 +483,12 @@ function CameraRig() {
       targetY = 0.1 * t;
       targetRotX = -0.02 * t;
     } else {
-      // Phase D: dramatic pull-out, long lens
+      // Phase D: dramatic pull-out, long lens (tighter to keep monument grand)
       const t = (p - 0.58) / 0.42;
-      targetZ = 0.7 + (10 - 0.7) * t;
-      targetFov = 55 + (34 - 55) * t;
-      targetY = 0.1 + 0.35 * t;
-      targetRotX = -0.02 + (-0.15) * t;
+      targetZ = 0.7 + (6 - 0.7) * t;
+      targetFov = 55 + (38 - 55) * t;
+      targetY = 0.1 + 0.15 * t;
+      targetRotX = -0.02 + (-0.08) * t;
     }
 
     camera.position.z += (targetZ - camera.position.z) * 0.08;
@@ -352,7 +535,8 @@ export default function HeroScene({ scrollProgress = 0 }) {
         <CameraRig />
         <Lighting />
         <LEDPanel />
-        <ParticleField count={500} />
+        <ParticleField count={3500} />
+        <BokehOrbs />
         <FloatingShapes />
       </Canvas>
     </div>

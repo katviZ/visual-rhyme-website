@@ -39,6 +39,9 @@ export default function Hero({ onOpenQuote }) {
   const ctaY = useTransform(scrollYProgress, [0.35, 0.45], [20, 0]);
   const trustOpacity = useTransform(scrollYProgress, [0.4, 0.5], [0, 1]);
 
+  // HUD fades in during pull-out when panel is monument
+  const hudOpacity = useTransform(scrollYProgress, [0.55, 0.72, 0.92, 1], [0, 1, 1, 0]);
+
   // Scroll indicator only at very top
   const scrollIndicatorOpacity = useTransform(scrollYProgress, [0, 0.02, 0.1], [1, 1, 0]);
 
@@ -96,6 +99,35 @@ export default function Hero({ onOpenQuote }) {
             <span className="hero__trust-dot" aria-hidden="true" />
             <span>7 Years Support</span>
           </motion.div>
+        </motion.div>
+
+        <motion.div className="hero__hud" style={{ opacity: hudOpacity }} aria-hidden="true">
+          <span className="hero__hud-corner hero__hud-corner--tl" />
+          <span className="hero__hud-corner hero__hud-corner--tr" />
+          <span className="hero__hud-corner hero__hud-corner--bl" />
+          <span className="hero__hud-corner hero__hud-corner--br" />
+
+          <div className="hero__hud-strip hero__hud-strip--left">
+            <span>SYS / LIVE</span>
+            <span>MicroLED · TrueHue</span>
+            <span>281T COLORS</span>
+          </div>
+          <div className="hero__hud-strip hero__hud-strip--right">
+            <span>REV 04.12</span>
+            <span>GRAVITON BLACK</span>
+            <span>LVL.A</span>
+          </div>
+
+          <div className="hero__hud-readout">
+            <span className="hero__hud-readout-label">LUM</span>
+            <span className="hero__hud-readout-val">6000<i>nit</i></span>
+            <span className="hero__hud-sep" />
+            <span className="hero__hud-readout-label">CONT</span>
+            <span className="hero__hud-readout-val">1M:1</span>
+            <span className="hero__hud-sep" />
+            <span className="hero__hud-readout-label">REF</span>
+            <span className="hero__hud-readout-val">240hz</span>
+          </div>
         </motion.div>
 
         <motion.div
