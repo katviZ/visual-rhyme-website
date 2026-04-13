@@ -1696,6 +1696,109 @@ img {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
+   LEAD CTA — PINNED PARALLAX CLOSER
+   ═══════════════════════════════════════════════════════════════════════════ */
+.lead-cta-pin {
+  position: relative;
+  background: #050012;
+  min-height: 88vh;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 120px 24px;
+}
+.lead-cta-pin__mesh {
+  position: absolute;
+  inset: -25%;
+  background:
+    radial-gradient(46% 60% at 22% 26%, rgba(124, 58, 237, 0.7) 0%, rgba(124, 58, 237, 0) 70%),
+    radial-gradient(40% 52% at 82% 78%, rgba(168, 85, 247, 0.55) 0%, rgba(168, 85, 247, 0) 70%),
+    radial-gradient(30% 40% at 50% 50%, rgba(192, 132, 252, 0.35) 0%, rgba(192, 132, 252, 0) 70%),
+    linear-gradient(135deg, #0a0215 0%, #14052a 50%, #050012 100%);
+  filter: blur(8px) saturate(0.95);
+  will-change: transform;
+}
+.lead-cta-pin__scrim {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(55% 80% at 50% 50%, rgba(5, 0, 18, 0) 0%, rgba(5, 0, 18, 0.55) 70%, rgba(5, 0, 18, 0.9) 100%),
+    linear-gradient(180deg, rgba(5, 0, 18, 0.5) 0%, rgba(5, 0, 18, 0) 20%, rgba(5, 0, 18, 0) 80%, rgba(5, 0, 18, 0.6) 100%);
+  pointer-events: none;
+}
+.lead-cta-pin__grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(192, 132, 252, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(192, 132, 252, 0.06) 1px, transparent 1px);
+  background-size: 60px 60px;
+  mask-image: radial-gradient(60% 60% at 50% 50%, #000 30%, transparent 100%);
+  -webkit-mask-image: radial-gradient(60% 60% at 50% 50%, #000 30%, transparent 100%);
+  pointer-events: none;
+}
+.lead-cta-pin__content {
+  position: relative;
+  z-index: 2;
+  max-width: 960px;
+  width: 100%;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.lead-cta-pin__kicker {
+  display: inline-block;
+  font-family: var(--font-mono, 'Courier New', monospace);
+  font-size: 0.72rem;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: rgba(233, 213, 255, 0.75);
+  margin-bottom: 28px;
+}
+.lead-cta-pin__title {
+  font-family: var(--font-display);
+  font-size: clamp(2.4rem, 6vw, 5.4rem);
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -0.025em;
+  margin: 0 0 28px;
+  color: #f4f4f5;
+  filter: drop-shadow(0 0 48px rgba(124, 58, 237, 0.35));
+}
+.lead-cta-pin__title-accent {
+  display: inline-block;
+  padding: 0.05em 0.18em 0.05em 0;
+  background: linear-gradient(135deg, #e9d5ff 0%, #c084fc 45%, #7c3aed 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  font-style: italic;
+}
+.lead-cta-pin__subtitle {
+  max-width: 560px;
+  margin: 0 auto 40px;
+  font-size: clamp(1rem, 1.3vw, 1.2rem);
+  line-height: 1.7;
+  color: rgba(244, 244, 245, 0.75);
+}
+.lead-cta-pin__buttons {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+@media (max-width: 900px) {
+  .lead-cta-pin__title { font-size: clamp(2.2rem, 11vw, 4.5rem); }
+  .lead-cta-pin__kicker { margin-bottom: 18px; font-size: 0.62rem; }
+  .lead-cta-pin__subtitle { margin-bottom: 28px; }
+  .lead-cta-pin__buttons { gap: 12px; }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
    SHOWCASE — TEXT-MASK SCROLL SECTION
    ═══════════════════════════════════════════════════════════════════════════ */
 .showcase {
