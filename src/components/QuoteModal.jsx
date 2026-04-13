@@ -5,7 +5,15 @@ import PixelQuotePro from './PixelQuotePro';
 export default function QuoteModal({ isOpen, onClose }) {
   useEffect(() => {
     document.body.style.overflow = isOpen ? 'hidden' : '';
-    return () => { document.body.style.overflow = ''; };
+    const lenis = typeof window !== 'undefined' ? window.__lenis : null;
+    if (lenis) {
+      if (isOpen) lenis.stop();
+      else lenis.start();
+    }
+    return () => {
+      document.body.style.overflow = '';
+      if (lenis) lenis.start();
+    };
   }, [isOpen]);
 
   useEffect(() => {
@@ -30,6 +38,7 @@ export default function QuoteModal({ isOpen, onClose }) {
         >
           <motion.div
             className="quote-modal-content"
+            data-lenis-prevent
             initial={{ opacity: 0, scale: 0.95, y: 30 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 30 }}

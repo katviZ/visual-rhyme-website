@@ -11,6 +11,7 @@ import About from './components/About';
 import Products from './components/Products';
 import Technology from './components/Technology';
 import Applications from './components/Applications';
+import Showcase from './components/Showcase';
 import Process from './components/Process';
 import Testimonials from './components/Testimonials';
 import LeadCTA from './components/LeadCTA';
@@ -41,6 +42,7 @@ export default function App() {
         <Products onOpenQuote={openQuote} />
         <Technology />
         <Applications />
+        <Showcase />
         <Process />
         <Testimonials />
         <LeadCTA onOpenQuote={openQuote} />
