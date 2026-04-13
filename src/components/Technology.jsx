@@ -2,6 +2,7 @@ import { lazy, Suspense } from 'react';
 import RevealSection from './ui/RevealSection';
 import LineReveal from './ui/LineReveal';
 import ClipReveal from './ui/ClipReveal';
+import MagneticWrapper from './ui/MagneticWrapper';
 
 const FloatingGeo = lazy(() => import('./three/FloatingGeo'));
 
@@ -107,17 +108,18 @@ export default function Technology() {
 
         <div className="why-us__grid">
           {techFeatures.map((item, i) => (
-            <ClipReveal
-              key={item.title}
-              className="why-us__card"
-              delay={i * 0.12}
-              duration={1.15}
-              whileHover={{ y: -8, transition: { duration: 0.3 } }}
-            >
-              <span className="why-us__icon">{item.icon}</span>
-              <h3 className="why-us__card-title">{item.title}</h3>
-              <p className="why-us__card-desc">{item.description}</p>
-            </ClipReveal>
+            <MagneticWrapper key={item.title} subtle fullWidth>
+              <ClipReveal
+                className="why-us__card"
+                delay={i * 0.12}
+                duration={1.15}
+                whileHover={{ y: -8, transition: { duration: 0.3 } }}
+              >
+                <span className="why-us__icon">{item.icon}</span>
+                <h3 className="why-us__card-title">{item.title}</h3>
+                <p className="why-us__card-desc">{item.description}</p>
+              </ClipReveal>
+            </MagneticWrapper>
           ))}
         </div>
       </div>

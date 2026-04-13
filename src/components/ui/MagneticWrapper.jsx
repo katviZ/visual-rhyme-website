@@ -8,7 +8,14 @@ export default function MagneticWrapper({
   maxDistance = 10,
   className = '',
   fullWidth = false,
+  subtle = false,
 }) {
+  // Subtle variant: for content cards. Gentler pull, no inner parallax, no scale.
+  if (subtle) {
+    outerStrength = 0.08;
+    innerStrength = 0;
+    maxDistance = 14;
+  }
   const display = fullWidth ? 'block' : 'inline-block';
   const width = fullWidth ? '100%' : undefined;
   const ref = useRef(null);
@@ -96,10 +103,10 @@ export default function MagneticWrapper({
       style={{
         x: outerSpringX,
         y: outerSpringY,
-        scale: active ? 1.025 : 1,
+        scale: subtle ? 1 : (active ? 1.025 : 1),
         display,
         width,
-        transition: 'scale 0.35s cubic-bezier(0.22, 1, 0.36, 1)',
+        transition: subtle ? undefined : 'scale 0.35s cubic-bezier(0.22, 1, 0.36, 1)',
       }}
     >
       <motion.div
