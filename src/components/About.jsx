@@ -4,6 +4,7 @@ import RevealSection from './ui/RevealSection';
 import AnimatedCounter from './ui/AnimatedCounter';
 import LogoIcon from './ui/LogoIcon';
 import LineReveal from './ui/LineReveal';
+import { staggerContainerProps, staggerItemProps } from './ui/StaggerGroup';
 
 export default function About() {
   const ref = useRef(null);
@@ -33,26 +34,26 @@ export default function About() {
             we're rewriting what "digital display" means in India.
           </p>
 
-          <div className="about__stats">
-            <div className="about__stat">
+          <motion.div className="about__stats" {...staggerContainerProps}>
+            <motion.div className="about__stat" {...staggerItemProps}>
               <span className="about__stat-number">
                 <AnimatedCounter target={281} suffix="T" />
               </span>
               <span className="about__stat-label">Colors Rendered</span>
-            </div>
-            <div className="about__stat">
+            </motion.div>
+            <motion.div className="about__stat" {...staggerItemProps}>
               <span className="about__stat-number">
                 <AnimatedCounter target={6000} />
               </span>
               <span className="about__stat-label">nits Peak Brightness</span>
-            </div>
-            <div className="about__stat">
+            </motion.div>
+            <motion.div className="about__stat" {...staggerItemProps}>
               <span className="about__stat-number">
                 <AnimatedCounter target={100} suffix="K+" />
               </span>
               <span className="about__stat-label">Hours LED Lifespan</span>
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
         </div>
 
         <motion.div className="about__visual" style={{ y: imgY }}>

@@ -5,6 +5,7 @@ import TiltCard from './ui/TiltCard';
 import LogoIcon from './ui/LogoIcon';
 import MagneticWrapper from './ui/MagneticWrapper';
 import LineReveal from './ui/LineReveal';
+import { staggerContainer, staggerItem } from './ui/StaggerGroup';
 
 const ProductScene = lazy(() => import('./three/ProductScene'));
 
@@ -138,14 +139,23 @@ export default function Products({ onOpenQuote }) {
                 </div>
 
                 <div className="products__card-right">
-                  <div className="products__specs">
+                  <motion.div
+                    className="products__specs"
+                    variants={staggerContainer}
+                    initial="hidden"
+                    animate="visible"
+                  >
                     {products[activeProduct].specs.map((spec) => (
-                      <div key={spec.label} className="products__spec">
+                      <motion.div
+                        key={spec.label}
+                        className="products__spec"
+                        variants={staggerItem}
+                      >
                         <span className="products__spec-value">{spec.value}</span>
                         <span className="products__spec-label">{spec.label}</span>
-                      </div>
+                      </motion.div>
                     ))}
-                  </div>
+                  </motion.div>
                   <div className="products__image-placeholder">
                     <Suspense fallback={<LogoIcon size={60} color="rgba(147, 51, 234, 0.2)" />}>
                       <ProductScene gradient={products[activeProduct].sceneColors} />
