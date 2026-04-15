@@ -207,6 +207,169 @@ function LEDPanel() {
   );
 }
 
+/* ─── LED Pixel Wall — InstancedMesh-style grid that reads as a real LED screen ─── */
+function PixelWall({ cols = 64, rows = 36, width = 18, height = 10.125, z = -3 }) {
+  const matRef = useRef();
+
+  const geometry = useMemo(() => {
+    const geo = new THREE.BufferGeometry();
+    const cellW = width / cols;
+    const cellH = height / rows;
+    const gap = 0.18;
+    const pw = cellW * (1 - gap);
+    const ph = cellH * (1 - gap);
+    const count = cols * rows;
+    const positions = new Float32Array(count * 6 * 3);
+    const cellUvs = new Float32Array(count * 6 * 2);
+    const cellCenters = new Float32Array(count * 6 * 3);
+    const phases = new Float32Array(count * 6);
+    const bases = new Float32Array(count * 6);
+    const gridUvs = new Float32Array(count * 6 * 2);
+    const heroes = new Float32Array(count * 6);
+    let vi = 0;
+    for (let iy = 0; iy < rows; iy++) {
+      for (let ix = 0; ix < cols; ix++) {
+        const cx = -width / 2 + (ix + 0.5) * cellW;
+        const cy = -height / 2 + (iy + 0.5) * cellH;
+        const jitter = 0.97 + Math.random() * 0.06;
+        const hw = pw * 0.5 * jitter;
+        const hh = ph * 0.5 * jitter;
+        const phase = Math.random() * Math.PI * 2;
+        const base = 0.55 + Math.random() * 0.45;
+        const isHero = Math.random() < 0.02 ? 1 : 0;
+        const gu = ix / (cols - 1);
+        const gv = iy / (rows - 1);
+        const verts = [
+          [cx - hw, cy - hh, 0, 0, 0],
+          [cx + hw, cy - hh, 0, 1, 0],
+          [cx + hw, cy + hh, 0, 1, 1],
+          [cx - hw, cy - hh, 0, 0, 0],
+          [cx + hw, cy + hh, 0, 1, 1],
+          [cx - hw, cy + hh, 0, 0, 1],
+        ];
+        for (let k = 0; k < 6; k++) {
+          const v = verts[k];
+          positions[vi * 3] = v[0];
+          positions[vi * 3 + 1] = v[1];
+          positions[vi * 3 + 2] = v[2];
+          cellUvs[vi * 2] = v[3];
+          cellUvs[vi * 2 + 1] = v[4];
+          cellCenters[vi * 3] = cx;
+          cellCenters[vi * 3 + 1] = cy;
+          cellCenters[vi * 3 + 2] = 0;
+          phases[vi] = phase;
+          bases[vi] = base;
+          heroes[vi] = isHero;
+          gridUvs[vi * 2] = gu;
+          gridUvs[vi * 2 + 1] = gv;
+          vi++;
+        }
+      }
+    }
+    geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    geo.setAttribute('aCellUv', new THREE.BufferAttribute(cellUvs, 2));
+    geo.setAttribute('aCellCenter', new THREE.BufferAttribute(cellCenters, 3));
+    geo.setAttribute('aPhase', new THREE.BufferAttribute(phases, 1));
+    geo.setAttribute('aBase', new THREE.BufferAttribute(bases, 1));
+    geo.setAttribute('aHero', new THREE.BufferAttribute(heroes, 1));
+    geo.setAttribute('aGridUv', new THREE.BufferAttribute(gridUvs, 2));
+    return geo;
+  }, [cols, rows, width, height]);
+
+  const uniforms = useMemo(
+    () => ({
+      uTime: { value: 0 },
+      uScroll: { value: 0 },
+      uMouse: { value: new THREE.Vector2(0, 0) },
+    }),
+    []
+  );
+
+  useFrame(({ clock }) => {
+    if (!matRef.current) return;
+    const u = matRef.current.uniforms;
+    u.uTime.value = clock.getElapsedTime();
+    u.uScroll.value = scrollState.progress;
+    u.uMouse.value.x += (mouseState.x - u.uMouse.value.x) * 0.08;
+    u.uMouse.value.y += (mouseState.y - u.uMouse.value.y) * 0.08;
+  });
+
+  const vertexShader = `
+    attribute vec2 aCellUv;
+    attribute vec3 aCellCenter;
+    attribute float aPhase;
+    attribute float aBase;
+    attribute float aHero;
+    attribute vec2 aGridUv;
+    uniform float uTime;
+    uniform float uScroll;
+    uniform vec2 uMouse;
+    varying vec2 vCellUv;
+    varying float vIntensity;
+    varying float vHero;
+
+    void main() {
+      vCellUv = aCellUv;
+      vHero = aHero;
+
+      float wave1 = sin(aGridUv.x * 6.2 + aGridUv.y * 3.8 - uTime * 1.1 + aPhase * 0.4);
+      float wave2 = sin(aGridUv.x * 2.5 - aGridUv.y * 4.0 + uTime * 0.6);
+      float wave = (wave1 * 0.7 + wave2 * 0.3) * 0.5 + 0.5;
+
+      vec4 cellProj = projectionMatrix * modelViewMatrix * vec4(aCellCenter, 1.0);
+      vec2 ndc = cellProj.xy / max(cellProj.w, 0.0001);
+      float d = length(ndc - uMouse);
+      float ripple = smoothstep(0.9, 0.0, d) * (0.55 + 0.45 * sin(uTime * 3.2 - d * 9.0));
+
+      float intensity = aBase * (0.35 + wave * 0.85) + ripple * 1.3;
+      intensity *= 0.4 + uScroll * 0.8;
+      vIntensity = intensity;
+
+      gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+    }
+  `;
+
+  const fragmentShader = `
+    varying vec2 vCellUv;
+    varying float vIntensity;
+    varying float vHero;
+
+    void main() {
+      vec2 uv = vCellUv - 0.5;
+      float sq = max(abs(uv.x), abs(uv.y));
+      float mask = 1.0 - smoothstep(0.36, 0.5, sq);
+      float glow = smoothstep(0.5, 0.0, length(uv));
+      mask *= 0.5 + glow * 0.9;
+
+      vec3 deep   = vec3(0.29, 0.11, 0.58);
+      vec3 purple = vec3(0.486, 0.227, 0.929);
+      vec3 bright = vec3(0.753, 0.518, 0.988);
+      vec3 col = mix(deep, purple, clamp(vIntensity, 0.0, 1.0));
+      col = mix(col, bright, clamp(vIntensity - 0.6, 0.0, 1.0));
+      col = mix(col, vec3(1.0, 0.94, 1.0), vHero * 0.75);
+      col *= 0.6 + vIntensity;
+
+      float alpha = mask * clamp(vIntensity * 0.9, 0.0, 1.0);
+      if (alpha < 0.01) discard;
+      gl_FragColor = vec4(col, alpha);
+    }
+  `;
+
+  return (
+    <mesh position={[0, 0, z]} geometry={geometry} frustumCulled={false}>
+      <shaderMaterial
+        ref={matRef}
+        uniforms={uniforms}
+        vertexShader={vertexShader}
+        fragmentShader={fragmentShader}
+        transparent
+        depthWrite={false}
+        blending={THREE.AdditiveBlending}
+      />
+    </mesh>
+  );
+}
+
 /* ─── GLSL Particle Field ─── */
 const ParticleVertexShader = `
   attribute float aSeed;
@@ -534,8 +697,8 @@ export default function HeroScene({ scrollProgress = 0 }) {
       >
         <CameraRig />
         <Lighting />
+        <PixelWall />
         <LEDPanel />
-        <ParticleField count={3500} />
         <BokehOrbs />
         <FloatingShapes />
       </Canvas>

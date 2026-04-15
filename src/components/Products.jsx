@@ -5,7 +5,7 @@ import TiltCard from './ui/TiltCard';
 import LogoIcon from './ui/LogoIcon';
 import MagneticWrapper from './ui/MagneticWrapper';
 import LineReveal from './ui/LineReveal';
-import { staggerContainer, staggerItem } from './ui/StaggerGroup';
+import SpecsTable from './SpecsTable';
 
 const ProductScene = lazy(() => import('./three/ProductScene'));
 
@@ -105,11 +105,10 @@ export default function Products({ onOpenQuote }) {
           <motion.div
             key={activeProduct}
             className="products__showcase"
-            initial={{ opacity: 0, y: 40, rotateY: -10 }}
-            animate={{ opacity: 1, y: 0, rotateY: 0 }}
-            exit={{ opacity: 0, y: -40, rotateY: 10 }}
-            transition={{ duration: 0.5 }}
-            style={{ perspective: 1200 }}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -12 }}
+            transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
             role="tabpanel"
             id={`product-panel-${products[activeProduct].id}`}
           >
@@ -139,23 +138,20 @@ export default function Products({ onOpenQuote }) {
                 </div>
 
                 <div className="products__card-right">
-                  <motion.div
-                    className="products__specs"
-                    variants={staggerContainer}
-                    initial="hidden"
-                    animate="visible"
-                  >
-                    {products[activeProduct].specs.map((spec) => (
+                  <div className="products__specs">
+                    {products[activeProduct].specs.map((spec, i) => (
                       <motion.div
                         key={spec.label}
                         className="products__spec"
-                        variants={staggerItem}
+                        initial={{ opacity: 0, y: 18 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.55, delay: 0.15 + i * 0.08, ease: [0.22, 1, 0.36, 1] }}
                       >
                         <span className="products__spec-value">{spec.value}</span>
                         <span className="products__spec-label">{spec.label}</span>
                       </motion.div>
                     ))}
-                  </motion.div>
+                  </div>
                   <div className="products__image-placeholder">
                     <Suspense fallback={<LogoIcon size={60} color="rgba(147, 51, 234, 0.2)" />}>
                       <ProductScene gradient={products[activeProduct].sceneColors} />
@@ -166,6 +162,8 @@ export default function Products({ onOpenQuote }) {
             </TiltCard>
           </motion.div>
         </AnimatePresence>
+
+        <SpecsTable />
       </div>
     </RevealSection>
   );
