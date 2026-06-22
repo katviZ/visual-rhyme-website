@@ -7,6 +7,7 @@ const applicationItems = [
     title: 'Board & Meeting Rooms',
     category: 'Corporate',
     kicker: 'Leynna Cosmo · Sapphire',
+    image: '/images/app-boardroom.jpg',
     description:
       'MicroLED walls that command the room. Noise-free, glare-free, and calibrated for boardrooms where every pixel is on record.',
   },
@@ -14,6 +15,7 @@ const applicationItems = [
     title: 'Stadiums & Arenas',
     category: 'Outdoor',
     kicker: 'Reyansh Outdoor P3/P4/P6',
+    image: '/images/app-stadium.jpg',
     description:
       'Up to 11,000 nits of daylight-visible brilliance. IP65-rated, 4,396 billion colors, tuned for live action from the front row to the nosebleeds.',
   },
@@ -21,6 +23,7 @@ const applicationItems = [
     title: 'Luxury Residences',
     category: 'Premium',
     kicker: 'Leynna Sapphire TV',
+    image: '/images/app-luxury.jpg',
     description:
       '108" to 163" MicroLED televisions with 281 trillion colors and Graviton Black surface treatment. Furniture for the ultra-premium home.',
   },
@@ -28,6 +31,7 @@ const applicationItems = [
     title: 'Indoor DOOH Advertising',
     category: 'Retail',
     kicker: 'Reyansh Indoor · Cloud CMS',
+    image: '/images/app-dooh.jpg',
     description:
       'Seamless front-serviceable panels with cloud content management. Airports, malls, and flagship stores — orchestrated from one dashboard.',
   },
@@ -35,6 +39,7 @@ const applicationItems = [
     title: 'Control & Command Centers',
     category: 'Mission Critical',
     kicker: 'Leynna Cosmo · 120Hz',
+    image: '/images/app-controlroom.jpg',
     description:
       'Low-latency, high-refresh displays built for 24/7 operation. Color-accurate across every shift, calibrated for decisions that matter.',
   },
@@ -42,6 +47,7 @@ const applicationItems = [
     title: 'Experience Centers & Museums',
     category: 'Immersive',
     kicker: 'Sapphire MicroLED · HDR10',
+    image: '/images/app-museum.jpg',
     description:
       'Life-like visual storytelling with HDR10/HLG and 95%+ DCI-P3 coverage. Curated environments that move people.',
   },
@@ -81,6 +87,10 @@ export default function Applications() {
             {applicationItems.map((item, i) => (
               <article key={item.title} className="apps-pin__card">
                 <div className="apps-pin__media" aria-hidden="true">
+                  <div
+                    className="apps-pin__media-photo"
+                    style={{ backgroundImage: `url(${item.image})` }}
+                  />
                   <span className="apps-pin__media-index">{String(i + 1).padStart(2, '0')}</span>
                   <span className="apps-pin__media-category">{item.category}</span>
                 </div>

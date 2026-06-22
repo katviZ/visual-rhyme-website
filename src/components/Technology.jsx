@@ -91,7 +91,7 @@ const techFeatures = [
 
 export default function Technology() {
   return (
-    <RevealSection className="why-us" style={{ position: 'relative' }} zoom>
+    <RevealSection className="why-us" style={{ position: 'relative' }}>
       <Suspense fallback={null}>
         <FloatingGeo variant="tech" />
       </Suspense>

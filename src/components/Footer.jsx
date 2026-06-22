@@ -48,7 +48,7 @@ const supportLinks = [
   { label: 'Spare Modules', href: '#technology' },
 ];
 
-export default function Footer() {
+export default function Footer({ onOpenGuide }) {
   const year = new Date().getFullYear();
   return (
     <footer className="footer-v2" role="contentinfo">
@@ -105,6 +105,13 @@ export default function Footer() {
               {supportLinks.map((l) => (
                 <li key={l.label}><a href={l.href}>{l.label}</a></li>
               ))}
+              {onOpenGuide && (
+                <li>
+                  <button type="button" className="footer-v2__guide-link" onClick={onOpenGuide}>
+                    Buyer's Guide ↗
+                  </button>
+                </li>
+              )}
             </ul>
           </div>
         </div>
@@ -118,6 +125,10 @@ export default function Footer() {
           <a href="https://youtube.com/@VisualRhyme" target="_blank" rel="noopener noreferrer" aria-label="YouTube"><YouTubeIcon /></a>
           <a href="mailto:Visualrhymepurchase@gmail.com" aria-label="Email"><MailIcon /></a>
         </div>
+      </div>
+
+      <div className="footer-v2__powered">
+        Powered by <strong>Microtronix Solution</strong>
       </div>
     </footer>
   );

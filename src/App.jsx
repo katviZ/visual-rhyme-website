@@ -18,11 +18,16 @@ import LeadCTA from './components/LeadCTA';
 import Contact from './components/Contact';
 import Footer from './components/Footer';
 import QuoteModal from './components/QuoteModal';
+import BuyersGuideCTA from './components/BuyersGuideCTA';
+import LeadCaptureModal from './components/LeadCaptureModal';
 
 export default function App() {
   const [quoteOpen, setQuoteOpen] = useState(false);
+  const [guideOpen, setGuideOpen] = useState(false);
   const openQuote = useCallback(() => setQuoteOpen(true), []);
   const closeQuote = useCallback(() => setQuoteOpen(false), []);
+  const openGuide = useCallback(() => setGuideOpen(true), []);
+  const closeGuide = useCallback(() => setGuideOpen(false), []);
 
   return (
     <>
@@ -45,11 +50,13 @@ export default function App() {
         <Showcase />
         <Process />
         <Testimonials />
+        <BuyersGuideCTA onOpen={openGuide} />
         <LeadCTA onOpenQuote={openQuote} />
         <Contact />
       </main>
-      <Footer />
+      <Footer onOpenGuide={openGuide} />
       <QuoteModal isOpen={quoteOpen} onClose={closeQuote} />
+      <LeadCaptureModal isOpen={guideOpen} onClose={closeGuide} />
     </>
   );
 }

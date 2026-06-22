@@ -1,0 +1,480 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Visual Rhyme · LED Display Buyer's Guide</title>
+<style>
+  :root {
+    --bg: #0a0010;
+    --panel: #14001f;
+    --ink: #f3e8ff;
+    --mute: #b8a8d4;
+    --line: rgba(168, 85, 247, 0.25);
+    --accent: #9d20d6;
+    --accent-lite: #c084fc;
+    --gold: #ffd166;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    font-size: 15px;
+    line-height: 1.55;
+  }
+  .page {
+    max-width: 820px;
+    margin: 0 auto;
+    padding: 4rem 3.5rem;
+    background: linear-gradient(180deg, #0a0010 0%, #100018 100%);
+  }
+  .cover {
+    min-height: 95vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 4rem;
+    margin-bottom: 4rem;
+    page-break-after: always;
+  }
+  .cover__brand {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: var(--accent-lite);
+    font-size: 0.85rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+  .cover__logo {
+    display: inline-block;
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #9d20d6, #c084fc);
+    box-shadow: 0 0 30px rgba(157, 32, 214, 0.5);
+  }
+  .cover__title {
+    font-size: clamp(2.5rem, 5vw, 4.2rem);
+    line-height: 1.05;
+    margin: 0;
+    font-weight: 800;
+    background: linear-gradient(180deg, #fff 0%, #c084fc 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .cover__sub {
+    color: var(--mute);
+    font-size: 1.15rem;
+    max-width: 540px;
+    line-height: 1.5;
+    margin-top: 1.25rem;
+  }
+  .cover__meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    font-size: 0.85rem;
+    color: var(--mute);
+    letter-spacing: 0.05em;
+  }
+  .cover__meta strong { color: var(--accent-lite); }
+  h2 {
+    font-size: 1.85rem;
+    line-height: 1.2;
+    margin: 3rem 0 1rem;
+    color: #fff;
+    font-weight: 700;
+    border-left: 4px solid var(--accent);
+    padding-left: 1rem;
+  }
+  h2 + p.kicker {
+    color: var(--accent-lite);
+    font-size: 0.78rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    margin: -0.5rem 0 1rem 1rem;
+  }
+  h3 {
+    color: var(--accent-lite);
+    margin: 1.6rem 0 0.6rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+  }
+  p { color: var(--ink); margin: 0.7rem 0; }
+  p.lede { font-size: 1.05rem; color: var(--mute); margin-bottom: 1.5rem; }
+  strong { color: #fff; font-weight: 600; }
+  em { color: var(--accent-lite); font-style: normal; font-weight: 500; }
+  ul { padding-left: 1.2rem; margin: 0.6rem 0 1rem; }
+  li { margin: 0.4rem 0; color: var(--ink); }
+  li::marker { color: var(--accent); }
+  hr { border: none; border-top: 1px solid var(--line); margin: 2.5rem 0; }
+  .formula {
+    background: linear-gradient(135deg, rgba(157, 32, 214, 0.18), rgba(124, 58, 237, 0.08));
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 1.25rem 1.5rem;
+    margin: 1.25rem 0;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+  }
+  .formula__eq {
+    color: #fff;
+    font-size: 1.1rem;
+    font-weight: 600;
+  }
+  .formula__note {
+    color: var(--mute);
+    font-size: 0.82rem;
+    letter-spacing: 0.08em;
+    margin-top: 0.5rem;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1rem 0 1.5rem;
+    font-size: 0.92rem;
+  }
+  th {
+    text-align: left;
+    color: var(--accent-lite);
+    padding: 0.65rem 0.6rem;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 600;
+    border-bottom: 1px solid var(--accent);
+  }
+  td {
+    padding: 0.55rem 0.6rem;
+    border-bottom: 1px solid var(--line);
+    color: var(--ink);
+  }
+  .pillar-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    margin: 1.5rem 0;
+  }
+  .pillar {
+    background: rgba(157, 32, 214, 0.06);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 1.1rem 1.2rem;
+  }
+  .pillar__num {
+    color: var(--accent-lite);
+    font-size: 0.7rem;
+    letter-spacing: 0.18em;
+    font-weight: 700;
+  }
+  .pillar__title {
+    color: #fff;
+    margin: 0.3rem 0 0.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+  }
+  .pillar__body { color: var(--mute); font-size: 0.88rem; line-height: 1.5; margin: 0; }
+  .checklist {
+    background: linear-gradient(180deg, rgba(157, 32, 214, 0.08), transparent);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 1.5rem 1.75rem;
+    margin: 1.5rem 0;
+  }
+  .checklist h3 {
+    margin-top: 0;
+    color: #fff;
+  }
+  .closing {
+    text-align: center;
+    border-top: 1px solid var(--line);
+    padding-top: 2.5rem;
+    margin-top: 4rem;
+  }
+  .closing__cta {
+    display: inline-block;
+    margin: 1.5rem 0 1rem;
+    padding: 0.85rem 1.75rem;
+    background: linear-gradient(135deg, #9d20d6, #c084fc);
+    color: #fff;
+    border-radius: 999px;
+    font-weight: 600;
+    text-decoration: none;
+    letter-spacing: 0.03em;
+  }
+  .closing__contact {
+    color: var(--mute);
+    font-size: 0.9rem;
+    line-height: 1.7;
+  }
+  .closing__contact strong { color: var(--accent-lite); }
+  .footer-line {
+    text-align: center;
+    color: var(--mute);
+    font-size: 0.75rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-top: 2.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--line);
+  }
+  .footer-line strong {
+    color: var(--accent-lite);
+    letter-spacing: 0.1em;
+  }
+  @media print {
+    html, body { background: #fff; color: #1a0033; }
+    .page { background: #fff; padding: 2rem 1.5rem; max-width: 100%; }
+    .cover__title { color: #1a0033; background: none; -webkit-background-clip: initial; background-clip: initial; }
+    .cover__sub, p, li, .closing__contact, .footer-line { color: #4b3060; }
+    h2 { color: #1a0033; border-left-color: #9d20d6; }
+    h2 + p.kicker, h3, .cover__brand, .pillar__num, th, em, strong { color: #6d28d9; }
+    strong { color: #1a0033; }
+    .formula, .pillar, .checklist { background: #faf5ff; border-color: #d8b4fe; color: #1a0033; }
+    .formula__eq { color: #1a0033; }
+    .closing__cta { background: #9d20d6; }
+    .cover { page-break-after: always; min-height: auto; }
+    h2 { page-break-after: avoid; }
+    .pillar { page-break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- ─── COVER ─── -->
+  <section class="cover">
+    <div class="cover__brand">
+      <span class="cover__logo"></span>
+      <span>Visual Rhyme · Ahmedabad</span>
+    </div>
+    <div>
+      <h1 class="cover__title">The LED Display<br />Buyer's Guide</h1>
+      <p class="cover__sub">
+        The honest, science-backed handbook for anyone evaluating
+        a MicroLED or MiniLED installation in India. Read this before
+        you accept the first vendor quote.
+      </p>
+    </div>
+    <div class="cover__meta">
+      <span>Edition <strong>v2.0</strong> · 2026</span>
+      <span>visualrhyme.digital</span>
+    </div>
+  </section>
+
+  <!-- ─── FOREWORD ─── -->
+  <h2>Why this guide exists</h2>
+  <p class="kicker">Foreword</p>
+  <p class="lede">
+    Most LED display vendors sell boxes. They quote pixel pitch, brightness, and price —
+    then hope you pick them over three other vendors doing the same thing.
+  </p>
+  <p>
+    We wrote this guide because the gap between <em>what the spec sheet says</em> and
+    <em>what your eyes will actually see</em> is enormous — and almost nobody walks you
+    through that gap before you sign a purchase order.
+  </p>
+  <p>
+    Whether you end up buying from us or not, after these pages you will know more about
+    LED display than 90% of vendors selling them in India.
+  </p>
+
+  <!-- ─── THE ARC MINUTE RULE ─── -->
+  <h2>The 1 Arc Minute Rule</h2>
+  <p class="kicker">The single most important formula in LED</p>
+  <p>
+    Your eye resolves angular detail down to roughly <strong>1 arc minute</strong> — that's
+    1/60th of one degree. Above that threshold, two points blur into one. Below it,
+    they remain distinct dots.
+  </p>
+  <p>
+    Every pixel pitch has a mathematical minimum viewing distance below which individual
+    pixels become visible. Buying a panel finer than necessary is wasted money. Buying
+    one coarser than necessary makes your brand look pixelated. The math is non-negotiable.
+  </p>
+
+  <div class="formula">
+    <div class="formula__eq">Minimum Viewing Distance (m) = Pixel Pitch (mm) × 3.438</div>
+    <div class="formula__note">3.438 = 1 ÷ tan(1 arc minute)</div>
+  </div>
+
+  <h3>Reference table</h3>
+  <table>
+    <thead>
+      <tr><th>Pitch</th><th>MVD (m)</th><th>Optimal Viewing</th><th>Application Fit</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>P0.78</td><td>2.68</td><td>1.6 – 2.3 m</td><td>Broadcast, XR/VP, museums</td></tr>
+      <tr><td>P0.93</td><td>3.20</td><td>1.9 – 2.8 m</td><td>Premium lobbies, studios</td></tr>
+      <tr><td>P1.25</td><td>4.30</td><td>2.5 – 3.8 m</td><td>Executive boardrooms</td></tr>
+      <tr><td>P1.56</td><td>5.36</td><td>3.1 – 4.7 m</td><td>Corporate, retail flagship</td></tr>
+      <tr><td>P1.86</td><td>6.39</td><td>3.7 – 5.6 m</td><td>Large conference, hospitality</td></tr>
+      <tr><td>P2.5</td><td>8.60</td><td>5.0 – 7.5 m</td><td>Auditoriums, retail</td></tr>
+      <tr><td>P4.0</td><td>13.75</td><td>8.0 – 12.0 m</td><td>DOOH, transit</td></tr>
+      <tr><td>P6.67</td><td>22.93</td><td>13.3 – 20.0 m</td><td>Stadium, highway billboard</td></tr>
+    </tbody>
+  </table>
+
+  <!-- ─── THE THREE SPECS THAT MATTER ─── -->
+  <h2>The three specs that fix 70% of problems</h2>
+  <p class="kicker">If you only check three numbers, check these</p>
+  <p>
+    Most visual artifacts on a poorly-spec'd LED wall — flicker, banding, moiré on cameras,
+    washed-out blacks — trace back to three numbers. Insist on these as minimums:
+  </p>
+  <ul>
+    <li><strong>Refresh rate ≥ 3,840 Hz.</strong> Below this, every phone camera capturing
+    your wall will show rolling black scan-bars. At 7,680 Hz the wall is camera-clean under
+    any shutter speed.</li>
+    <li><strong>Grayscale bit depth ≥ 14-bit.</strong> Below 14-bit, dark gradients (sunsets,
+    skin tones, moody content) show visible stepping. The human eye's Weber contrast
+    threshold is ~1% — 8-bit shadows step at 4%+ which is plainly visible. 14-bit steps
+    are mathematically below your eye's detection limit.</li>
+    <li><strong>Common Cathode architecture for fine pitch.</strong> Common Cathode uses
+    separate optimised voltages for R/G/B chips, saving 31% power, running 20-25°C cooler,
+    and delivering 67% longer LED life than Common Anode. Critical for 24/7 operation
+    and broadcast-grade black levels.</li>
+  </ul>
+
+  <!-- ─── SMD VS GOB VS COB ─── -->
+  <h2>SMD vs GOB vs COB</h2>
+  <p class="kicker">Why packaging changes everything</p>
+  <p>
+    These are not three competing technologies — they're a progression. Pick by use case,
+    not by salesperson preference.
+  </p>
+  <table>
+    <thead>
+      <tr><th>Technology</th><th>Fill Factor</th><th>Static Contrast</th><th>Best For</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><strong>SMD</strong> (Surface Mount)</td><td>~30%</td><td>3,000 – 6,000 : 1</td><td>Outdoor DOOH, signage, budget-sensitive indoor</td></tr>
+      <tr><td><strong>GOB</strong> (Glue-on-Board)</td><td>~50%</td><td>7,000 – 10,000 : 1</td><td>Rental, events, high-traffic, LED floors</td></tr>
+      <tr><td><strong>COB</strong> (Chip-on-Board)</td><td>~90%</td><td>15,000 – 25,000 : 1</td><td>Broadcast, XR/VP, fine-pitch, luxury indoor</td></tr>
+    </tbody>
+  </table>
+
+  <!-- ─── STATIC VS DYNAMIC CONTRAST ─── -->
+  <h2>The contrast trap</h2>
+  <p class="kicker">Why "1,000,000 : 1" is usually marketing</p>
+  <p>
+    Every datasheet you'll see lists two contrast numbers. One is honest. One is theatre.
+  </p>
+  <ul>
+    <li><strong>Static contrast</strong> measures black and white shown simultaneously
+    (checkerboard pattern). This is what your eyes actually perceive in real content.
+    Honest numbers fall between 3,000 : 1 and 25,000 : 1.</li>
+    <li><strong>Dynamic contrast</strong> compares a full-white frame against a full-black
+    frame, measured separately. Real content never produces this scenario. Dynamic
+    numbers run into millions, but they don't reflect what you'll see on the wall.</li>
+  </ul>
+  <p>
+    When a vendor leads with "1,000,000 : 1 contrast" — they are quoting dynamic.
+    Ask for the static contrast number. If they hesitate, walk.
+  </p>
+
+  <!-- ─── CALIBRATION ─── -->
+  <h2>The hidden cost: calibration</h2>
+  <p class="kicker">What gets cut from the cheap quote</p>
+  <p>
+    LED panels drift. Without recalibration, your brand red becomes brand orange-red within
+    12-18 months. Every premium LED brand — Absen, Samsung, Sony, ourselves — calibrates
+    in five layers:
+  </p>
+  <ol>
+    <li><strong>Pixel-level</strong> — individual R/G/B gain correction per LED.</li>
+    <li><strong>Module-level</strong> — module-to-module brightness uniformity.</li>
+    <li><strong>Cabinet-level</strong> — cabinet brightness & color matching.</li>
+    <li><strong>Wall-level</strong> — gamma, white balance (D65), color space.</li>
+    <li><strong>Content 3D LUT</strong> — creative grade, brand colour mapping.</li>
+  </ol>
+  <p>
+    Insist on a documented Delta E (ΔE) target. <em>ΔE &lt; 2</em> is broadcast-grade.
+    <em>ΔE &lt; 4</em> is commercial-acceptable. Anything above 6 will be visibly inaccurate
+    to a trained eye — and to your brand team.
+  </p>
+
+  <!-- ─── 7 QUESTIONS ─── -->
+  <div class="checklist">
+    <h3>7 questions to ask any LED vendor</h3>
+    <ol>
+      <li>What is the <strong>static contrast</strong> (not dynamic)? Measured by what standard?</li>
+      <li>What is the <strong>refresh rate</strong>, and is grayscale maintained at that refresh?</li>
+      <li>What is the <strong>bit depth</strong> per colour channel?</li>
+      <li>What is the <strong>calibration ΔE target</strong>? Done at factory or on-site?</li>
+      <li>What is the <strong>driver IC and PSU brand</strong>? Tier-1 components or generic?</li>
+      <li>Is post-install <strong>recalibration</strong> included? For how many years?</li>
+      <li>What is the <strong>5-year total cost</strong> — including power, maintenance, and parts?</li>
+    </ol>
+    <p style="margin-top:1rem; color: var(--mute); font-size: 0.85rem;">
+      If a vendor can't answer all seven without checking their phone, you are talking to a
+      reseller, not an engineer. Find someone who can.
+    </p>
+  </div>
+
+  <!-- ─── 5 PILLARS ─── -->
+  <h2>Why Visual Rhyme</h2>
+  <p class="kicker">Five reasons we win the meeting</p>
+
+  <div class="pillar-grid">
+    <div class="pillar">
+      <div class="pillar__num">PILLAR 01</div>
+      <h3 class="pillar__title">Technical Authority</h3>
+      <p class="pillar__body">We sell understanding before hardware. This guide is the proof — no other Indian LED vendor publishes content at this depth.</p>
+    </div>
+    <div class="pillar">
+      <div class="pillar__num">PILLAR 02</div>
+      <h3 class="pillar__title">Dual-Brand Portfolio</h3>
+      <p class="pillar__body">Reyansh for cost-effective DOOH and corporate; Leynna for premium MicroLED. We cover the full pitch spectrum from P0.78 to P10.</p>
+    </div>
+    <div class="pillar">
+      <div class="pillar__num">PILLAR 03</div>
+      <h3 class="pillar__title">Human-First Engineering</h3>
+      <p class="pillar__body">We spec for arc minute, ambient adaptation, and perception — not for lab benchmarks. The wall has to look right in <em>your</em> room.</p>
+    </div>
+    <div class="pillar">
+      <div class="pillar__num">PILLAR 04</div>
+      <h3 class="pillar__title">Indian Support, Global Standards</h3>
+      <p class="pillar__body">Tier-1 components (Meanwell, Macroblock, TBSilicon) assembled and serviced in Ahmedabad. INR pricing, sub-week service nationwide.</p>
+    </div>
+    <div class="pillar">
+      <div class="pillar__num">PILLAR 05</div>
+      <h3 class="pillar__title">Lifetime Performance</h3>
+      <p class="pillar__body">Installation is the start, not the end. Year-1 recalibration included. Calibration revisits, content consulting, and upgrade pathway available.</p>
+    </div>
+    <div class="pillar" style="background: linear-gradient(135deg, rgba(157, 32, 214, 0.18), rgba(192, 132, 252, 0.08)); border-color: rgba(192, 132, 252, 0.4);">
+      <div class="pillar__num" style="color: #ffd166;">SIGNATURE</div>
+      <h3 class="pillar__title">Pre-Install Perception Report</h3>
+      <p class="pillar__body">Before we quote, we visit. We measure ambient, viewing distances, audience flow. You get a 5-page report. <em>No competitor does this.</em></p>
+    </div>
+  </div>
+
+  <!-- ─── CLOSING ─── -->
+  <div class="closing">
+    <h2 style="border: none; padding: 0;">Talk to the engineers, not the salespeople.</h2>
+    <p style="color: var(--mute); max-width: 540px; margin: 1rem auto;">
+      Book a 30-minute consultation with our technical team. We'll review your venue, your
+      content goals, and your competing quotes — even if you don't end up buying from us.
+    </p>
+    <a class="closing__cta" href="https://visualrhyme.digital#contact">Book a Consultation →</a>
+    <p class="closing__contact">
+      <strong>Visual Rhyme Pvt. Ltd.</strong><br />
+      Experience Centre · 193, Silver Radiance 4, off SG Highway, Gota, Ahmedabad – 382481<br />
+      visualrhyme.digital · Visualrhymepurchase@gmail.com · +91 99745 31845
+    </p>
+  </div>
+
+  <div class="footer-line">
+    Powered by <strong>Microtronix Solution</strong>
+  </div>
+
+</div>
+</body>
+</html>

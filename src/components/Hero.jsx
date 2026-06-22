@@ -48,6 +48,11 @@ export default function Hero({ onOpenQuote }) {
   return (
     <section id="hero" ref={ref} className="hero hero--cinematic">
       <div className="hero__sticky">
+        <div
+          className="hero__photo-bg"
+          style={{ backgroundImage: 'url(/images/hero-essence.jpg)' }}
+          aria-hidden="true"
+        />
         <motion.div
           className="hero__scene-wrap"
           style={{ opacity: sceneOpacity, filter: sceneFilter }}

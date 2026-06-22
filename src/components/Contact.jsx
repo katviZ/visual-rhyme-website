@@ -103,20 +103,12 @@ export default function Contact() {
               <a href="tel:+919974531845">+91 99745 31845</a>
             </div>
             <div className="contact__detail">
-              <span className="contact__detail-label">Alternate</span>
-              <a href="tel:+917090588882">+91 70905 88882</a>
-            </div>
-            <div className="contact__detail">
               <span className="contact__detail-label">Email</span>
               <a href="mailto:Visualrhymepurchase@gmail.com">Visualrhymepurchase@gmail.com</a>
             </div>
             <div className="contact__detail">
-              <span className="contact__detail-label">Office</span>
-              <address className="contact__detail-address">193, 9th Floor, Silver Radiance 4, off SG Highway, Beside Bhavik Publication, Gota, Ahmedabad - 382481</address>
-            </div>
-            <div className="contact__detail">
-              <span className="contact__detail-label">Registered Address</span>
-              <address className="contact__detail-address">002, Mashri Prajavani, Near Palloti Nilaya, Chellikere, Kalyan Nagar, Bangalore - 560043</address>
+              <span className="contact__detail-label">Experience Centre</span>
+              <address className="contact__detail-address">193, 9th Floor, Silver Radiance 4, off SG Highway, Gota, Ahmedabad – 382481</address>
             </div>
           </div>
 

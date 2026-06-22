@@ -6,6 +6,7 @@ import LogoIcon from './ui/LogoIcon';
 import MagneticWrapper from './ui/MagneticWrapper';
 import LineReveal from './ui/LineReveal';
 import SpecsTable from './SpecsTable';
+import PitchCalculator from './PitchCalculator';
 
 const ProductScene = lazy(() => import('./three/ProductScene'));
 
@@ -24,6 +25,7 @@ const products = [
     useCases: ['Luxury Residences', 'Boardrooms', 'Experience Centers', 'Museums'],
     gradient: 'linear-gradient(135deg, #1A0025 0%, #5B2C8E 50%, #7C3AED 100%)',
     sceneColors: ['#7C3AED', '#C084FC'],
+    moduleType: 'microled',
   },
   {
     id: 'leynna-cosmo',
@@ -39,6 +41,7 @@ const products = [
     useCases: ['Corporate Lobbies', 'Control Centers', 'Branding Walls', 'Indoor DOOH'],
     gradient: 'linear-gradient(135deg, #2D0A4E 0%, #7B2FBE 100%)',
     sceneColors: ['#9333EA', '#A855F7'],
+    moduleType: 'microled',
   },
   {
     id: 'reyansh-outdoor',
@@ -54,6 +57,7 @@ const products = [
     useCases: ['Stadiums & Arenas', 'Highway Billboards', 'Concert Stages', 'Building Facades'],
     gradient: 'linear-gradient(135deg, #1a0533 0%, #6C3483 100%)',
     sceneColors: ['#6C3483', '#A855F7'],
+    moduleType: 'outdoor',
   },
   {
     id: 'reyansh-indoor',
@@ -69,6 +73,7 @@ const products = [
     useCases: ['Shopping Malls', 'Airport Lounges', 'Hotel Lobbies', 'Showrooms'],
     gradient: 'linear-gradient(135deg, #0D0015 0%, #4A148C 100%)',
     sceneColors: ['#4A148C', '#9333EA'],
+    moduleType: 'indoor',
   },
 ];
 
@@ -76,13 +81,15 @@ export default function Products({ onOpenQuote }) {
   const [activeProduct, setActiveProduct] = useState(0);
 
   return (
-    <RevealSection className="products" delay={0} zoom>
+    <RevealSection className="products" delay={0}>
       <div id="products" className="products__inner">
         <span className="section-label">Our Products</span>
         <LineReveal as="h2" className="section-title">
           Displays That
           <span className="text-gradient"> Defy Ordinary</span>
         </LineReveal>
+
+        <PitchCalculator />
 
         <div className="products__tabs" role="tablist" aria-label="Product categories">
           {products.map((p, i) => (
@@ -143,9 +150,9 @@ export default function Products({ onOpenQuote }) {
                       <motion.div
                         key={spec.label}
                         className="products__spec"
-                        initial={{ opacity: 0, y: 18 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.55, delay: 0.15 + i * 0.08, ease: [0.22, 1, 0.36, 1] }}
+                        initial={{ y: 18 }}
+                        animate={{ y: 0 }}
+                        transition={{ duration: 0.5, delay: 0.1 + i * 0.06, ease: [0.22, 1, 0.36, 1] }}
                       >
                         <span className="products__spec-value">{spec.value}</span>
                         <span className="products__spec-label">{spec.label}</span>
@@ -154,7 +161,10 @@ export default function Products({ onOpenQuote }) {
                   </div>
                   <div className="products__image-placeholder">
                     <Suspense fallback={<LogoIcon size={60} color="rgba(147, 51, 234, 0.2)" />}>
-                      <ProductScene gradient={products[activeProduct].sceneColors} />
+                      <ProductScene
+                        gradient={products[activeProduct].sceneColors}
+                        moduleType={products[activeProduct].moduleType}
+                      />
                     </Suspense>
                   </div>
                 </div>
