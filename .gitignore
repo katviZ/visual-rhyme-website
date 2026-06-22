@@ -4,4 +4,13 @@ dist
 .env.local
 .DS_Store
 *.log
+
+# Build & deploy artifacts
+.vercel
+.vite
+.cache
+
+# Python (for any local helper scripts)
+__pycache__/
+*.pyc
 scripts/__pycache__/
