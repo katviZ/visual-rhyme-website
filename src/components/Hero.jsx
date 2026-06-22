@@ -11,19 +11,19 @@ export default function Hero({ onOpenQuote }) {
 
   useMotionValueEvent(scrollYProgress, 'change', (v) => setScrollVal(v));
 
-  // Text hidden at start, fades in mid-scroll, fades out at end
-  const contentOpacity = useTransform(scrollYProgress, [0, 0.2, 0.4, 0.75], [0, 0, 1, 0]);
+  // Text hidden at start, fades in mid-scroll, fades out at end — wider read window
+  const contentOpacity = useTransform(scrollYProgress, [0, 0.22, 0.42, 0.78], [0, 0, 1, 0]);
 
-  // Scene dims + desaturates while text is reading, then brightens for pull-out
+  // Scene dims + desaturates further during reading so the photo backdrop dominates
   const sceneOpacity = useTransform(
     scrollYProgress,
-    [0, 0.25, 0.4, 0.65, 0.85, 1],
-    [1, 1, 0.22, 0.22, 1, 1]
+    [0, 0.25, 0.42, 0.7, 0.88, 1],
+    [1, 1, 0.12, 0.12, 1, 1]
   );
   const sceneSaturate = useTransform(
     scrollYProgress,
-    [0, 0.25, 0.4, 0.65, 0.85, 1],
-    [1, 1, 0.35, 0.35, 1, 1]
+    [0, 0.25, 0.42, 0.7, 0.88, 1],
+    [1, 1, 0.28, 0.28, 1, 1]
   );
   const sceneFilter = useTransform(sceneSaturate, (s) => `saturate(${s})`);
   const contentY = useTransform(scrollYProgress, [0.2, 0.4], [60, 0]);

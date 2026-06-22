@@ -566,7 +566,7 @@ img {
 
 .hero--cinematic {
   display: block;
-  min-height: 250vh;
+  min-height: 380vh;
   overflow: visible;
 }
 
@@ -760,10 +760,18 @@ img {
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  opacity: 0.55;
-  filter: saturate(1.1) brightness(0.7);
-  mask-image: radial-gradient(ellipse 90% 70% at 50% 50%, #000 30%, transparent 90%);
-  -webkit-mask-image: radial-gradient(ellipse 90% 70% at 50% 50%, #000 30%, transparent 90%);
+  opacity: 0.85;
+  filter: saturate(1.18) brightness(0.92) contrast(1.05);
+  mask-image: radial-gradient(ellipse 110% 90% at 50% 50%, #000 55%, transparent 100%);
+  -webkit-mask-image: radial-gradient(ellipse 110% 90% at 50% 50%, #000 55%, transparent 100%);
+  pointer-events: none;
+}
+
+.hero__photo-bg::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(10, 0, 24, 0.35) 0%, transparent 30%, transparent 70%, rgba(10, 0, 24, 0.55) 100%);
   pointer-events: none;
 }
 
