@@ -3,28 +3,53 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 const families = [
   {
-    id: 'leynna-real',
-    label: 'Leynna Real Pixel',
-    blurb: 'Flip Chip COB · dedicated R/G/B per pixel · reference-grade MicroLED. Used for broadcast, XR/VP, executive boardrooms, and luxury retail flagships.',
+    id: 'leynna-sapphire-tv',
+    label: 'Leynna Sapphire TV',
+    blurb: 'Furniture-grade MicroLED televisions on Sapphire substrate · 108" to 163" · 281 trillion colors · 1,000,000:1 dynamic contrast · HDR10/HLG · wall-mount or floor-stand. Mesmerizing visuals for luxury residential, private cinemas, premium lounges, executive suites.',
     shared: [
-      ['Technology',   'Flip Chip COB · Real Pixel'],
-      ['Architecture', 'Common Cathode (std) · Common Anode (opt)'],
-      ['Substrate',    'Sapphire · Graviton Black'],
-      ['Bin Tier',     'Premium (1-2 bin)'],
-      ['Wavelength',   'G ±2nm · B ±3nm · R ±5nm'],
-      ['Cabinet',      '600 × 337.5 × 44.5 mm · 4.8 kg'],
-      ['Service',      'Front · Wire-Free'],
-      ['IP / Calib.',  'IP65 Front · 5-Layer · D65'],
-      ['HDR / Life',   'HDR10 / HLG · 100,000 hrs'],
-      ['Warranty',     '3 yr std · Up to 5 yr · 5% spares · 7 yr support'],
+      ['Pixel Type',     'TrueHue MicroLED · Sapphire substrate'],
+      ['Pixel Engine',   'Sapphire Pixel Engine'],
+      ['Surface',        'Graviton Black · IP65 front'],
+      ['Color Depth',    '48-bit · 65,536 grayscale levels'],
+      ['Color',          '281 Trillion · ≥95% DCI-P3 · ≥90% Rec2020'],
+      ['Contrast',       '≤20,000:1 static · ≤1,000,000:1 dynamic'],
+      ['HDR',            'HDR10 / HLG'],
+      ['Calibration',    '≥98% brightness/color uniformity · 16-bit · D65'],
+      ['Audio / OS',     '2 × 30 W stereo · Android or Android/Windows dual-boot'],
+      ['Warranty',       '3 yr std · Up to 5 yr · 5% spares · 7 yr support'],
     ],
     skus: [
-      { pitch: 'P0.78', code: 'MCBP008 Pro S',  tag: 'Reference',       specs: [['Bit Depth','16-bit'],['Peak Brightness','1,200 nits'],['Static Contrast','20,000:1'],['Dynamic Contrast','≥300,000:1'],['Refresh Rate','7,680 Hz'],['Driver IC','ICND2270'],['Color Gamut','≥95% DCI-P3'],['Delta E (ΔE)','<2 avg · <4 max'],['Viewing Angle','170° / 170°'],['MVD','2.68 m'],['OVD','1.56 – 2.34 m'],['Retinal Distance','5.36 m']] },
-      { pitch: 'P0.93', code: 'MCBP009 Pro S',  tag: 'Broadcast',       specs: [['Bit Depth','16-bit'],['Peak Brightness','1,200 nits'],['Static Contrast','20,000:1'],['Dynamic Contrast','≥300,000:1'],['Refresh Rate','7,680 Hz'],['Driver IC','ICND2270'],['Color Gamut','≥95% DCI-P3'],['Delta E (ΔE)','<2 avg · <4 max'],['Viewing Angle','170° / 170°'],['MVD','3.20 m'],['OVD','1.86 – 2.79 m'],['Retinal Distance','6.39 m']] },
-      { pitch: 'P1.17', code: 'Custom COB',     tag: 'Premium',         specs: [['Bit Depth','16-bit'],['Peak Brightness','1,200 nits'],['Static Contrast','20,000:1'],['Dynamic Contrast','≥300,000:1'],['Refresh Rate','7,680 Hz'],['Driver IC','ICND2270'],['Color Gamut','≥95% DCI-P3'],['Delta E (ΔE)','<2 avg · <4 max'],['Viewing Angle','170° / 170°'],['MVD','4.02 m'],['OVD','2.34 – 3.51 m'],['Retinal Distance','8.04 m']] },
-      { pitch: 'P1.25', code: 'MCBP012 Pro S',  tag: 'Entry Premium',   specs: [['Bit Depth','16-bit'],['Peak Brightness','1,200 nits'],['Static Contrast','20,000:1'],['Dynamic Contrast','≥300,000:1'],['Refresh Rate','7,680 Hz'],['Driver IC','ICND2270'],['Color Gamut','≥95% DCI-P3'],['Delta E (ΔE)','<2 avg · <4 max'],['Viewing Angle','170° / 170°'],['MVD','4.30 m'],['OVD','2.50 – 3.75 m'],['Retinal Distance','8.60 m']] },
-      { pitch: 'P1.56', code: 'MCBP015 Pro S',  tag: 'Premium',         specs: [['Bit Depth','16-bit'],['Peak Brightness','1,200 nits'],['Static Contrast','20,000:1'],['Dynamic Contrast','≥300,000:1'],['Refresh Rate','7,680 Hz'],['Driver IC','ICND2270'],['Color Gamut','≥95% DCI-P3'],['Delta E (ΔE)','<2 avg · <4 max'],['Viewing Angle','170° / 170°'],['MVD','5.36 m'],['OVD','3.12 – 4.68 m'],['Retinal Distance','10.73 m']] },
-      { pitch: 'P1.86', code: 'MCUP018 Pro S',  tag: '22-bit Flagship', highlight: true, specs: [['Bit Depth','22-bit'],['Peak Brightness','1,200 nits'],['Static Contrast','20,000:1'],['Dynamic Contrast','≥300,000:1'],['Refresh Rate','7,680 Hz'],['Driver IC','XM Plus 11206 (Hybrid PWM+PAM)'],['Color Gamut','NTSC ≥115% · DCI-P3 ≥95%'],['Delta E (ΔE)','<2 avg · <4 max (Broadcast)'],['Viewing Angle','170° / 170°'],['MVD','6.39 m'],['OVD','3.72 – 5.58 m'],['Retinal Distance','12.79 m']] },
+      { pitch: '108"',  code: 'LS1KTV108',  tag: 'Compact Cinema',        specs: [['Resolution','1920 × 1080 (FHD)'],['Screen','2400 × 1350 mm'],['Frame','2422 × 1481 mm'],['Weight','155 / 195 kg (wall / stand)'],['Peak Brightness','≥1,200 nits'],['Sustained','≤800 nits'],['Refresh Rate','≤3,840 Hz'],['Frame Rate','≤120 Hz'],['Optimal Viewing','0.93 m'],['Viewing Angle','175° / 175°'],['Power','≤1,700 W'],['Heat','≤4,352 BTU/hr']] },
+      { pitch: '136"',  code: 'LS1KTV136',  tag: 'Cinema Hall · FHD',     specs: [['Resolution','1920 × 1080 (FHD)'],['Screen','3000 × 1687.5 mm'],['Frame','3022 × 1818.5 mm'],['Weight','210 / 250 kg (wall / stand)'],['Peak Brightness','≥1,200 nits'],['Sustained','≤800 nits'],['Refresh Rate','≤3,840 Hz'],['Frame Rate','≤120 Hz'],['Optimal Viewing','1.17 m'],['Viewing Angle','175° / 175°'],['Power','≤2,300 W'],['Heat','≤5,891 BTU/hr']] },
+      { pitch: '136"',  code: 'LS4KTV136',  tag: 'Cinema Hall · 4K',      highlight: true, specs: [['Resolution','3840 × 2160 (4K UHD)'],['Screen','3000 × 1687.5 mm'],['Frame','3022 × 1818.5 mm'],['Weight','210 / 250 kg (wall / stand)'],['Peak Brightness','≥1,200 nits'],['Sustained','≤800 nits'],['Refresh Rate','≤3,840 Hz'],['Frame Rate','≤120 Hz'],['Optimal Viewing','0.60 m'],['Viewing Angle','175° / 175°'],['Power','≤2,300 W'],['Heat','≤5,891 BTU/hr']] },
+      { pitch: '163"',  code: 'LS4KTV163',  tag: 'Flagship · 4K',         highlight: true, specs: [['Resolution','3840 × 2160 (4K UHD)'],['Screen','3600 × 2025 mm'],['Frame','3622 × 2156 mm'],['Weight','300 / 370 kg (wall / stand)'],['Peak Brightness','≥1,200 nits'],['Sustained','≤800 nits'],['Refresh Rate','≤3,840 Hz'],['Frame Rate','≤120 Hz'],['Optimal Viewing','0.70 m'],['Viewing Angle','175° / 175°'],['Power','≤3,200 W'],['Heat','≤8,189 BTU/hr']] },
+    ],
+  },
+  {
+    id: 'leynna-cosmo',
+    label: 'Leynna Cosmo',
+    blurb: 'MicroLED panels on Sapphire substrate · four pitches × two engine tiers. ECO uses our Dynamic Pixel Engine (300,000:1 dynamic contrast, ≥90% DCI-P3). ULTRA upgrades to the Sapphire Pixel Engine (1,000,000:1 dynamic contrast, ≥95% DCI-P3, ≥97% uniformity). Mesmerizing visuals for every setting.',
+    shared: [
+      ['Technology',     'Flip Chip On Board · TrueHue MicroLED'],
+      ['Substrate',      'Sapphire · Graviton Black'],
+      ['Cabinet',        '600 × 337.5 × 44.5 mm · Aluminium Die Cast · 4.8 kg'],
+      ['Service',        'Front · Wire-Free'],
+      ['Color',          '281 Trillion (16-bit) · 65,536 grayscale'],
+      ['Brightness',     'Sustained ~800 nits · Peak ~1,200 nits'],
+      ['Refresh / Life', '3,840 Hz · ~100,000 hr lifespan'],
+      ['Redundancy',     'Optional: Data / Power / Both'],
+      ['IP / Calib.',    'IP65 front · 16-bit calibration · D65'],
+      ['Warranty',       '3 yr std · Up to 5 yr · 5% spares · 7 yr support'],
+    ],
+    skus: [
+      { pitch: 'P0.93 ECO',   code: 'Dynamic Pixel Engine',  tag: 'Premium · Eco',     specs: [['Pixel Engine','Dynamic'],['Cabinet Resolution','640 × 360'],['Static Contrast','≥10,000:1'],['Dynamic Contrast','≥300,000:1'],['Color Gamut','≥90% DCI-P3 · ≥85% Rec2020'],['Uniformity','≥97% brightness / chroma'],['Viewing Angle','≤175° / 175°'],['Scan Rate','1/40'],['Optimal Viewing','1.02 m'],['Power','≤350 W/sqm avg ≤115 W/sqm']] },
+      { pitch: 'P0.93 ULTRA', code: 'Sapphire Pixel Engine', tag: 'Reference',         highlight: true, specs: [['Pixel Engine','Sapphire'],['Cabinet Resolution','640 × 360'],['Static Contrast','≥20,000:1'],['Dynamic Contrast','≥1,000,000:1'],['Color Gamut','≥95% DCI-P3 · ≥90% Rec2020'],['Uniformity','≥98% brightness / chroma'],['Viewing Angle','≤175° / 175°'],['Scan Rate','1/40'],['Optimal Viewing','1.02 m'],['Power','≤350 W/sqm avg ≤115 W/sqm']] },
+      { pitch: 'P1.17 ECO',   code: 'Dynamic Pixel Engine',  tag: 'Boardroom · Eco',   specs: [['Pixel Engine','Dynamic'],['Cabinet Resolution','512 × 288'],['Static Contrast','≥10,000:1'],['Dynamic Contrast','≥300,000:1'],['Color Gamut','≥90% DCI-P3 · ≥85% Rec2020'],['Uniformity','≥97% brightness / chroma'],['Viewing Angle','≤175° / 175°'],['Scan Rate','1/64'],['Optimal Viewing','1.29 m'],['Power','≤300 W/sqm avg ≤100 W/sqm']] },
+      { pitch: 'P1.17 ULTRA', code: 'Sapphire Pixel Engine', tag: 'Boardroom · Ultra', specs: [['Pixel Engine','Sapphire'],['Cabinet Resolution','512 × 288'],['Static Contrast','≥20,000:1'],['Dynamic Contrast','≥1,000,000:1'],['Color Gamut','≥95% DCI-P3 · ≥90% Rec2020'],['Uniformity','≥98% brightness / chroma'],['Viewing Angle','≤175° / 175°'],['Scan Rate','1/64'],['Optimal Viewing','1.29 m'],['Power','≤300 W/sqm avg ≤100 W/sqm']] },
+      { pitch: 'P1.25 ECO',   code: 'Dynamic Pixel Engine',  tag: 'Lobby · Eco',       specs: [['Pixel Engine','Dynamic'],['Cabinet Resolution','480 × 270'],['Static Contrast','≥10,000:1'],['Dynamic Contrast','≥300,000:1'],['Color Gamut','≥90% DCI-P3 · ≥85% Rec2020'],['Uniformity','≥97% brightness / chroma'],['Viewing Angle','≤175° / 175°'],['Scan Rate','1/60'],['Optimal Viewing','1.38 m'],['Power','≤300 W/sqm avg ≤100 W/sqm']] },
+      { pitch: 'P1.25 ULTRA', code: 'Sapphire Pixel Engine', tag: 'Lobby · Ultra',     specs: [['Pixel Engine','Sapphire'],['Cabinet Resolution','480 × 270'],['Static Contrast','≥20,000:1'],['Dynamic Contrast','≥1,000,000:1'],['Color Gamut','≥95% DCI-P3 · ≥90% Rec2020'],['Uniformity','≥98% brightness / chroma'],['Viewing Angle','≤175° / 175°'],['Scan Rate','1/60'],['Optimal Viewing','1.38 m'],['Power','≤300 W/sqm avg ≤100 W/sqm']] },
+      { pitch: 'P1.56 ECO',   code: 'Dynamic Pixel Engine',  tag: 'Volume · Eco',      specs: [['Pixel Engine','Dynamic'],['Cabinet Resolution','384 × 216'],['Static Contrast','≥10,000:1'],['Dynamic Contrast','≥300,000:1'],['Color Gamut','≥90% DCI-P3 · ≥85% Rec2020'],['Uniformity','≥97% brightness / chroma'],['Viewing Angle','≤175° / 175°'],['Scan Rate','1/54'],['Optimal Viewing','1.72 m'],['Power','≤280 W/sqm avg ≤90 W/sqm']] },
+      { pitch: 'P1.56 ULTRA', code: 'Sapphire Pixel Engine', tag: 'Volume · Ultra',    specs: [['Pixel Engine','Sapphire'],['Cabinet Resolution','384 × 216'],['Static Contrast','≥20,000:1'],['Dynamic Contrast','≥1,000,000:1'],['Color Gamut','≥95% DCI-P3 · ≥90% Rec2020'],['Uniformity','≥98% brightness / chroma'],['Viewing Angle','≤175° / 175°'],['Scan Rate','1/54'],['Optimal Viewing','1.72 m'],['Power','≤280 W/sqm avg ≤90 W/sqm']] },
     ],
   },
   {
@@ -32,15 +57,14 @@ const families = [
     label: 'Leynna Virtual Pixel',
     blurb: 'RCBP subpixel-sharing architecture · 40% lower cost than equivalent real-pixel pitch · ideal for close-view creative content where apparent resolution matters more than 1:1 fidelity.',
     shared: [
-      ['Technology',   'Flip Chip COB · Virtual Pixel (RCBP)'],
-      ['Architecture', 'Common Cathode (std) · Common Anode (opt)'],
-      ['Substrate',    'Sapphire · Graviton Black'],
-      ['Bin Tier',     'Premium (1-2 bin)'],
-      ['Cabinet',      '600 × 337.5 × 44.5 mm · 4.8 kg'],
-      ['Service',      'Front · Wire-Free'],
-      ['IP / Calib.',  'IP65 Front · 5-Layer · D65'],
-      ['HDR / Life',   'HDR10 / HLG · 100,000 hrs'],
-      ['Warranty',     '3 yr std · Up to 5 yr · 5% spares · 7 yr support'],
+      ['Technology',     'Flip Chip COB · Virtual Pixel (RCBP)'],
+      ['Architecture',   'Common Cathode (std) · Common Anode (opt)'],
+      ['Substrate',      'Sapphire · Graviton Black'],
+      ['Cabinet',        '600 × 337.5 × 44.5 mm · 4.8 kg'],
+      ['Service',        'Front · Wire-Free'],
+      ['IP / Calib.',    'IP65 Front · 5-Layer · D65'],
+      ['HDR / Life',     'HDR10 / HLG · 100,000 hrs'],
+      ['Warranty',       '3 yr std · Up to 5 yr · 5% spares · 7 yr support'],
     ],
     skus: [
       { pitch: 'P0.78 V', code: 'RCBP008', tag: 'Virtual Reference', virtual: '~0.39 mm effective', specs: [['Bit Depth','14 / 16-bit'],['Peak Brightness','800 nits'],['Static Contrast','≥10,000:1'],['Dynamic Contrast','≥350,000:1'],['Refresh Rate','3,840 Hz'],['Driver IC','Chipone ICND1065S / 2270'],['Color Gamut','≥95% DCI-P3'],['Delta E (ΔE)','<3 avg (Commercial)'],['Viewing Angle','170° / 170°'],['Physical MVD','2.68 m'],['Virtual MVD','1.34 m'],['Retinal Distance','5.36 m']] },
@@ -49,68 +73,53 @@ const families = [
     ],
   },
   {
-    id: 'reyansh-indoor-micro',
-    label: 'Reyansh Indoor MicroLED',
-    blurb: 'Entry-grade MicroLED on COB flip-chip · premium feel at Reyansh pricing · built for corporate MicroLED and premium retail installations.',
+    id: 'reyansh-indoor',
+    label: 'Reyansh Indoor',
+    blurb: 'TrueHue MiniLED · SMD and GOB packaging · 640 × 480 mm cabinet · front-serviceable · passively cooled · the Indian corporate / retail / event workhorse from P1.56 to P2.5.',
     shared: [
-      ['Technology',   'Flip Chip COB'],
-      ['Architecture', 'Common Cathode (std) · Common Anode (opt)'],
-      ['Substrate',    'Sapphire · Graviton Black'],
-      ['Cabinet',      '600 × 337.5 × 44.5 mm'],
-      ['Service',      'Front'],
-      ['IP / Calib.',  'IP65 Front · 5-Layer · D65'],
-      ['HDR / Life',   'HDR10 / HLG · 100,000 hrs'],
-      ['Warranty',     '3 yr std · Up to 5 yr'],
+      ['LED Type',       'TrueHue MiniLED'],
+      ['Technology',     'SMD (std) · GOB (G/GS premium)'],
+      ['Architecture',   'Common Anode (std) · Common Cathode (opt)'],
+      ['Cabinet',        '640 × 480 × 75 mm · Mild Steel / Aluminium Die Cast'],
+      ['Service',        'Front'],
+      ['Cooling',        'Passive (fanless)'],
+      ['Color',          '4.4 Trillion · 14-bit · 16,384 grayscale'],
+      ['Refresh / Frame','Up to 7,680 Hz · Up to 120 Hz'],
+      ['Calibration',    '14-bit · D65 · ≥93% uniformity (X-tier)'],
+      ['Warranty',       '2 yr std · Up to 5 yr · 3% spares · 7 yr support'],
     ],
     skus: [
-      { pitch: 'P1.56', code: 'RCM156 COB', tag: 'Entry MicroLED', specs: [['Bit Depth','16-bit'],['Peak Brightness','1,200 nits'],['Static Contrast','≥10,000:1'],['Dynamic Contrast','≥300,000:1'],['Refresh Rate','3,840 Hz'],['Driver IC','Chipone ICND2270'],['Color Gamut','≥95% DCI-P3'],['Delta E (ΔE)','<3 avg'],['Viewing Angle','170° / 170°'],['MVD','5.36 m'],['OVD','3.12 – 4.68 m'],['Retinal Distance','10.73 m']] },
-    ],
-  },
-  {
-    id: 'reyansh-indoor-mini',
-    label: 'Reyansh Indoor MiniLED',
-    blurb: 'SMD and GOB packaging · front-serviceable · 640 × 480 mm cabinet · the Indian corporate / retail / event workhorse.',
-    shared: [
-      ['Technology',   'SMD / GOB'],
-      ['Architecture', 'Common Anode (std) · Common Cathode (opt)'],
-      ['LED Type',     'TrueHue MiniLED'],
-      ['Bin Tier',     'Standard to High (2-3 bin)'],
-      ['Cabinet',      '640 × 480 × 75 mm'],
-      ['Service',      'Front or Rear'],
-      ['IP / Calib.',  'IP30-54 · 5-Layer · D65'],
-      ['HDR / Life',   'HDR10 · ~100,000 hrs'],
-      ['Warranty',     '2 yr std · Up to 5 yr'],
-    ],
-    skus: [
-      { pitch: 'P1.25', code: 'SMD / GOB', tag: 'Fine Pitch', specs: [['Bit Depth','14-bit'],['Peak Brightness','700 nits'],['Static Contrast','≥6,000:1'],['Dynamic Contrast','≥250,000:1'],['Refresh Rate','Up to 7,680 Hz'],['Driver IC','ICN2153 / TBS5266A'],['Color Gamut','≥110% sRGB'],['Delta E (ΔE)','<5 avg'],['Viewing Angle','160° / 160°'],['MVD','4.30 m'],['OVD','2.50 – 3.75 m'],['Retinal Distance','8.60 m']] },
-      { pitch: 'P1.56', code: 'SMD / GOB', tag: 'Fine Pitch', specs: [['Bit Depth','14-bit'],['Peak Brightness','800 nits'],['Static Contrast','≥6,000:1'],['Dynamic Contrast','≥250,000:1'],['Refresh Rate','Up to 7,680 Hz'],['Driver IC','ICN2153 / TBS5266A'],['Color Gamut','≥110% sRGB'],['Delta E (ΔE)','<5 avg'],['Viewing Angle','160° / 160°'],['MVD','5.36 m'],['OVD','3.12 – 4.68 m'],['Retinal Distance','10.73 m']] },
-      { pitch: 'P1.86', code: 'SMD / GOB', tag: 'Mid-Range',  specs: [['Bit Depth','14-bit'],['Peak Brightness','600 nits'],['Static Contrast','≥6,000:1'],['Dynamic Contrast','≥250,000:1'],['Refresh Rate','Up to 7,680 Hz'],['Driver IC','ICN2153 / TBS5266A'],['Color Gamut','≥110% sRGB'],['Delta E (ΔE)','<5 avg'],['Viewing Angle','160° / 160°'],['MVD','6.39 m'],['OVD','3.72 – 5.58 m'],['Retinal Distance','12.79 m']] },
-      { pitch: 'P2.5',  code: 'SMD / GOB', tag: 'Volume',     specs: [['Bit Depth','14-bit'],['Peak Brightness','800 nits'],['Static Contrast','≥6,000:1'],['Dynamic Contrast','≥250,000:1'],['Refresh Rate','Up to 7,680 Hz'],['Driver IC','ICN2153 / TBS5266A'],['Color Gamut','≥110% sRGB'],['Delta E (ΔE)','<5 avg'],['Viewing Angle','160° / 160°'],['MVD','8.60 m'],['OVD','5.00 – 7.50 m'],['Retinal Distance','17.19 m']] },
+      { pitch: 'P1.56',  code: 'SMD · 344×258 cabinet',     tag: 'Fine Pitch',          specs: [['Pixel Density','410,000 dots/sqm'],['Peak Brightness','≤800 nits'],['Static Contrast','≥6,000:1'],['Dynamic Contrast','≥200,000:1'],['Driver IC','ICN2153 / TBS5266A'],['Color Gamut','≥110% sRGB'],['Viewing Angle','155° / 155°'],['Optimal Viewing','≥1.5 m'],['IP Rating','IP54 (G/GS)'],['Power','≤400 W/sqm']] },
+      { pitch: 'P1.86',  code: 'SMD · GOB (G/GS)',          tag: 'Mid-Range',           specs: [['Pixel Density','288,906 dots/sqm'],['Peak Brightness','≤700 nits'],['Static Contrast','≥6,000:1'],['Dynamic Contrast','≥200,000:1'],['Driver IC','ICN2153 / TBS5266A'],['Color Gamut','≥110% sRGB'],['Viewing Angle','155° / 155°'],['Optimal Viewing','≥1.86 m'],['IP Rating','IP30 / IP54 (G/GS)'],['Power','≤400 W/sqm']] },
+      { pitch: 'P2',     code: 'SMD · GOB',                 tag: 'Corporate Standard',  specs: [['Pixel Density','250,000 dots/sqm'],['Peak Brightness','≤800 nits'],['Static Contrast','≥6,000:1'],['Dynamic Contrast','≥250,000:1'],['Driver IC','ICN2153 / TBS5266A'],['Color Gamut','≥110% sRGB'],['Viewing Angle','155° / 155°'],['Optimal Viewing','≥2.0 m'],['IP Rating','IP30 / IP54 (G/GS)'],['Power','≤400 W/sqm']] },
+      { pitch: 'P2.5',   code: 'SMD · GOB · GX (Mg-alloy)', tag: 'Workhorse',           highlight: true, specs: [['Pixel Density','160,000 dots/sqm'],['Peak Brightness','≤1,000 nits (X)'],['Static Contrast','≥8,000:1 (X)'],['Dynamic Contrast','≥250,000:1 (X)'],['Driver IC','ICN2153 / TBS5266A'],['Color Gamut','≥110% sRGB'],['Viewing Angle','155° / 155°'],['Optimal Viewing','≥2.5 m'],['IP Rating','IP30 / IP65 (GX)'],['Power','≤400 W/sqm']] },
     ],
   },
   {
     id: 'reyansh-outdoor',
     label: 'Reyansh Outdoor',
-    blurb: 'TrueHue MiniLED · IP65 · up to 11,000 nits peak on X-variant · 960×960 or 640×640 cabinet · X-series adds Nationstar LEDs, gold contacts, naked-eye 3D.',
+    blurb: 'TrueHue MiniLED · IP65 · up to 11,000 nits peak on X-variant · 960×960 or 640×640 cabinet · X-series adds Nationstar LEDs, gold contacts, naked-eye 3D readiness.',
     shared: [
-      ['Technology',   'SMD IP65'],
-      ['Architecture', 'Common Anode (std) · Common Cathode (opt)'],
-      ['LED Type',     'TrueHue MiniLED (SMD3535)'],
-      ['Bin Tier',     'Standard / High / Premium (1-3 bin)'],
-      ['Cabinet',      '960×960 or 640×640 · 75 mm depth'],
-      ['Service',      'Rear or Front*'],
-      ['IP / Calib.',  'IP65 Front · IP54 Rear · 5-Layer'],
-      ['HDR / Life',   'HDR10 · 100,000 hrs'],
-      ['Warranty',     '2 yr std · Up to 5 yr on X-variant'],
+      ['LED Type',       'TrueHue MiniLED (SMD3535 / SMD1921 / SMD1415)'],
+      ['Architecture',   'Common Anode (std) · Common Cathode (opt)'],
+      ['Cabinet',        '960×960 or 640×640 · 75 mm · Mild Steel / Aluminium Die Cast'],
+      ['Service',        'Rear (std) · Front (opt)'],
+      ['IP / Cooling',   'IP65 front · IP54 rear · 1-2 fan active'],
+      ['Color',          '4.4 Trillion · 14-bit · 16,384 grayscale'],
+      ['Refresh / Frame','Up to 7,680 Hz · Up to 120 Hz · Naked-eye 3D (X)'],
+      ['Calibration',    '14-bit · D65 · ≥93% uniformity (X-tier)'],
+      ['Warranty',       '2 yr std · Up to 5 yr on X-variant · 3% spares · 7 yr support'],
     ],
     skus: [
-      { pitch: 'P2.5',    code: 'SMD IP65',      tag: 'Fine Outdoor',       specs: [['Bit Depth','14-bit'],['Peak Brightness','5,000 nits'],['Static Contrast','≥8,000:1'],['Dynamic Contrast','≥250,000:1'],['Refresh Rate','Up to 7,680 Hz'],['Frame Rate','Up to 120 Hz'],['Driver IC','ICN2153 / TBS5266A'],['Color Gamut','≥110% sRGB'],['Delta E (ΔE)','<4 avg (S/X)'],['Viewing Angle','155° / 155°'],['MVD','8.60 m'],['Retinal Distance','17.19 m']] },
-      { pitch: 'P3.076',  code: 'SMD IP65',      tag: 'Premium DOOH',       specs: [['Bit Depth','14-bit'],['Peak Brightness','5,500 nits'],['Static Contrast','≥8,000:1'],['Dynamic Contrast','≥250,000:1'],['Refresh Rate','Up to 7,680 Hz'],['Frame Rate','Up to 120 Hz'],['Driver IC','ICN2153 / TBS5266A'],['Color Gamut','≥110% sRGB'],['Delta E (ΔE)','<4 avg (S/X)'],['Viewing Angle','155° / 155°'],['MVD','10.58 m'],['Retinal Distance','21.15 m']] },
-      { pitch: 'P4.0',    code: 'SMD IP65',      tag: 'DOOH Standard',      specs: [['Bit Depth','14-bit'],['Peak Brightness','6,000 nits'],['Static Contrast','≥8,000:1'],['Dynamic Contrast','≥250,000:1'],['Refresh Rate','Up to 7,680 Hz'],['Frame Rate','Up to 120 Hz'],['Driver IC','ICN2153 / TBS5266A'],['Color Gamut','≥110% sRGB'],['Delta E (ΔE)','<4 avg (S/X)'],['Viewing Angle','155° / 155°'],['MVD','13.75 m'],['Retinal Distance','27.50 m']] },
-      { pitch: 'P6.67 X', code: 'Nationstar · Hybrid PWM+PAM', tag: '11K nits · Billboard', highlight: true, specs: [['Bit Depth','14-bit'],['Peak Brightness','11,000 nits'],['Static Contrast','≥8,000:1'],['Dynamic Contrast','≥250,000:1'],['Refresh Rate','7,680 Hz'],['Frame Rate','120 Hz · Naked-eye 3D'],['Driver IC','TBS5266A (Hybrid PWM+PAM)'],['Color Gamut','≥110% sRGB'],['Delta E (ΔE)','<3 avg'],['Viewing Angle','155° / 155°'],['MVD','22.93 m'],['Retinal Distance','45.86 m']] },
+      { pitch: 'P2.5',   code: 'SMD1415 · GKGD / Nationstar (X)', tag: 'Fine Outdoor',        specs: [['Pixel Density','160,000 dots/sqm'],['Peak Brightness','≤5,000 nits (std) · ≤6,000 (X)'],['Static Contrast','≥6,000:1 std · ≥8,000:1 X'],['Dynamic Contrast','≥200,000:1 / ≥250,000:1'],['Driver IC','ICN2153 / TBS5266A'],['Color Gamut','≥110% sRGB · ≤85% Rec2020'],['Viewing Angle','155° / 155°'],['Optimal Viewing','≥3 m'],['Naked-eye 3D','X only'],['Power','≤800 W/sqm']] },
+      { pitch: 'P3.076', code: 'SMD1415 · GKGD / Nationstar (X)', tag: 'Premium DOOH',        specs: [['Pixel Density','105,625 dots/sqm'],['Peak Brightness','≤5,000 nits (std) · ≤6,000 (X)'],['Static Contrast','≥6,000:1 std · ≥8,000:1 X'],['Dynamic Contrast','≥200,000:1 / ≥250,000:1'],['Driver IC','ICN2153 / TBS5266A'],['Color Gamut','≥110% sRGB · ≤85% Rec2020'],['Viewing Angle','155° / 155°'],['Optimal Viewing','≥3 m'],['Naked-eye 3D','X only'],['Power','≤800 W/sqm']] },
+      { pitch: 'P4.0',   code: 'SMD1921 · GKGD / Nationstar (X)', tag: 'DOOH Standard',       specs: [['Pixel Density','62,500 dots/sqm'],['Peak Brightness','≤5,500 nits (std) · ≤6,500 (X)'],['Static Contrast','≥6,000:1 std · ≥8,000:1 X'],['Dynamic Contrast','≥200,000:1 / ≥250,000:1'],['Driver IC','ICN2153 / TBS5266A'],['Color Gamut','≥110% sRGB · ≤85% Rec2020'],['Viewing Angle','155° / 155°'],['Optimal Viewing','≥4 m'],['Naked-eye 3D','X only'],['Power','≤800 W/sqm']] },
+      { pitch: 'P6.67 X',code: 'SMD3535 · Nationstar · Hybrid PWM+PAM', tag: '11K nits · Billboard', highlight: true, specs: [['Pixel Density','22,500 dots/sqm'],['Peak Brightness','≤6,000 nits std · ≤11,000 (X)'],['Static Contrast','≥6,000:1 std · ≥8,000:1 X'],['Dynamic Contrast','≥200,000:1 / ≥250,000:1'],['Driver IC','TBS5266A (Hybrid PWM+PAM)'],['Color Gamut','≥110% sRGB · ≤85% Rec2020'],['Viewing Angle','155° / 155°'],['Optimal Viewing','≥3 m'],['Naked-eye 3D','X only'],['Power','≤800 W/sqm']] },
     ],
   },
 ];
+
+const totalSkus = families.reduce((sum, f) => sum + f.skus.length, 0);
 
 export default function SpecsTable() {
   const [active, setActive] = useState(0);
@@ -122,11 +131,11 @@ export default function SpecsTable() {
         <div className="specs__header">
           <span className="specs__kicker">Technical Specifications</span>
           <h3 className="specs__title">
-            18 configurations. <span className="text-gradient">Five product families.</span>
+            {totalSkus} configurations. <span className="text-gradient">Five product families.</span>
           </h3>
           <p className="specs__lede">
             Every SKU below carries the full engineering specification —
-            driver IC, architecture, calibration Delta E, and arc-minute viewing geometry.
+            pixel engine, architecture, contrast, gamut, calibration, and viewing geometry.
             Pulled straight from our data sheets.
           </p>
         </div>
@@ -176,7 +185,7 @@ export default function SpecsTable() {
             <div className={`specs__sku-grid ${family.skus.length === 1 ? 'specs__sku-grid--single' : ''}`}>
               {family.skus.map((sku, i) => (
                 <motion.div
-                  key={sku.pitch}
+                  key={`${sku.pitch}-${sku.code}`}
                   className={`specs__sku-card ${sku.highlight ? 'specs__sku-card--highlight' : ''}`}
                   initial={{ opacity: 0, y: 18 }}
                   whileInView={{ opacity: 1, y: 0 }}
@@ -205,9 +214,8 @@ export default function SpecsTable() {
             </div>
 
             <p className="specs__footnote">
-              All specifications per engineering data sheet. MVD / OVD / Retinal distances calculated
-              via arc-minute formula (pitch × 3.438). Custom configurations on request —
-              contact our Ahmedabad experience center.
+              All specifications per engineering data sheet. Custom sizes, pitches, and cabinet
+              materials available on request — contact our Ahmedabad experience center.
             </p>
           </motion.div>
         </AnimatePresence>
