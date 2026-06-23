@@ -1,7 +1,6 @@
 import { useState, lazy, Suspense } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import RevealSection from './ui/RevealSection';
-import TiltCard from './ui/TiltCard';
 import LogoIcon from './ui/LogoIcon';
 import MagneticWrapper from './ui/MagneticWrapper';
 import LineReveal from './ui/LineReveal';
@@ -108,70 +107,58 @@ export default function Products({ onOpenQuote }) {
           ))}
         </div>
 
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={activeProduct}
-            className="products__showcase"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -12 }}
-            transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-            role="tabpanel"
-            id={`product-panel-${products[activeProduct].id}`}
-          >
-            <TiltCard className="products__card">
-              <div className="products__card-bg" style={{ background: products[activeProduct].gradient }} />
-              <div className="products__card-content">
-                <div className="products__card-left">
-                  <h3 className="products__card-name">{products[activeProduct].name}</h3>
-                  <p className="products__card-tagline">{products[activeProduct].tagline}</p>
-                  <p className="products__card-desc">{products[activeProduct].description}</p>
+        <div
+          className="products__showcase"
+          role="tabpanel"
+          id={`product-panel-${products[activeProduct].id}`}
+        >
+          <div className="products__card">
+            <div className="products__card-bg" style={{ background: products[activeProduct].gradient }} />
+            <div className="products__card-content">
+              <div className="products__card-left">
+                <h3 className="products__card-name">{products[activeProduct].name}</h3>
+                <p className="products__card-tagline">{products[activeProduct].tagline}</p>
+                <p className="products__card-desc">{products[activeProduct].description}</p>
 
-                  <div className="products__use-cases">
-                    <h4>Ideal For:</h4>
-                    <div className="products__use-case-tags">
-                      {products[activeProduct].useCases.map((uc) => (
-                        <span key={uc} className="products__use-case-tag">{uc}</span>
-                      ))}
-                    </div>
-                  </div>
-
-                  <MagneticWrapper>
-                    <button className="btn btn--primary" onClick={onOpenQuote}>
-                      Pixel Quote Max
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                    </button>
-                  </MagneticWrapper>
-                </div>
-
-                <div className="products__card-right">
-                  <div className="products__specs">
-                    {products[activeProduct].specs.map((spec, i) => (
-                      <motion.div
-                        key={spec.label}
-                        className="products__spec"
-                        initial={{ y: 18 }}
-                        animate={{ y: 0 }}
-                        transition={{ duration: 0.5, delay: 0.1 + i * 0.06, ease: [0.22, 1, 0.36, 1] }}
-                      >
-                        <span className="products__spec-value">{spec.value}</span>
-                        <span className="products__spec-label">{spec.label}</span>
-                      </motion.div>
+                <div className="products__use-cases">
+                  <h4>Ideal For:</h4>
+                  <div className="products__use-case-tags">
+                    {products[activeProduct].useCases.map((uc) => (
+                      <span key={uc} className="products__use-case-tag">{uc}</span>
                     ))}
                   </div>
-                  <div className="products__image-placeholder">
-                    <Suspense fallback={<LogoIcon size={60} color="rgba(147, 51, 234, 0.2)" />}>
-                      <ProductScene
-                        gradient={products[activeProduct].sceneColors}
-                        moduleType={products[activeProduct].moduleType}
-                      />
-                    </Suspense>
-                  </div>
+                </div>
+
+                <MagneticWrapper>
+                  <button className="btn btn--primary" onClick={onOpenQuote}>
+                    Pixel Quote Max
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                  </button>
+                </MagneticWrapper>
+              </div>
+
+              <div className="products__card-right">
+                <div className="products__specs">
+                  {products[activeProduct].specs.map((spec) => (
+                    <div key={spec.label} className="products__spec">
+                      <span className="products__spec-value">{spec.value}</span>
+                      <span className="products__spec-label">{spec.label}</span>
+                    </div>
+                  ))}
+                </div>
+                <div className="products__image-placeholder">
+                  <Suspense fallback={<LogoIcon size={60} color="rgba(147, 51, 234, 0.35)" />}>
+                    <ProductScene
+                      key={products[activeProduct].id}
+                      gradient={products[activeProduct].sceneColors}
+                      moduleType={products[activeProduct].moduleType}
+                    />
+                  </Suspense>
                 </div>
               </div>
-            </TiltCard>
-          </motion.div>
-        </AnimatePresence>
+            </div>
+          </div>
+        </div>
 
         <SpecsTable />
       </div>
