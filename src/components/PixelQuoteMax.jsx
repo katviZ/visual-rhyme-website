@@ -1,0 +1,1511 @@
+/* =============================================================================
+   PIXEL QUOTE MAX — single-file React component
+   -----------------------------------------------------------------------------
+   Drop into any React 18+ project:
+       import PixelQuoteMax from "./PixelQuoteMax.jsx";
+       <PixelQuoteMax />
+
+   Self-contained — bundles:
+   • engine math (was engine.js)
+   • price/tech database (was pixel-data.xml — embedded inline)
+   • Visual Rhyme stylesheet + Google Fonts link
+   • policy gate · assistant · unit converter · history · comparison
+   • SVG drawings (elevation · plan · section) · print/PDF sheet
+   • brand logo (inline base64 PNG)
+
+   Lead capture POSTs to SHEET_ENDPOINT (Google Apps Script Web App).
+   localStorage keys used by this component:
+       pqm_agreed     — policy acceptance version
+       pqm_session    — last-used inputs (auto-restore)
+       pqm_history    — saved quotes (top-bar 🕘 History panel)
+       pqm_compare    — comparison set (top-bar ⊞ Compare)
+       pqm_leads      — name+phone lead backup before POST
+
+   Export PDF uses window.print() — every host page that mounts this
+   component inherits the print stylesheet automatically.
+
+   © Visual Rhyme Pvt. Ltd. · Kathan Mehta · All rights reserved.
+   Powered by Microtronix Solution.
+   ============================================================================= */
+
+import React, { useState, useEffect, useMemo, useRef } from "react";
+
+/* ===== bundled stylesheet (was the global <style> in index.html) ===== */
+const STYLE_CSS = String.raw`
+:root{
+    --navy:#06001A; --navyLight:#0F0826; --purple:#793494; --magenta:#9d20d6;
+    --lavender:#c89dd9; --cream:#F5EFE6; --line:#2A1F3D;
+    --amber:#E5B454; --green:#7BC474; --red:#E26464; --wall:#8B7355;
+    --fr:'Fraunces',Georgia,serif; --mn:'Manrope',system-ui,sans-serif; --mo:'JetBrains Mono',ui-monospace,monospace;
+  }
+  .pqm-root *{box-sizing:border-box;}
+  .pqm-root{background:var(--navy);color:var(--cream);font-family:var(--mn);}
+  .pqm-root button{font-family:var(--mn);transition:transform .12s ease, box-shadow .25s ease, background .25s ease, border-color .25s ease;}
+  .pqm-root button:active{transform:scale(.96);}
+  .pqm-root input,.pqm-root select{font-family:var(--mo);transition:border-color .2s ease, box-shadow .2s ease;}
+  .vr-scroll::-webkit-scrollbar{width:8px;}
+  .vr-scroll::-webkit-scrollbar-thumb{background:var(--line);border-radius:8px;}
+
+  /* three-column cockpit; collapses to one column on narrow screens */
+  .vr-cockpit{display:grid;grid-template-columns:330px minmax(0,1fr) 360px;gap:18px;align-items:start;}
+  @media (max-width:1240px){ .vr-cockpit{grid-template-columns:1fr;} .vr-sticky{position:static!important;max-height:none!important;} }
+
+  /* entrance animation — staggered fade+rise */
+  @keyframes vr-rise { from { opacity:0; transform: translateY(14px); } to { opacity:1; transform: translateY(0); } }
+  .vr-rise { animation: vr-rise .55s cubic-bezier(.2,.8,.2,1) both; }
+  .vr-rise-1 { animation-delay: .05s; } .vr-rise-2 { animation-delay: .15s; } .vr-rise-3 { animation-delay: .25s; }
+
+  /* panel hover lift */
+  .vr-lift{transition: transform .2s ease, box-shadow .25s ease, border-color .25s ease;}
+  .vr-lift:hover{transform: translateY(-2px); box-shadow: 0 12px 30px rgba(157,32,214,.18), 0 0 0 1px rgba(157,32,214,.25);}
+
+  /* top bar gradient sweep */
+  @keyframes vr-sweep { 0%{background-position:0% 50%;} 50%{background-position:100% 50%;} 100%{background-position:0% 50%;} }
+  .vr-sweep{ background-size: 200% 100%; animation: vr-sweep 16s ease-in-out infinite; }
+
+  /* mode/tab content fade */
+  @keyframes vr-fadein { from { opacity:0; } to { opacity:1; } }
+  .vr-fade { animation: vr-fadein .25s ease-out both; }
+
+  .vr-print{display:none;}
+  @media print{
+    .vr-screen{display:none !important;}
+    .vr-print{display:block !important;}
+    @page{size:A4 portrait;margin:13mm;}
+    html,body{background:#fff !important;color:#1A1208 !important;}
+    .pg-break{break-before:page;}
+    .avoid-break{break-inside:avoid;}
+  }
+`;
+
+/* ===== bundled price + tech database (was pixel-data.xml) ===== */
+const FALLBACK_DB_XML = String.raw`
+<pixelData>
+  <meta currency="INR" curveSurchargePct="15" pixelsPerPortMini="650000" pixelsPerPortMicro="500000" controllerGst="18" installGst="18" />
+  <installTiers><tier maxArea="50" rate="300" /><tier maxArea="150" rate="200" /><tier maxArea="999999" rate="150" /></installTiers>
+  <controllers type="mini"><tier maxPorts="1" price="15000" /><tier maxPorts="2" price="25000" /><tier maxPorts="3" price="45000" /><tier maxPorts="5" price="75000" /><tier maxPorts="7" price="125000" /><tier maxPorts="999" price="150000" /></controllers>
+  <controllers type="micro"><tier maxPorts="3" price="125000" /><tier maxPorts="7" price="150000" /><tier maxPorts="12" price="200000" /><tier maxPorts="20" price="250000" /><tier maxPorts="999" price="350000" /></controllers>
+  <products>
+    <product id="outdoor" series="Reyansh Outdoor" type="MiniLED" env="outdoor" moduleW="320" moduleH="160">
+      <cabinet w="320" h="160" label="320×160mm Module" weight="1.5" type="module" /><cabinet w="640" h="640" label="640×640mm" /><cabinet w="960" h="960" label="960×960mm" /><cabinet w="960" h="1280" label="960×1280mm" /><cabinet w="1280" h="1280" label="1280×1280mm" />
+      <pitch pp="6.67" rate="5000" gst="18" sku="Reyansh Outdoor P6.67" /><pitch pp="4" rate="5500" gst="18" sku="Reyansh Outdoor P4" /><pitch pp="3" rate="7250" gst="18" sku="Reyansh Outdoor P3" /><pitch pp="2.5" rate="12500" gst="18" sku="Reyansh Outdoor P2.5" />
+    </product>
+    <product id="indoor" series="Reyansh Indoor" type="MiniLED" env="indoor" moduleW="320" moduleH="160">
+      <cabinet w="320" h="160" label="320×160mm Module" weight="1.2" type="module" /><cabinet w="640" h="480" label="640×480mm" /><cabinet w="640" h="640" label="640×640mm" />
+      <pitch pp="2.5" rate="7500" gst="18" sku="Reyansh Indoor P2.5" /><pitch pp="2" rate="9500" gst="18" sku="Reyansh Indoor P2 (SMD)" /><pitch pp="1.86" rate="10500" gst="18" sku="Reyansh Indoor P1.86" /><pitch pp="1.56" rate="23000" gst="28" sku="Reyansh Indoor P1.56" />
+    </product>
+    <product id="microled" series="Leynna Cosmo" type="MicroLED" env="indoor" moduleW="300" moduleH="168.75">
+      <cabinet w="600" h="337.5" label="600×337.5mm" /><cabinet w="609.6" h="342.9" label="609.6×342.9mm" />
+      <pitch pp="1.56" rate="23000" gst="28" sku="Leynna Cosmo P1.56" /><pitch pp="1.25" rate="25000" gst="28" sku="Leynna Cosmo P1.25" /><pitch pp="1.17" rate="23500" gst="28" sku="Leynna Cosmo P1.17" /><pitch pp="0.93" rate="35000" gst="28" sku="Leynna Cosmo P0.93 Virtual" /><pitch pp="0.78" rate="60000" gst="28" sku="Leynna Cosmo P0.78" />
+    </product>
+    <product id="sapphire" series="Leynna Sapphire" type="MicroLED" env="indoor" moduleW="300" moduleH="168.75">
+      <cabinet w="600" h="337.5" label="600×337.5mm" /><cabinet w="609.6" h="342.9" label="609.6×342.9mm" />
+      <pitch pp="1.53" rate="37800" gst="28" sku="Leynna Sapphire P1.53" /><pitch pp="1.23" rate="42000" gst="28" sku="Leynna Sapphire P1.23" /><pitch pp="0.95" rate="66000" gst="28" sku="Leynna Sapphire P0.95" />
+    </product>
+  </products>
+</pixelData>
+`;
+
+/* ===== engine math (was engine.js — pure JS, framework-agnostic) ===== */
+/* ============================================================
+   PIXEL QUOTE MAX — calculation engine (pure, dependency-free)
+   Runs in the browser (window.PQM) AND in Node (module.exports)
+   so the same code is unit-tested headless and shipped to users.
+   All internal geometry is in millimetres. Money in INR.
+   ============================================================ */
+const E = (function () {
+  "use strict";
+
+  const MM_PER_FT = 304.8;
+  const ftToMm = (ft) => ft * MM_PER_FT;
+  const mmToFt = (mm) => mm / MM_PER_FT;
+  const round = Math.round;
+  const fmtINR = (n) => "₹" + Math.round(n).toLocaleString("en-IN");
+
+  /* ---------- attribute reader ---------- */
+  function attrs(tag) {
+    const o = {};
+    const re = /([\w-]+)\s*=\s*"([^"]*)"/g;
+    let m;
+    while ((m = re.exec(tag)) !== null) o[m[1]] = m[2];
+    return o;
+  }
+  const numKeys = (o, keys) => { keys.forEach((k) => { if (o[k] !== undefined) o[k] = parseFloat(o[k]); }); return o; };
+
+  /* ---------- XML -> db object (works in Node and browser) ---------- */
+  function parseDbXml(xml) {
+    const db = { meta: {}, install: [], controllers: { mini: [], micro: [] }, products: [] };
+
+    const metaM = xml.match(/<meta\b[^>]*>/);
+    if (metaM) db.meta = numKeys(attrs(metaM[0]),
+      ["curveSurchargePct", "pixelsPerPortMini", "pixelsPerPortMicro", "controllerGst", "installGst"]);
+
+    const instBlock = (xml.match(/<installTiers>([\s\S]*?)<\/installTiers>/) || [])[1] || "";
+    instBlock.replace(/<tier\b[^>]*\/>/g, (t) => { db.install.push(numKeys(attrs(t), ["maxArea", "rate"])); return t; });
+
+    xml.replace(/<controllers\s+type="(mini|micro)">([\s\S]*?)<\/controllers>/g, (full, type, body) => {
+      body.replace(/<tier\b[^>]*\/>/g, (t) => { db.controllers[type].push(numKeys(attrs(t), ["maxPorts", "price"])); return t; });
+      return full;
+    });
+
+    xml.replace(/<product\b([^>]*)>([\s\S]*?)<\/product>/g, (full, head, body) => {
+      const p = numKeys(attrs("<x " + head + ">"), ["moduleW","moduleH","brightnessNits","refreshHz","bitDepth","viewingAngleDeg","contrastStatic","contrastDynamic","colorGamutSrgbPct","colorGamutRec2020Pct","maxPowerSqm","avgPowerSqm","warrantyYears","cabinetDepthMm","moduleDepthMm","lifespanHours","opTempMin","opTempMax","vdMultiplier"]);
+      p.cabinets = []; p.pitches = [];
+      body.replace(/<cabinet\b[^>]*\/>/g, (t) => { p.cabinets.push(numKeys(attrs(t), ["w","h","weight"])); return t; });
+      body.replace(/<pitch\b[^>]*\/>/g, (t) => { p.pitches.push(numKeys(attrs(t), ["pp", "rate", "gst"])); return t; });
+      db.products.push(p);
+      return full;
+    });
+
+    return db;
+  }
+
+  const getProduct = (db, id) => db.products.find((p) => p.id === id) || null;
+  const isMicro = (product) => (product.type || "").toLowerCase() === "microled";
+
+  /* ---------- price lookups ---------- */
+  function priceForPitch(product, pp) {
+    const exact = product.pitches.find((x) => Math.abs(x.pp - pp) < 1e-9);
+    if (exact) return { rate: exact.rate, gst: exact.gst, sku: exact.sku };
+    // linear interpolation between nearest catalogue pitches (rate rises as pitch falls)
+    const sorted = [...product.pitches].sort((a, b) => a.pp - b.pp);
+    const lo = sorted.filter((x) => x.pp <= pp).pop();
+    const hi = sorted.filter((x) => x.pp >= pp).shift();
+    if (lo && hi && lo.pp !== hi.pp) {
+      const r = (pp - lo.pp) / (hi.pp - lo.pp);
+      const rate = round(lo.rate + (hi.rate - lo.rate) * r);
+      return { rate, gst: pp <= 1.56 ? 28 : 18, sku: "Custom " + pp + "mm" };
+    }
+    const one = lo || hi;
+    return { rate: one.rate, gst: one.gst, sku: "Custom " + pp + "mm" };
+  }
+
+  function controllerPrice(db, ports, micro) {
+    const tiers = micro ? db.controllers.micro : db.controllers.mini;
+    const t = tiers.find((x) => ports <= x.maxPorts) || tiers[tiers.length - 1];
+    return t.price;
+  }
+  function installRate(db, area) {
+    const t = db.install.find((x) => area < x.maxArea) || db.install[db.install.length - 1];
+    return t.rate;
+  }
+
+  /* ---------- curve geometry ---------- */
+  // chordMm = straight span of the curved screen; returns radius R (mm)
+  function radiusFrom(curveMode, { chordMm, sagittaMm, radiusMm, presetFactor }) {
+    if (curveMode === "radius") return radiusMm;
+    if (curveMode === "sagitta") {
+      const s = Math.max(sagittaMm, 0.0001);
+      return (chordMm * chordMm) / (8 * s) + s / 2; // exact for circular segment
+    }
+    return chordMm * presetFactor; // preset: R = factor * width
+  }
+
+  function curveMetrics({ chordMm, screenHmm, R, cabW, curveType, sag }) {
+    const halfAngle = Math.asin(Math.min(1, chordMm / (2 * R)));
+    const arcLen = R * 2 * halfAngle;
+    const cabAngleDeg = (2 * Math.asin(Math.min(1, cabW / (2 * R))) * 180) / Math.PI;
+    const gapPerJoint = (cabW * cabW) / (2 * R); // back gap a flat cabinet leaves on the arc
+
+    let verdict, advice;
+    if (gapPerJoint < 8) { verdict = "EXCELLENT"; advice = "Flat cabinets mount directly tangent. Negligible gap. No filler needed."; }
+    else if (gapPerJoint < 15) { verdict = "VERY GOOD"; advice = "Flat cabinets work. Use 5mm closed-cell foam strip on cabinet edge for moisture seal."; }
+    else if (gapPerJoint < 25) { verdict = "ACCEPTABLE"; advice = "Use wedge spacer plates (max ~12mm at edges) behind cabinets. Add aluminium trim filler at front joints."; }
+    else if (gapPerJoint < 40) { verdict = "FACETED"; advice = "Visible faceting. Recommend a smaller cabinet, custom angled-edge cabinets, or a gentler curve."; }
+    else { verdict = "SEVERE"; advice = "Use flexible/soft LED modules or cabinets fabricated specifically for this radius."; }
+
+    const isOuter = curveType === "outer";
+    const cantileverAtCenter = isOuter ? sag : 0;
+    const wallContactAtEnds = isOuter ? "Chord endpoints" : "Full arc face";
+    const structuralStrategy = isOuter
+      ? (sag < 300 ? "Bracket cantilever from wall" : sag < 700 ? "Floating back-frame + 4-6 wall struts" : "Deep back-frame + heavy bracket system")
+      : "Direct anchor along curve face into recessed wall";
+    return { arcLen, cabAngleDeg, gapPerJoint, verdict, advice, isOuter, cantileverAtCenter, wallContactAtEnds, structuralStrategy };
+  }
+
+  /* ============================================================
+     MAIN: computeQuote
+     params = {
+       mode: "flat" | "curved",
+       productId, pitch (mm),
+       widthFt, heightFt,           // requested screen size in feet
+       cabIndex,                    // chosen cabinet from product list
+       // curved only:
+       curveMode: "preset"|"sagitta"|"radius",
+       preset: "subtle"|"signature"|"wrap"|"cylinder",
+       sagittaMm, radiusMm, curveType: "outer"|"inner",
+       cabWeightKg,
+       moduleW, moduleH            // optional overrides (mm)
+     }
+     ============================================================ */
+  const PRESETS = { subtle: 5, signature: 2.5, wrap: 1.3, cylinder: 0.8 };
+
+  function computeQuote(params, db) {
+    const product = getProduct(db, params.productId);
+    if (!product) throw new Error("Unknown product: " + params.productId);
+    const micro = isMicro(product);
+    const pitch = parseFloat(params.pitch);
+    const cab = product.cabinets[Math.min(params.cabIndex || 0, product.cabinets.length - 1)];
+    const rotated = params.orientation === "rotated";
+    const cabW = rotated ? cab.h : cab.w;
+    const cabH = rotated ? cab.w : cab.h;
+    const modW = rotated ? (params.moduleH || product.moduleH) : (params.moduleW || product.moduleW);
+    const modH = rotated ? (params.moduleW || product.moduleW) : (params.moduleH || product.moduleH);
+
+    const reqWmm = ftToMm(params.widthFt);
+    const reqHmm = ftToMm(params.heightFt);
+
+    // snap UP to whole cabinets (you build & quote whole cabinets)
+    const cabCountW = Math.max(1, Math.ceil(reqWmm / cabW));
+    const cabCountH = Math.max(1, Math.ceil(reqHmm / cabH));
+    const builtWmm = cabCountW * cabW;
+    const builtHmm = cabCountH * cabH;
+    const totalCabs = cabCountW * cabCountH;
+
+    const modPerCabW = Math.round(cabW / modW);
+    const modPerCabH = Math.round(cabH / modH);
+    const modPerCab = modPerCabW * modPerCabH;
+    const totalMods = totalCabs * modPerCab;
+
+    const pxW = Math.round(builtWmm / pitch);
+    const pxH = Math.round(builtHmm / pitch);
+    const totalPixels = pxW * pxH;
+
+    const areaSqft = (builtWmm * builtHmm) / (MM_PER_FT * MM_PER_FT);
+    const areaSqm = (builtWmm * builtHmm) / 1e6;
+    const ppp = micro ? db.meta.pixelsPerPortMicro : db.meta.pixelsPerPortMini;
+    const ports = Math.max(1, Math.ceil(totalPixels / ppp));
+
+    // ---- tech / engineering derivatives (shared, used by PDF + screen) ----
+    const diagInches = Math.sqrt(builtWmm*builtWmm + builtHmm*builtHmm) / 25.4;
+    const gcd = (a,b)=> b===0 ? a : gcd(b, a%b);
+    const g = gcd(pxW || 1, pxH || 1);
+    const aspectRatio = `${Math.round((pxW||1)/g)}:${Math.round((pxH||1)/g)}`;
+    const pixelDensitySqm = pitch > 0 ? Math.round(1e6 / (pitch * pitch)) : 0;
+    const vdMul = product.vdMultiplier != null ? product.vdMultiplier : 1.0;
+    const minViewingDistanceM = +(pitch * vdMul).toFixed(2);
+
+    // cabinet weight: explicit param > cab attr > sensible default
+    const perCabWeightKg = (params.cabWeightKg != null && params.cabWeightKg !== "" && !isNaN(+params.cabWeightKg))
+      ? +params.cabWeightKg : (cab.weight != null ? cab.weight : (micro ? 5 : 14));
+    const screenWeightKg = Math.round(totalCabs * perCabWeightKg);
+
+    // electrical (for BOTH flat & curved now)
+    const avgPowerW = Math.round(areaSqm * (product.avgPowerSqm || 0));
+    const maxPowerW = Math.round(areaSqm * (product.maxPowerSqm || 0));
+    const recommendedSupplyKw = Math.max(1, Math.ceil((maxPowerW * 1.25) / 1000));
+
+    // ---- pricing (shared) ----
+    const pr = priceForPitch(product, pitch);
+    const screenCost = round(pr.rate * areaSqft);
+    const screenGst = round((screenCost * pr.gst) / 100);
+
+    const ctrlCost = controllerPrice(db, ports, micro);
+    const ctrlGstPct = db.meta.controllerGst;
+    const ctrlGst = round((ctrlCost * ctrlGstPct) / 100);
+
+    const iRate = installRate(db, areaSqft);
+    const installCost = round(iRate * Math.ceil(areaSqft));
+    const installGstPct = db.meta.installGst;
+    const installGst = round((installCost * installGstPct) / 100);
+
+    const lines = [
+      { item: "LED Display", rate: pr.rate, rateUnit: "/sqft", qty: areaSqft.toFixed(1) + " sqft", amount: screenCost, gstPct: pr.gst, gst: screenGst },
+      { item: "Video Controller", rate: ctrlCost, rateUnit: " /system", qty: ports + " port(s)", amount: ctrlCost, gstPct: ctrlGstPct, gst: ctrlGst },
+      { item: "Installation", rate: iRate, rateUnit: "/sqft", qty: Math.ceil(areaSqft) + " sqft", amount: installCost, gstPct: installGstPct, gst: installGst },
+    ];
+
+    let curve = null;
+    if (params.mode === "curved") {
+      const chordMm = reqWmm;
+      const R = radiusFrom(params.curveMode, {
+        chordMm, sagittaMm: params.sagittaMm, radiusMm: params.radiusMm,
+        presetFactor: PRESETS[params.preset] || PRESETS.signature,
+      });
+      const sag = R - Math.sqrt(Math.max(0, R * R - (chordMm * chordMm) / 4));
+      const m = curveMetrics({ chordMm, screenHmm: reqHmm, R, cabW, curveType: params.curveType || "outer", sag });
+
+      // curve-fabrication surcharge (editable in XML)
+      const surPct = db.meta.curveSurchargePct || 0;
+      const surcharge = round((screenCost * surPct) / 100);
+      const surchargeGst = round((surcharge * pr.gst) / 100);
+      lines.push({ item: "Curve Fabrication", rate: surPct, rateUnit: "%", qty: "curve work", amount: surcharge, gstPct: pr.gst, gst: surchargeGst });
+
+      // structure (steel + curve mounting)
+      const vertPosts = Math.ceil(builtWmm / 960) + 1;
+      const vertPostLen = (builtHmm + 600) / 1000;
+      const horizRails = Math.ceil(builtHmm / 960) + 1;
+      const horizRailLen = m.arcLen / 1000;
+      const strutLen = m.isOuter ? (sag * 6) / 1000 : 0;
+      const steelWeightKg = Math.round((vertPosts * vertPostLen + horizRails * horizRailLen + strutLen) * 12);
+
+      curve = {
+        chordMm, R, sag, surPct, surcharge, surchargeGst,
+        // legacy keys kept for compatibility with existing PrintSheet code
+        totalWeight: screenWeightKg, avgPower: avgPowerW, maxPower: maxPowerW,
+        recommendedSupply: recommendedSupplyKw, steelWeightKg,
+        vertPosts, horizRails, ...m,
+        curveType: params.curveType || "outer",
+      };
+    }
+
+    const subtotal = lines.reduce((s, l) => s + l.amount, 0);
+    const totalGst = lines.reduce((s, l) => s + l.gst, 0);
+    const grandTotal = subtotal + totalGst;
+
+    const tech = {
+      displayTech: product.displayTech || null, ledType: product.ledType || null,
+      brightnessNits: product.brightnessNits || null, refreshHz: product.refreshHz || null,
+      bitDepth: product.bitDepth || null, viewingAngleDeg: product.viewingAngleDeg || null,
+      contrastStatic: product.contrastStatic || null, contrastDynamic: product.contrastDynamic || null,
+      colorGamutSrgbPct: product.colorGamutSrgbPct || null, colorGamutRec2020Pct: product.colorGamutRec2020Pct || null,
+      ipRating: product.ipRating || null, cabinetDepthMm: product.cabinetDepthMm || null,
+      moduleDepthMm: product.moduleDepthMm || null, lifespanHours: product.lifespanHours || null,
+      warrantyYears: product.warrantyYears || null,
+      opTempMin: product.opTempMin != null ? product.opTempMin : null,
+      opTempMax: product.opTempMax != null ? product.opTempMax : null,
+    };
+
+    return {
+      mode: params.mode, micro, sku: pr.sku, pitch,
+      product: { id: product.id, series: product.series, type: product.type },
+      cab, cabW, cabH, modW, modH,
+      reqWmm, reqHmm, builtWmm, builtHmm,
+      builtWft: mmToFt(builtWmm), builtHft: mmToFt(builtHmm),
+      cabCountW, cabCountH, totalCabs,
+      modPerCabW, modPerCabH, modPerCab, totalMods,
+      pxW, pxH, totalPixels, areaSqft, areaSqm, ports,
+      diagInches, aspectRatio, pixelDensitySqm, minViewingDistanceM,
+      perCabWeightKg, screenWeightKg, avgPowerW, maxPowerW, recommendedSupplyKw,
+      tech,
+      lines, subtotal, totalGst, grandTotal,
+      curve,
+    };
+  }
+
+  /* ---------- smart fit-finder ----------
+     For a given product + requested width/height (ft), evaluates every
+     cabinet × {native, rotated} and returns the best NEAREST (≤ input) and
+     best OPTIMAL (≥ input) fits by minimum total waste. */
+  function findFits(params, db) {
+    const product = getProduct(db, params.productId);
+    if (!product) return null;
+    const reqW = ftToMm(parseFloat(params.widthFt) || 0);
+    const reqH = ftToMm(parseFloat(params.heightFt) || 0);
+    if (reqW <= 0 || reqH <= 0) return { nearest: null, optimal: null };
+
+    let bestOpt = null, bestNear = null;
+    product.cabinets.forEach((cab, cabIndex) => {
+      // Module-based builds (modules-on-frame) are a deliberate construction
+      // choice — AUTO never picks them. User must select via Manual override.
+      if (cab.type === "module") return;
+      const orientations = cab.w === cab.h ? ["native"] : ["native", "rotated"];
+      orientations.forEach((orientation) => {
+        const cw = orientation === "rotated" ? cab.h : cab.w;
+        const ch = orientation === "rotated" ? cab.w : cab.h;
+
+        const ncWup = Math.max(1, Math.ceil(reqW / cw));
+        const ncHup = Math.max(1, Math.ceil(reqH / ch));
+        const builtW = ncWup * cw, builtH = ncHup * ch;
+        const wasteUp = (builtW - reqW) + (builtH - reqH);
+        const optRec = { cabIndex, orientation, cabW: cw, cabH: ch, cabLabel: cab.label,
+                         cabCountW: ncWup, cabCountH: ncHup, builtWmm: builtW, builtHmm: builtH, waste: wasteUp };
+        if (!bestOpt || wasteUp < bestOpt.waste) bestOpt = optRec;
+
+        const ncWdn = Math.floor(reqW / cw);
+        const ncHdn = Math.floor(reqH / ch);
+        if (ncWdn >= 1 && ncHdn >= 1) {
+          const builtWdn = ncWdn * cw, builtHdn = ncHdn * ch;
+          const wasteDn = (reqW - builtWdn) + (reqH - builtHdn);
+          const nearRec = { cabIndex, orientation, cabW: cw, cabH: ch, cabLabel: cab.label,
+                            cabCountW: ncWdn, cabCountH: ncHdn, builtWmm: builtWdn, builtHmm: builtHdn, waste: wasteDn };
+          if (!bestNear || wasteDn < bestNear.waste) bestNear = nearRec;
+        }
+      });
+    });
+    return { nearest: bestNear, optimal: bestOpt };
+  }
+
+  function quoteRef(date) {
+    const d = date || new Date();
+    const yr = d.getFullYear();
+    const seq = Math.floor((d.getMonth() * 31 + d.getDate()) * 13 + (d.getHours() * 60 + d.getMinutes())) % 9999 + 1;
+    return "VR-" + yr + "-" + String(seq).padStart(4, "0");
+  }
+
+  return {
+    MM_PER_FT, ftToMm, mmToFt, fmtINR, PRESETS,
+    parseDbXml, getProduct, isMicro,
+    priceForPitch, controllerPrice, installRate,
+    radiusFrom, curveMetrics, computeQuote, findFits, quoteRef,
+  };
+})();
+
+/* ===== UI components + main App (was the in-browser Babel JSX) ===== */
+const C = {
+  navy:"#06001A", navyLight:"#0F0826", purple:"#793494", magenta:"#9d20d6",
+  lavender:"#c89dd9", cream:"#F5EFE6", line:"#2A1F3D",
+  amber:"#E5B454", green:"#7BC474", red:"#E26464", wall:"#8B7355",
+};
+const FR="var(--fr)", MN="var(--mn)", MO="var(--mo)";
+const num=(n,d=0)=> (isFinite(n)? Number(n).toLocaleString(undefined,{maximumFractionDigits:d,minimumFractionDigits:d}) : "—");
+const verdictColor=(v)=>({EXCELLENT:C.green,"VERY GOOD":C.green,ACCEPTABLE:C.amber,FACETED:C.amber,SEVERE:C.red}[v]||C.lavender);
+
+/* ───────── VR logo (embedded brand mark, transparent PNG) ───────── */
+const LOGO_SRC = "data:image/png;base64,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";
+const VRLogo = ({size=40}) => (
+  <img src={LOGO_SRC} height={size} alt="Visual Rhyme" style={{display:"block",width:"auto",flex:"0 0 auto"}}/>
+)
+
+/* ───────── small UI atoms ───────── */
+function Field({label,unit,hint,children}){
+  return (
+    <div style={{display:"flex",flexDirection:"column",gap:6}}>
+      <label style={{fontSize:11,letterSpacing:1.2,textTransform:"uppercase",color:C.lavender,fontFamily:MN,fontWeight:600}}>
+        {label} {unit&&<span style={{opacity:.5}}>({unit})</span>}
+      </label>
+      {children}
+      {hint&&<div style={{fontSize:11,color:C.lavender,opacity:.6,fontFamily:MN}}>{hint}</div>}
+    </div>
+  );
+}
+function NumInput({value,onChange,min,max,step=1}){
+  return <input type="number" value={value} min={min} max={max} step={step}
+    onChange={(e)=>onChange(e.target.value===""?"":parseFloat(e.target.value))}
+    style={{background:C.navy,border:`1px solid ${C.line}`,color:C.cream,padding:"10px 12px",fontFamily:MO,fontSize:14,borderRadius:6,outline:"none",width:"100%"}} />;
+}
+function Pill({active,onClick,children}){
+  return <button onClick={onClick}
+    style={{background:active?C.purple:"transparent",color:active?C.cream:C.lavender,border:`1px solid ${active?C.purple:C.line}`,padding:"8px 14px",borderRadius:999,fontWeight:600,fontSize:12,letterSpacing:.6,textTransform:"uppercase",cursor:"pointer",transition:"all .15s"}}>
+    {children}</button>;
+}
+const headerBtn=(active)=>({background:active?C.magenta:"transparent",color:active?C.cream:C.lavender,border:`1px solid ${active?C.magenta:C.line}`,padding:"9px 16px",borderRadius:999,fontWeight:700,fontSize:12,letterSpacing:.8,textTransform:"uppercase",cursor:"pointer",transition:"all .15s"});
+function Panel({children,accent,style}){
+  return <div className="vr-lift" style={{background:C.navyLight,border:`1px solid ${C.line}`,borderLeft:accent?`3px solid ${accent}`:`1px solid ${C.line}`,borderRadius:12,padding:18,...style}}>{children}</div>;
+}
+
+/* Animated number — rolls from previous to next on change */
+function AnimatedNumber({ value, format }){
+  const [v,setV]=useState(value);
+  const fromRef = useRef(value);
+  const startRef = useRef(0);
+  useEffect(()=>{
+    const from = fromRef.current, to = value;
+    if(from === to) return;
+    const dur = 600; let raf;
+    const start = performance.now(); startRef.current = start;
+    const tick = (t)=>{
+      const p = Math.min(1, (t-start)/dur);
+      const eased = 1 - Math.pow(1-p, 3);
+      setV(from + (to-from) * eased);
+      if(p<1) raf = requestAnimationFrame(tick); else { fromRef.current = to; setV(to); }
+    };
+    raf = requestAnimationFrame(tick);
+    return ()=> raf && cancelAnimationFrame(raf);
+  },[value]);
+  return <>{format ? format(Math.round(v)) : Math.round(v)}</>;
+}
+function Metric({label,value,unit,accent,sub}){
+  return (
+    <div style={{borderTop:`1px solid ${C.line}`,padding:"12px 0"}}>
+      <div style={{fontSize:10,letterSpacing:1.4,textTransform:"uppercase",color:C.lavender,opacity:.7,fontWeight:600}}>{label}</div>
+      <div style={{display:"flex",alignItems:"baseline",gap:6,marginTop:4}}>
+        <span style={{fontFamily:FR,fontSize:24,fontWeight:500,color:accent||C.cream,lineHeight:1}}>{value}</span>
+        {unit&&<span style={{fontFamily:MO,fontSize:12,color:C.lavender,opacity:.7}}>{unit}</span>}
+      </div>
+      {sub&&<div style={{fontFamily:MO,fontSize:11,color:C.lavender,opacity:.6,marginTop:4}}>{sub}</div>}
+    </div>
+  );
+}
+
+/* ───────── drawings ───────── */
+function PlanDrawing({chord,R,sag,cabCountW,curveType}){
+  const W=560,H=320,pad=50, scale=(W-2*pad)/chord, cx=W/2;
+  const isOuter=curveType==="outer";
+  const wallY=isOuter?H-pad-30:pad+30, viewerY=isOuter?44:H-14, apexDir=isOuter?-1:1, half=chord/2;
+  const x1=cx-half*scale, x2=cx+half*scale, Rpx=R*scale, sweep=isOuter?1:0;
+  const arcPath=`M ${x1} ${wallY} A ${Rpx} ${Rpx} 0 0 ${sweep} ${x2} ${wallY}`;
+  const arcPoint=(t)=>{const xc=-half+t*chord;const yo=Math.sqrt(Math.max(0,R*R-xc*xc))-(R-sag);return{x:cx+xc*scale,y:wallY+apexDir*yo*scale};};
+  const ticks=[]; const n=Math.max(1,Math.round(cabCountW)); for(let i=0;i<=n;i++) ticks.push(arcPoint(i/n));
+  const apex=arcPoint(.5);
+  const struts=[.25,.5,.75].map(t=>{const p=arcPoint(t);const wx=cx+(-half+t*chord)*scale;return{from:{x:wx,y:wallY},to:p};});
+  return (
+    <svg viewBox={`0 0 ${W} ${H}`} style={{width:"100%",height:"auto",display:"block"}}>
+      <defs><pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse"><path d="M 20 0 L 0 0 0 20" fill="none" stroke={C.line} strokeWidth="0.5" opacity="0.4"/></pattern>
+      <pattern id="wh" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="8" stroke={C.wall} strokeWidth="1.5"/></pattern></defs>
+      <rect width={W} height={H} fill={C.navyLight}/><rect width={W} height={H} fill="url(#grid)"/>
+      <text x={pad} y={18} fontSize="10" fill={C.lavender} opacity="0.7" fontWeight="600" letterSpacing="2">PLAN · {isOuter?"OUTER":"INNER"}</text>
+      <rect x={x1-30} y={isOuter?wallY:wallY-14} width={chord*scale+60} height={14} fill="url(#wh)" opacity="0.7"/>
+      <line x1={x1-30} y1={wallY} x2={x2+30} y2={wallY} stroke={C.wall} strokeWidth="2"/>
+      <text x={cx} y={isOuter?wallY+28:wallY-20} textAnchor="middle" fontSize="10" fill={C.wall} fontWeight="700" letterSpacing="1.5">BUILDING WALL</text>
+      <text x={cx} y={viewerY} textAnchor="middle" fontSize="11" fill={C.amber} fontWeight="700" letterSpacing="1.5">{isOuter?"↑ VIEWER / STREET":"↓ VIEWER"}</text>
+      {struts.map((s,i)=>(<line key={i} x1={s.from.x} y1={s.from.y} x2={s.to.x} y2={s.to.y} stroke={C.lavender} strokeWidth="1" strokeDasharray="2 3" opacity="0.35"/>))}
+      <circle cx={x1} cy={wallY} r="5" fill={C.amber}/><circle cx={x2} cy={wallY} r="5" fill={C.amber}/>
+      <path d={arcPath} fill="none" stroke={C.lavender} strokeWidth="1.5" opacity="0.35"/>
+      <path d={`M ${arcPoint(0).x} ${arcPoint(0).y} A ${Rpx} ${Rpx} 0 0 ${sweep} ${arcPoint(1).x} ${arcPoint(1).y}`} fill="none" stroke={C.magenta} strokeWidth="4"/>
+      {ticks.map((p,i)=>(<circle key={i} cx={p.x} cy={p.y} r="2.5" fill={C.cream}/>))}
+      <line x1={apex.x-22} y1={apex.y} x2={apex.x-22} y2={wallY} stroke={C.green} strokeWidth="1.2"/>
+      <text x={apex.x-30} y={(apex.y+wallY)/2+4} textAnchor="end" fontSize="10" fill={C.green} fontFamily={MO} fontWeight="600">S={num(sag,0)}</text>
+      <text x={W-pad+22} y={apex.y+4} textAnchor="end" fontSize="10" fill={C.amber} fontFamily={MO} fontWeight="600">R={num(R/1000,2)}m</text>
+      <text x={cx} y={isOuter?64:Math.max(arcPoint(0).y,apex.y)+24} textAnchor="middle" fontSize="11" fill={C.magenta} fontWeight="700">LED SCREEN · {Math.round(cabCountW)} CABINETS WIDE</text>
+    </svg>
+  );
+}
+function ElevationDrawing({wmm,hmm,cabCountW,cabCountH,modPerCabW,modPerCabH,accent}){
+  const W=560,H=320,pad=30, aspect=wmm/hmm;
+  let dW=W-2*pad, dH=dW/aspect; if(dH>H-2*pad-40){dH=H-2*pad-40;dW=dH*aspect;}
+  const x0=(W-dW)/2,y0=44, cpw=dW/cabCountW, cph=dH/cabCountH, cabs=[];
+  for(let r=0;r<cabCountH;r++)for(let c=0;c<cabCountW;c++)cabs.push({x:x0+c*cpw,y:y0+r*cph,idx:r*cabCountW+c+1});
+  return (
+    <svg viewBox={`0 0 ${W} ${H}`} style={{width:"100%",height:"auto",display:"block"}}>
+      <defs><pattern id="grid2" width="20" height="20" patternUnits="userSpaceOnUse"><path d="M 20 0 L 0 0 0 20" fill="none" stroke={C.line} strokeWidth="0.5" opacity="0.4"/></pattern>
+      <linearGradient id="cg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor={C.purple} stopOpacity="0.45"/><stop offset="100%" stopColor={C.magenta} stopOpacity="0.25"/></linearGradient></defs>
+      <rect width={W} height={H} fill={C.navyLight}/><rect width={W} height={H} fill="url(#grid2)"/>
+      <text x={pad} y={24} fontSize="10" fill={C.lavender} opacity="0.7" fontWeight="600" letterSpacing="2">FRONT ELEVATION · VIEWER PERSPECTIVE</text>
+      <rect x={x0-2} y={y0-2} width={dW+4} height={dH+4} fill="none" stroke={accent||C.amber} strokeWidth="1.5"/>
+      {cabs.map((cb,i)=>(
+        <g key={i}>
+          <rect x={cb.x} y={cb.y} width={cpw} height={cph} fill="url(#cg)" stroke={C.magenta} strokeWidth="0.8"/>
+          {[...Array(Math.max(0,modPerCabW-1))].map((_,j)=>(<line key={"v"+j} x1={cb.x+((j+1)*cpw)/modPerCabW} y1={cb.y} x2={cb.x+((j+1)*cpw)/modPerCabW} y2={cb.y+cph} stroke={C.lavender} strokeWidth="0.4" opacity="0.5"/>))}
+          {[...Array(Math.max(0,modPerCabH-1))].map((_,j)=>(<line key={"h"+j} x1={cb.x} y1={cb.y+((j+1)*cph)/modPerCabH} x2={cb.x+cpw} y2={cb.y+((j+1)*cph)/modPerCabH} stroke={C.lavender} strokeWidth="0.4" opacity="0.5"/>))}
+          {cpw>34&&<text x={cb.x+cpw/2} y={cb.y+cph/2+3} textAnchor="middle" fontSize="9" fill={C.cream} fontFamily={MO} opacity="0.85">C{cb.idx}</text>}
+        </g>
+      ))}
+      <text x={x0+dW/2} y={y0+dH+22} textAnchor="middle" fontSize="10" fill={C.lavender} fontFamily={MO}>← {num(wmm)} mm · {cabCountW} cab × {modPerCabW} mod →</text>
+      <text x={x0-10} y={y0+dH/2} textAnchor="middle" fontSize="10" fill={C.lavender} fontFamily={MO} transform={`rotate(-90 ${x0-10} ${y0+dH/2})`}>{num(hmm)} mm · {cabCountH} × {modPerCabH}</text>
+    </svg>
+  );
+}
+function SectionDrawing({sag,curveType}){
+  const W=340,H=320, isOuter=curveType==="outer", wallX=60;
+  const sagScale=Math.min(160/Math.max(sag,100),0.35), vSag=Math.max(sag*sagScale,30);
+  const faceX=wallX+(isOuter?vSag:vSag), topY=60, botY=H-80;
+  return (
+    <svg viewBox={`0 0 ${W} ${H}`} style={{width:"100%",height:"auto",display:"block"}}>
+      <defs><pattern id="grid3" width="20" height="20" patternUnits="userSpaceOnUse"><path d="M 20 0 L 0 0 0 20" fill="none" stroke={C.line} strokeWidth="0.5" opacity="0.4"/></pattern>
+      <pattern id="wh2" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="6" stroke={C.wall} strokeWidth="1.2"/></pattern></defs>
+      <rect width={W} height={H} fill={C.navyLight}/><rect width={W} height={H} fill="url(#grid3)"/>
+      <text x={20} y={22} fontSize="10" fill={C.lavender} opacity="0.7" fontWeight="600" letterSpacing="2">SIDE SECTION</text>
+      <rect x={wallX-16} y={topY-30} width={16} height={botY-topY+50} fill="url(#wh2)" opacity="0.8"/>
+      <line x1={wallX} y1={topY-30} x2={wallX} y2={botY+20} stroke={C.wall} strokeWidth="2.5"/>
+      <text x={wallX-22} y={(topY+botY)/2} textAnchor="middle" fontSize="9" fill={C.wall} fontWeight="700" transform={`rotate(-90 ${wallX-22} ${(topY+botY)/2})`}>BUILDING WALL</text>
+      <line x1={faceX-8} y1={topY-10} x2={faceX-8} y2={botY+10} stroke={C.amber} strokeWidth="2"/>
+      <text x={faceX-12} y={topY-16} textAnchor="end" fontSize="8" fill={C.amber} fontFamily={MO}>BACK FRAME</text>
+      <rect x={faceX} y={topY} width={6} height={botY-topY} fill={C.magenta} opacity="0.9"/>
+      <text x={faceX+12} y={(topY+botY)/2-5} fontSize="9" fill={C.magenta} fontWeight="700">LED FACE</text>
+      {[topY+20,(topY+botY)/2,botY-20].map((y,i)=>(<line key={i} x1={wallX} y1={y} x2={faceX-8} y2={y} stroke={C.purple} strokeWidth="1.5"/>))}
+      <line x1={wallX} y1={botY+50} x2={faceX} y2={botY+50} stroke={C.green} strokeWidth="1.2"/>
+      <text x={(wallX+faceX)/2} y={botY+65} textAnchor="middle" fontSize="11" fill={C.green} fontFamily={MO} fontWeight="600">{num(sag,0)} mm</text>
+      <text x={(wallX+faceX)/2} y={botY+77} textAnchor="middle" fontSize="8" fill={C.green} fontFamily={MO} opacity="0.7">{isOuter?"cantilever @ apex":"depth into wall"}</text>
+    </svg>
+  );
+}
+
+/* ───────── price table ───────── */
+function PriceTable({r,paper}){
+  const ink=paper?"#1A1208":C.cream, muted=paper?"#6B5E4A":C.lavender, bd=paper?"#E4DCCB":C.line;
+  const th={padding:"7px 8px",textAlign:"left",fontSize:9,textTransform:"uppercase",letterSpacing:1,color:muted,borderBottom:`1px solid ${bd}`,fontWeight:700};
+  const td={padding:"7px 8px",fontSize:12,borderBottom:`1px solid ${bd}`,color:ink};
+  const tr={...td,textAlign:"right",fontFamily:MO,fontWeight:600};
+  return (
+    <table style={{width:"100%",borderCollapse:"collapse"}}>
+      <thead><tr><th style={th}>Item</th><th style={th}>Rate</th><th style={th}>Qty</th><th style={{...th,textAlign:"right"}}>Amount</th><th style={{...th,textAlign:"right"}}>GST%</th><th style={{...th,textAlign:"right"}}>GST</th></tr></thead>
+      <tbody>{r.lines.map((l,i)=>(
+        <tr key={i}><td style={td}>{l.item}</td><td style={td}>{l.rateUnit==="%"?l.rate+"%":(l.item==="Video Controller"?"Per system":E.fmtINR(l.rate)+l.rateUnit)}</td><td style={td}>{l.qty}</td><td style={tr}>{E.fmtINR(l.amount)}</td><td style={tr}>{l.gstPct}%</td><td style={tr}>{E.fmtINR(l.gst)}</td></tr>
+      ))}</tbody>
+      <tfoot>
+        <tr><td colSpan="3" style={{...td,fontWeight:700,borderTop:`2px solid ${bd}`}}>Subtotal</td><td style={{...tr,borderTop:`2px solid ${bd}`}}>{E.fmtINR(r.subtotal)}</td><td style={tr}></td><td style={{...tr,borderTop:`2px solid ${bd}`}}>{E.fmtINR(r.totalGst)}</td></tr>
+        <tr><td colSpan="3" style={{...td,fontWeight:800,fontSize:14,color:paper?C.magenta:C.lavender,border:"none"}}>Grand Total (incl. GST)</td><td colSpan="3" style={{...tr,fontWeight:800,fontSize:16,color:paper?C.magenta:C.lavender,border:"none"}}>{E.fmtINR(r.grandTotal)}</td></tr>
+      </tfoot>
+    </table>
+  );
+}
+
+/* ───────── print / PDF sheet ───────── */
+function PrintSheet({r,meta,preview}){
+  if(!r) return null;
+  const ink="#1A1208",muted="#6B5E4A",mg=C.magenta;
+  const Row=({k,v,accent})=>(
+    <div style={{display:"flex",justifyContent:"space-between",alignItems:"baseline",padding:"4.5px 0",borderBottom:"1px solid #E4DCCB"}}>
+      <span style={{fontSize:11,letterSpacing:.4,textTransform:"uppercase",color:muted,fontWeight:600}}>{k}</span>
+      <span style={{fontFamily:MO,fontSize:12.5,fontWeight:600,color:accent||ink}}>{v}</span>
+    </div>
+  );
+  const SectionH=({children})=>(<div style={{fontSize:11,letterSpacing:2,color:mg,fontWeight:700,textTransform:"uppercase",margin:"12px 0 6px"}}>{children}</div>);
+  const cv=r.curve;
+  return (
+    <div className={preview?"":"vr-print"} style={{background:"#fff",color:ink,fontFamily:MN,padding:0,display:preview?"block":undefined}}>
+      {/* header */}
+      <div className="avoid-break" style={{display:"flex",justifyContent:"space-between",alignItems:"flex-end",borderBottom:`2px solid ${mg}`,paddingBottom:12}}>
+        <div style={{display:"flex",alignItems:"center",gap:12}}>
+          <VRLogo size={42}/>
+          <div>
+            <div style={{fontSize:10,letterSpacing:4,color:mg,fontWeight:700,textTransform:"uppercase"}}>Visual Rhyme Pvt. Ltd.</div>
+            <div style={{fontFamily:FR,fontSize:26,fontWeight:600,marginTop:2,lineHeight:1}}>Pixel Quote Max — {r.mode==="curved"?"Curved":"Flat"} LED {r.mode==="curved"?"Spec & Quote":"Quotation"}</div>
+          </div>
+        </div>
+        <div style={{textAlign:"right",fontFamily:MO,fontSize:11,color:muted}}>
+          <div style={{fontSize:13,color:ink,fontWeight:700}}>{meta.project||"Untitled Project"}</div>
+          {meta.client&&<div style={{marginTop:2}}>{meta.client}</div>}
+          <div style={{marginTop:2}}>{meta.ref}</div>
+          <div>{meta.date}</div>
+        </div>
+      </div>
+
+      {/* drawings — mandatory in both modes */}
+      <SectionH>Drawings</SectionH>
+      <div className="avoid-break" style={{display:"grid",gridTemplateColumns: r.mode==="curved"?"1fr 1fr":"1fr",gap:14}}>
+        <div style={{border:"1px solid #E4DCCB",borderRadius:6,overflow:"hidden"}}>
+          <ElevationDrawing wmm={r.builtWmm} hmm={r.builtHmm} cabCountW={r.cabCountW} cabCountH={r.cabCountH} modPerCabW={r.modPerCabW} modPerCabH={r.modPerCabH}/>
+        </div>
+        {r.mode==="curved"&&(
+          <div style={{border:"1px solid #E4DCCB",borderRadius:6,overflow:"hidden"}}>
+            <PlanDrawing chord={cv.chordMm} R={cv.R} sag={cv.sag} cabCountW={r.cabCountW} curveType={cv.curveType}/>
+          </div>
+        )}
+      </div>
+      {r.mode==="curved"&&(
+        <div className="avoid-break" style={{border:"1px solid #E4DCCB",borderRadius:6,overflow:"hidden",marginTop:14,maxWidth:300}}>
+          <SectionDrawing sag={cv.sag} curveType={cv.curveType}/>
+        </div>
+      )}
+
+      {/* spec */}
+      <div className="avoid-break" style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:24,marginTop:6}}>
+        <div>
+          <SectionH>Configuration</SectionH>
+          <Row k="Product" v={r.product.series}/>
+          <Row k="Type / SKU" v={r.sku}/>
+          <Row k="Pixel pitch" v={r.pitch+" mm"}/>
+          <Row k="Requested size" v={`${num(r.reqWmm/304.8,2)} × ${num(r.reqHmm/304.8,2)} ft`}/>
+          <Row k="Built size" v={`${num(r.builtWft,2)} × ${num(r.builtHft,2)} ft`} accent={mg}/>
+          <Row k="Cabinet" v={r.cab.label + (r.cabW!==r.cab.w?" · ↺ rotated":"")}/>
+          {r.mode==="curved"&&<Row k="Curve type" v={cv.curveType==="outer"?"Outer / Convex":"Inner / Concave"}/>}
+        </div>
+        <div>
+          <SectionH>Build Quantities</SectionH>
+          <Row k="Cabinets (W × H)" v={`${r.cabCountW} × ${r.cabCountH} = ${r.totalCabs}`} accent={mg}/>
+          <Row k="Modules / cabinet" v={`${r.modPerCabW} × ${r.modPerCabH} = ${r.modPerCab}`}/>
+          <Row k="Total modules" v={num(r.totalMods)}/>
+          <Row k="Pixel resolution" v={`${num(r.pxW)} × ${num(r.pxH)} px`}/>
+          <Row k="Total pixels" v={num(r.totalPixels)}/>
+          <Row k="Active area" v={`${num(r.areaSqft,1)} sqft`}/>
+          <Row k="Screen diagonal" v={`${num(r.diagInches,1)} in (${num(r.diagInches/12,2)} ft)`}/>
+          <Row k="Aspect ratio" v={r.aspectRatio}/>
+          <Row k="Pixel density" v={`${num(r.pixelDensitySqm)} px/sqm`}/>
+          <Row k="Min. viewing distance" v={`${num(r.minViewingDistanceM,1)} m`}/>
+          <Row k="Controller ports" v={String(r.ports)}/>
+        </div>
+      </div>
+
+      {/* Power & Weight — both modes */}
+      <div className="avoid-break" style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:24,marginTop:6}}>
+        <div>
+          <SectionH>Power</SectionH>
+          <Row k="Avg power consumption" v={`${num(r.avgPowerW)} W (${num(r.avgPowerW/1000,2)} kW)`}/>
+          <Row k="Max power consumption" v={`${num(r.maxPowerW)} W (${num(r.maxPowerW/1000,2)} kW)`}/>
+          <Row k="Recommended supply" v={`${num(r.recommendedSupplyKw)} kW`} accent={mg}/>
+          <Row k="AC input" v="100-240V 50/60 Hz"/>
+        </div>
+        <div>
+          <SectionH>Weight</SectionH>
+          <Row k="Per cabinet" v={`${num(r.perCabWeightKg,1)} kg`}/>
+          <Row k="Screen weight (cabinets)" v={`${num(r.screenWeightKg)} kg`}/>
+          {r.curve && <Row k="Steel structure (est.)" v={`~${num(r.curve.steelWeightKg)} kg`}/>}
+          {r.curve && <Row k="Total system weight (est.)" v={`~${num(r.screenWeightKg + r.curve.steelWeightKg)} kg`} accent={mg}/>}
+        </div>
+      </div>
+
+      {/* Technical Specifications — both modes */}
+      {r.tech && r.tech.brightnessNits && (
+        <div className="avoid-break" style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:24,marginTop:6}}>
+          <div>
+            <SectionH>Technical Specifications</SectionH>
+            <Row k="Display technology" v={r.tech.displayTech || "—"}/>
+            <Row k="LED type" v={r.tech.ledType || "—"}/>
+            <Row k="Cabinet depth" v={r.tech.cabinetDepthMm ? `${r.tech.cabinetDepthMm} mm` : "—"}/>
+            <Row k="Module depth" v={r.tech.moduleDepthMm ? `${r.tech.moduleDepthMm} mm` : "—"}/>
+            <Row k="Ingress protection" v={r.tech.ipRating || "—"}/>
+            <Row k="Bit depth" v={r.tech.bitDepth ? `${r.tech.bitDepth}-bit (${num(Math.pow(2,r.tech.bitDepth))} levels)` : "—"}/>
+          </div>
+          <div>
+            <SectionH>Image & Reliability</SectionH>
+            <Row k="Max brightness" v={`${num(r.tech.brightnessNits)} nits`} accent={C.amber}/>
+            <Row k="Refresh rate" v={`${num(r.tech.refreshHz)} Hz`}/>
+            <Row k="Contrast (static / dynamic)" v={`${num(r.tech.contrastStatic)}:1 / ${num(r.tech.contrastDynamic)}:1`}/>
+            <Row k="Viewing angle" v={r.tech.viewingAngleDeg ? `≤ ${r.tech.viewingAngleDeg}°` : "—"}/>
+            <Row k="Colour gamut" v={`${num(r.tech.colorGamutSrgbPct)}% sRGB · ${num(r.tech.colorGamutRec2020Pct)}% Rec.2020`}/>
+            <Row k="Operating temperature" v={(r.tech.opTempMin!=null) ? `${r.tech.opTempMin}°C to ${r.tech.opTempMax}°C @ 10-90% RH` : "—"}/>
+            <Row k="Lifespan / Warranty" v={`~${num((r.tech.lifespanHours||0)/1000)}k hrs · ${r.tech.warrantyYears||"—"} yr warranty`}/>
+          </div>
+        </div>
+      )}
+
+      {/* curved geometry + structure */}
+      {r.mode==="curved"&&(
+        <div className="avoid-break" style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:24,marginTop:6}}>
+          <div>
+            <SectionH>Curve Geometry</SectionH>
+            <Row k="Radius (R)" v={`${num(cv.R/1000,2)} m`} accent={C.amber}/>
+            <Row k={cv.curveType==="outer"?"Sagitta · cantilever":"Sagitta · depth"} v={`${num(cv.sag,0)} mm`}/>
+            <Row k="Arc length" v={`${num(cv.arcLen,0)} mm`}/>
+            <Row k="Per-joint back gap" v={`${num(cv.gapPerJoint,1)} mm`} accent={verdictColor(cv.verdict)}/>
+            <Row k="Per-cabinet wedge" v={`${num(cv.cabAngleDeg,2)}°`}/>
+            <Row k="Curve verdict" v={cv.verdict} accent={verdictColor(cv.verdict)}/>
+          </div>
+          <div>
+            <SectionH>Structure & Mounting</SectionH>
+            <Row k="Mounting strategy" v={cv.structuralStrategy}/>
+            <Row k="Cantilever @ centre" v={`${num(cv.cantileverAtCenter,0)} mm`}/>
+            <Row k="Wall contact" v={cv.wallContactAtEnds}/>
+            <Row k="Vertical posts" v={`${cv.vertPosts}`}/>
+            <Row k="Horizontal rails" v={`${cv.horizRails}`}/>
+          </div>
+        </div>
+      )}
+
+      {/* quote */}
+      <SectionH>Quotation</SectionH>
+      <div className="avoid-break"><PriceTable r={r} paper/></div>
+
+      {/* notes */}
+      <div className="avoid-break" style={{marginTop:16,fontSize:10.5,lineHeight:1.6,color:muted}}>
+        <strong style={{color:ink}}>Notes:</strong> ACP, scaffolding, H-frame priced as actual. Quote valid 7 working days.
+        All prices inclusive of GST as itemised. Transportation, fabrication & electrical work charged additional unless specified.
+        {r.mode==="curved"&&<span style={{display:"block",marginTop:6,fontStyle:"italic",color:C.wall}}>Pre-engineering estimates for scoping only. Final structural design, anchor specification and wind-load verification must be stamped by a licensed structural engineer per local code (IS 875 Part 3 for wind in India).</span>}
+      </div>
+      <div style={{marginTop:16,paddingTop:10,borderTop:"1px solid #E4DCCB",fontSize:9.5,color:muted,textAlign:"center",letterSpacing:.5,lineHeight:1.6}}>
+        VISUAL RHYME PVT. LTD. · 913, Avirat Silver Radiance 4, SG Hwy, Gota, Ahmedabad-382481 · visualrhyme.digital<br/>
+        © {new Date().getFullYear()} Visual Rhyme Pvt. Ltd. · Kathan Mehta · All rights reserved. This is a tool and can contain errors — verify before ordering.
+      </div>
+      <div style={{marginTop:6,textAlign:"right",fontSize:9,color:muted,opacity:.7,letterSpacing:.4,fontStyle:"italic"}}>
+        Powered by Microtronix Solution
+      </div>
+    </div>
+  );
+}
+
+/* ───────── assistant (scripted, drives the tool, captures leads) ───────── */
+// Paste your Google Apps Script Web App URL here to send leads to your Sheet.
+// Leave "" and leads still save to the browser (localStorage "pqm_leads") as backup.
+const SHEET_ENDPOINT = "https://script.google.com/macros/s/AKfycbztZ4cfIfkJnBxhgqvlWZ0mxyXjMFNrAEFVDD3cAdxcomEP3ecvxP0oP47lbZCo7Tei8g/exec";
+
+const KB = {
+  root: { bot: "Hi! I'm the Visual Rhyme assistant 👋 I can help you size and price an LED screen. What do you need?",
+    chips: [
+      { t: "Quote a flat screen", go: "flat" },
+      { t: "Quote a curved screen", go: "curved" },
+      { t: "Which pixel pitch?", go: "pitch" },
+      { t: "Export a PDF quote", go: "export" },
+      { t: "Get a callback", go: "lead_name" },
+    ] },
+  flat: { bot: "Flat screen it is — I've switched the tool to Flat mode. Pick your product and pixel pitch on the left, then enter width × height in feet. Want me to drop in an example to see how it works?",
+    act: (a)=>a.setMode("flat"),
+    chips: [ { t:"Load a 12×8 ft example", act:(a)=>a.setSize(12,8) }, { t:"Which pitch?", go:"pitch" }, { t:"Explain the price", go:"pricing" }, { t:"Back", go:"root" } ] },
+  curved: { bot: "Curved mode is on. Set your width × height, then choose the curve under section 3 — Preset (easiest), Sagitta (bulge depth), or Radius. The tool shows a live plan/section drawing and a build verdict. Want an example?",
+    act: (a)=>a.setMode("curved"),
+    chips: [ { t:"Load a 16×8 ft example", act:(a)=>a.setSize(16,8) }, { t:"What's 'sagitta'?", go:"sagitta" }, { t:"Explain the price", go:"pricing" }, { t:"Back", go:"root" } ] },
+  sagitta: { bot: "Sagitta = how far the screen bulges from a straight line across its ends (the chord). Bigger sagitta = tighter curve. If you only know the bend, use Sagitta mode; if you know the curve radius, use Radius; otherwise pick a Preset.",
+    chips: [ { t:"Show curved tool", go:"curved" }, { t:"Back", go:"root" } ] },
+  pitch: { bot: "Pixel pitch is the gap between LEDs in mm — smaller pitch = sharper image = higher cost. Rule of thumb: minimum comfortable viewing distance ≈ pitch in metres (P4 ≈ 4 m, P2.5 ≈ 2.5 m). Outdoor/far → P4–P6.67; indoor/close → P1.5–P2.5; premium close-up → MicroLED sub-1.5.",
+    chips: [ { t:"Quote flat", go:"flat" }, { t:"Quote curved", go:"curved" }, { t:"Back", go:"root" } ] },
+  pricing: { bot: "Every quote breaks down as: LED display (₹/sqft × area) + video controller (by ports) + installation (₹/sqft) + GST — and for curved, a curve-fabrication line on top. The Grand Total is fully GST-inclusive. Hit Export PDF for an itemised sheet.",
+    chips: [ { t:"Export a PDF", go:"export" }, { t:"Get a callback", go:"lead_name" }, { t:"Back", go:"root" } ] },
+  export: { bot: "Top-right → ⤓ Export PDF opens your browser's print dialog; choose 'Save as PDF'. You get a clean A4 sheet with the drawings, specs and itemised quote. I've highlighted the button for you.",
+    act: (a)=>a.flashExport(),
+    chips: [ { t:"Explain the price", go:"pricing" }, { t:"Get a callback", go:"lead_name" }, { t:"Back", go:"root" } ] },
+  lead_name: { bot: "Happy to arrange a callback from the Visual Rhyme team. What's your name?", ask: "name" },
+  lead_phone: { bot: "Thanks! And the best phone number to reach you?", ask: "phone" },
+  lead_done: { bot: "Got it — our team will reach out shortly. Anything else I can help with?",
+    chips: [ { t:"Quote flat", go:"flat" }, { t:"Quote curved", go:"curved" }, { t:"That's all", go:"root" } ] },
+};
+
+/* ───────── inline unit converter (sits under Size in Inputs panel) ───────── */
+const UNIT_TO_MM = { mm:1, cm:10, m:1000, ft:304.8, inch:25.4 };
+function UnitConverter(){
+  const [value,setValue]=useState("");
+  const [from,setFrom]=useState("ft");
+  const v = parseFloat(value);
+  const inMm = isFinite(v) ? v * UNIT_TO_MM[from] : 0;
+  const fmt = (n,d)=> isFinite(n) ? Number(n).toLocaleString(undefined,{maximumFractionDigits:d}) : "—";
+  const rows = [
+    { u:"mm",   v: inMm,                  d: 1 },
+    { u:"cm",   v: inMm / 10,             d: 2 },
+    { u:"m",    v: inMm / 1000,           d: 3 },
+    { u:"ft",   v: inMm / 304.8,          d: 3 },
+    { u:"inch", v: inMm / 25.4,           d: 2 },
+  ].filter(r => r.u !== from);
+  return (
+    <div style={{marginTop:14,padding:12,background:C.navy,border:`1px solid ${C.line}`,borderRadius:10}}>
+      <div style={{fontSize:10,letterSpacing:1.6,textTransform:"uppercase",color:C.lavender,fontWeight:600,marginBottom:8,fontFamily:MN,opacity:.75}}>📐 Unit Converter</div>
+      <div style={{display:"flex",gap:6,marginBottom:8}}>
+        <input type="number" value={value} onChange={e=>setValue(e.target.value)} step="any" placeholder="value"
+          style={{flex:1,background:C.navyLight,border:`1px solid ${C.line}`,color:C.cream,padding:"8px 10px",borderRadius:6,fontFamily:MO,fontSize:13,outline:"none",minWidth:0}}/>
+        <select value={from} onChange={e=>setFrom(e.target.value)}
+          style={{background:C.navyLight,border:`1px solid ${C.line}`,color:C.cream,padding:"8px 6px",borderRadius:6,fontFamily:MO,fontSize:12,cursor:"pointer"}}>
+          {Object.keys(UNIT_TO_MM).map(u=><option key={u} value={u} style={{background:C.navyLight}}>{u}</option>)}
+        </select>
+      </div>
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"3px 12px"}}>
+        {rows.map(r=>(
+          <div key={r.u} style={{display:"flex",justifyContent:"space-between",alignItems:"baseline"}}>
+            <span style={{fontSize:10,textTransform:"uppercase",letterSpacing:1.2,color:C.lavender,opacity:.55,fontWeight:600}}>{r.u}</span>
+            <span style={{fontFamily:MO,fontSize:12,color:value!==""?C.cream:C.lavender,opacity:value!==""?1:.4,fontWeight:600}}>{value!==""?fmt(r.v,r.d):"—"}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function Assistant({ api }){
+  const [open,setOpen]=useState(()=> typeof location!=="undefined" && new URLSearchParams(location.search).get("chat")==="1");
+  const [node,setNode]=useState("root");
+  const [msgs,setMsgs]=useState([{ from:"bot", text:KB.root.bot }]);
+  const [draft,setDraft]=useState("");
+  const [lead,setLead]=useState({});
+  const asking = KB[node].ask;
+  const endRef = useRef(null);
+  useEffect(()=>{ if(endRef.current) endRef.current.scrollTop=endRef.current.scrollHeight; },[msgs,open]);
+
+  const push = (from,text)=> setMsgs(m=>[...m,{from,text}]);
+  const goNode = (id)=>{
+    const n=KB[id]; if(!n) return;
+    if(n.act) try{ n.act(api); }catch{}
+    setNode(id); push("bot", typeof n.bot==="function"?n.bot(api):n.bot);
+  };
+  const tapChip = (c)=>{
+    push("user", c.t);
+    if(c.act) try{ c.act(api); }catch{}
+    if(c.go) setTimeout(()=>goNode(c.go),150);
+    else if(c.act) setTimeout(()=>setMsgs(m=>[...m,{from:"bot",text:"Done ✓ — anything else?"}]),150);
+  };
+  const submitText = ()=>{
+    const v=draft.trim(); if(!v) return;
+    push("user", v); setDraft("");
+    if(asking==="name"){ setLead(l=>({...l,name:v})); setTimeout(()=>goNode("lead_phone"),150); }
+    else if(asking==="phone"){
+      const digits=v.replace(/\D/g,"");
+      if(digits.length<10){ setTimeout(()=>push("bot","That doesn't look like a full number — please enter at least 10 digits."),150); return; }
+      const record={ ...lead, phone:v, context:api.context(), at:new Date().toISOString() };
+      saveLead(record); setLead(record);
+      setTimeout(()=>goNode("lead_done"),150);
+    }
+  };
+  const saveLead = (rec)=>{
+    try{ const k="pqm_leads"; const arr=JSON.parse(localStorage.getItem(k)||"[]"); arr.push(rec); localStorage.setItem(k,JSON.stringify(arr)); }catch{}
+    if(SHEET_ENDPOINT){
+      try{ fetch(SHEET_ENDPOINT,{ method:"POST", mode:"no-cors", headers:{ "Content-Type":"text/plain;charset=utf-8" }, body:JSON.stringify(rec) }); }catch{}
+    }
+  };
+
+  const chips = !asking ? (KB[node].chips||[]) : [];
+  return (
+    <div style={{position:"fixed",right:18,bottom:18,zIndex:200,fontFamily:MN}}>
+      {open && (
+        <div style={{width:340,height:480,background:C.navyLight,border:`1px solid ${C.line}`,borderRadius:16,boxShadow:"0 18px 60px rgba(0,0,0,.5)",display:"flex",flexDirection:"column",overflow:"hidden",marginBottom:12}}>
+          <div style={{display:"flex",alignItems:"center",gap:10,padding:"12px 14px",borderBottom:`1px solid ${C.line}`,background:`linear-gradient(90deg, ${C.purple}, ${C.magenta})`}}>
+            <VRLogo size={26}/>
+            <div style={{flex:1}}><div style={{fontWeight:700,fontSize:14,color:C.cream}}>Visual Rhyme Assistant</div><div style={{fontSize:10,color:"rgba(255,255,255,.7)"}}>here to help you quote</div></div>
+            <button onClick={()=>setOpen(false)} style={{background:"transparent",border:"none",color:C.cream,fontSize:20,cursor:"pointer",lineHeight:1}}>×</button>
+          </div>
+          <div ref={endRef} className="vr-scroll" style={{flex:1,overflowY:"auto",padding:14,display:"flex",flexDirection:"column",gap:10}}>
+            {msgs.map((m,i)=>(
+              <div key={i} style={{alignSelf:m.from==="bot"?"flex-start":"flex-end",maxWidth:"82%",background:m.from==="bot"?C.navy:C.purple,color:C.cream,padding:"9px 12px",borderRadius:12,fontSize:13,lineHeight:1.45,border:m.from==="bot"?`1px solid ${C.line}`:"none"}}>{m.text}</div>
+            ))}
+            {chips.length>0 && (
+              <div style={{display:"flex",flexWrap:"wrap",gap:6,marginTop:2}}>
+                {chips.map((c,i)=>(<button key={i} onClick={()=>tapChip(c)} style={{background:"transparent",border:`1px solid ${C.magenta}`,color:C.lavender,borderRadius:999,padding:"6px 11px",fontSize:12,cursor:"pointer"}}>{c.t}</button>))}
+              </div>
+            )}
+          </div>
+          {asking && (
+            <div style={{display:"flex",gap:8,padding:"10px 12px",borderTop:`1px solid ${C.line}`}}>
+              <input value={draft} onChange={e=>setDraft(e.target.value)} onKeyDown={e=>{if(e.key==="Enter")submitText();}} placeholder={asking==="phone"?"e.g. +91 98XXXXXXXX":"Type your answer…"} autoFocus
+                style={{flex:1,background:C.navy,border:`1px solid ${C.line}`,color:C.cream,borderRadius:8,padding:"9px 11px",fontFamily:MN,fontSize:13,outline:"none"}}/>
+              <button onClick={submitText} style={{background:C.magenta,border:"none",color:C.cream,borderRadius:8,padding:"0 14px",fontWeight:700,cursor:"pointer"}}>Send</button>
+            </div>
+          )}
+        </div>
+      )}
+      <button onClick={()=>setOpen(o=>!o)} aria-label="Open assistant"
+        style={{width:58,height:58,borderRadius:"50%",border:"none",cursor:"pointer",background:`linear-gradient(135deg, ${C.purple}, ${C.magenta})`,boxShadow:"0 8px 28px rgba(157,32,214,.45)",display:"flex",alignItems:"center",justifyContent:"center",marginLeft:"auto"}}>
+        <span style={{fontSize:24}}>{open?"✕":"💬"}</span>
+      </button>
+    </div>
+  );
+}
+
+/* ───────── main app ───────── */
+const Q = (typeof location!=="undefined") ? new URLSearchParams(location.search) : new URLSearchParams();
+const qDef = (k,d)=> Q.get(k)!==null ? Q.get(k) : d;
+
+/* remembered session (last-used inputs) + policy acceptance */
+const POLICY_VERSION = "1";
+let SAVED = {};
+try { SAVED = JSON.parse(localStorage.getItem("pqm_session") || "{}"); } catch {}
+const sDef = (k,d)=> SAVED[k]!==undefined ? SAVED[k] : d;
+
+/* ───────── usage-policy gate (must accept to enter) ───────── */
+function Gate({ onAgree }){
+  const [checked,setChecked]=useState(false);
+  const bullet = { display:"flex", gap:8, marginBottom:8, fontSize:13, lineHeight:1.5, color:C.cream };
+  const dot = { color:C.magenta, fontWeight:700, flexShrink:0 };
+  return (
+    <div style={{position:"fixed",inset:0,zIndex:1000,background:"rgba(6,0,26,.92)",backdropFilter:"blur(6px)",display:"flex",alignItems:"center",justifyContent:"center",padding:18,fontFamily:MN}}>
+      <div className="vr-scroll" style={{maxWidth:520,width:"100%",maxHeight:"92vh",overflowY:"auto",background:C.navyLight,border:`1px solid ${C.line}`,borderRadius:18,boxShadow:"0 24px 80px rgba(0,0,0,.6)",padding:"26px 26px 22px"}}>
+        <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:14}}>
+          <VRLogo size={40}/>
+          <div>
+            <div style={{fontSize:10,letterSpacing:3,color:C.magenta,fontWeight:700,textTransform:"uppercase"}}>Visual Rhyme</div>
+            <div style={{fontFamily:FR,fontSize:24,fontWeight:600,lineHeight:1,marginTop:2}}>Pixel Quote <em style={{color:C.lavender}}>Max</em></div>
+          </div>
+        </div>
+
+        <div style={{background:`${C.amber}1A`,border:`1px solid ${C.amber}`,borderRadius:10,padding:"11px 13px",marginBottom:16,fontSize:13,lineHeight:1.5,color:C.cream}}>
+          ⚠ <strong>This is a tool — it can make mistakes.</strong> Just like an AI, it produces estimates that may contain errors. Always review and verify every quote, dimension and spec before sharing it or placing an order.
+        </div>
+
+        <div style={{fontSize:10,letterSpacing:2,color:C.magenta,textTransform:"uppercase",fontWeight:700,marginBottom:10}}>Usage Policy</div>
+        <div style={bullet}><span style={dot}>•</span><span>For estimation and scoping only. Prices are indicative and subject to confirmation by Visual Rhyme.</span></div>
+        <div style={bullet}><span style={dot}>•</span><span>Curved-screen structural, steel and power figures are pre-engineering estimates and must be verified by a licensed structural engineer (IS 875 Pt 3 for wind in India) before fabrication.</span></div>
+        <div style={bullet}><span style={dot}>•</span><span>Your inputs are stored locally in this browser to restore your session. If you request a callback, the name and phone you provide are sent to Visual Rhyme.</span></div>
+        <div style={bullet}><span style={dot}>•</span><span>The tool, its calculations and outputs are the property of Visual Rhyme Pvt. Ltd. and may not be redistributed without permission.</span></div>
+
+        <label style={{display:"flex",gap:9,alignItems:"flex-start",margin:"16px 0 14px",cursor:"pointer",fontSize:13,color:C.lavender}}>
+          <input type="checkbox" checked={checked} onChange={e=>setChecked(e.target.checked)} style={{marginTop:2,accentColor:C.magenta,width:16,height:16,flexShrink:0}}/>
+          <span>I understand this tool can make errors and I agree to the usage policy above.</span>
+        </label>
+
+        <button onClick={onAgree} disabled={!checked}
+          style={{width:"100%",padding:"13px",borderRadius:12,border:"none",fontWeight:700,fontSize:14,letterSpacing:.6,textTransform:"uppercase",cursor:checked?"pointer":"not-allowed",color:C.cream,background:checked?`linear-gradient(135deg, ${C.purple}, ${C.magenta})`:C.line,opacity:checked?1:.6,transition:"opacity .2s"}}>
+          I Agree — Enter
+        </button>
+
+        <div style={{textAlign:"center",marginTop:14,fontSize:10.5,color:C.lavender,opacity:.6,lineHeight:1.5}}>
+          © {new Date().getFullYear()} Visual Rhyme Pvt. Ltd. · Kathan Mehta · All rights reserved.
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ───────── quote history panel ───────── */
+function HistoryPanel({ history, onOpen, onDelete, onClose }){
+  return (
+    <div onClick={onClose} style={{position:"fixed",inset:0,zIndex:300,background:"rgba(6,0,26,.75)",backdropFilter:"blur(4px)",display:"flex",justifyContent:"flex-end",fontFamily:MN}}>
+      <div onClick={e=>e.stopPropagation()} className="vr-scroll" style={{width:420,maxWidth:"94vw",height:"100%",overflowY:"auto",background:C.navyLight,borderLeft:`1px solid ${C.line}`,boxShadow:"-20px 0 60px rgba(0,0,0,.5)",padding:20}}>
+        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:4}}>
+          <h2 style={{fontFamily:FR,fontSize:21,margin:0}}>Quote History</h2>
+          <button onClick={onClose} style={{background:"transparent",border:"none",color:C.cream,fontSize:24,cursor:"pointer",lineHeight:1}}>×</button>
+        </div>
+        <div style={{fontSize:11,color:C.lavender,opacity:.7,marginBottom:16}}>Saved automatically each time you export a PDF. Stored in this browser.</div>
+        {history.length===0 && <div style={{color:C.lavender,opacity:.6,fontSize:13,padding:"30px 0",textAlign:"center"}}>No saved quotes yet.<br/>Export a quote and it'll appear here.</div>}
+        <div style={{display:"flex",flexDirection:"column",gap:10}}>
+          {history.map((h)=>(
+            <div key={h.ref+h.savedAt} style={{background:C.navy,border:`1px solid ${C.line}`,borderRadius:12,padding:"12px 14px"}}>
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"baseline",gap:8}}>
+                <span style={{fontFamily:MO,fontSize:12,color:C.lavender,fontWeight:600}}>{h.ref}</span>
+                <span style={{fontSize:10,color:C.lavender,opacity:.6}}>{h.date}</span>
+              </div>
+              <div style={{fontFamily:FR,fontSize:18,color:C.magenta,margin:"3px 0 2px"}}>{E.fmtINR(h.grandTotal)}</div>
+              <div style={{fontSize:11.5,color:C.cream,opacity:.85}}>
+                <span style={{textTransform:"uppercase",letterSpacing:1,color:h.mode==="curved"?C.amber:C.lavender,fontWeight:700,fontSize:10}}>{h.mode}</span> · {h.series} · {h.sizeFt}
+                {h.client?` · ${h.client}`:""}{h.project?` · ${h.project}`:""}
+              </div>
+              <div style={{display:"flex",gap:8,marginTop:10}}>
+                <button onClick={()=>onOpen(h)} style={{flex:1,background:`linear-gradient(135deg, ${C.purple}, ${C.magenta})`,border:"none",color:C.cream,borderRadius:8,padding:"7px 0",fontWeight:700,fontSize:12,cursor:"pointer"}}>Open</button>
+                <button onClick={()=>onDelete(h.ref)} style={{background:"transparent",border:`1px solid ${C.line}`,color:C.lavender,borderRadius:8,padding:"7px 12px",fontSize:12,cursor:"pointer"}}>Delete</button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ───────── comparison panel (up to 3 configs side by side) ───────── */
+function ComparePanel({ items, db, onLoad, onRemove, onClear, onClose }){
+  const rows = items.map((cfg)=>{ let r=null; try{ r=E.computeQuote({...cfg,widthFt:Number(cfg.widthFt)||0,heightFt:Number(cfg.heightFt)||0},db); }catch{} return { cfg, r }; });
+  const valid = rows.filter(x=>x.r);
+  const cheapest = valid.length>1 ? Math.min(...valid.map(x=>x.r.grandTotal)) : null;
+  const Line = ({k,v,accent,strong})=>(
+    <div style={{display:"flex",justifyContent:"space-between",gap:8,padding:"5px 0",borderBottom:`1px solid ${C.line}`,fontSize:12}}>
+      <span style={{color:C.lavender,opacity:.7}}>{k}</span>
+      <span style={{fontFamily:MO,fontWeight:strong?700:600,color:accent||C.cream,textAlign:"right"}}>{v}</span>
+    </div>
+  );
+  return (
+    <div onClick={onClose} style={{position:"fixed",inset:0,zIndex:300,background:"rgba(6,0,26,.8)",backdropFilter:"blur(4px)",display:"flex",alignItems:"center",justifyContent:"center",padding:18,fontFamily:MN}}>
+      <div onClick={e=>e.stopPropagation()} className="vr-scroll" style={{maxWidth:980,width:"100%",maxHeight:"92vh",overflow:"auto",background:C.navyLight,border:`1px solid ${C.line}`,borderRadius:18,boxShadow:"0 24px 80px rgba(0,0,0,.6)",padding:22}}>
+        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:4}}>
+          <h2 style={{fontFamily:FR,fontSize:22,margin:0}}>Compare Configurations</h2>
+          <button onClick={onClose} style={{background:"transparent",border:"none",color:C.cream,fontSize:24,cursor:"pointer",lineHeight:1}}>×</button>
+        </div>
+        <div style={{fontSize:11,color:C.lavender,opacity:.7,marginBottom:16}}>Up to 3 side by side. Lowest grand total is flagged. Add more with “＋ Add to comparison”.</div>
+        {items.length===0 && <div style={{color:C.lavender,opacity:.6,fontSize:13,padding:"30px 0",textAlign:"center"}}>Nothing to compare yet.<br/>Configure a quote and hit “＋ Add to comparison”.</div>}
+        <div style={{display:"flex",gap:14,alignItems:"stretch"}}>
+          {rows.map(({cfg,r},i)=>(
+            <div key={i} style={{flex:"1 1 0",minWidth:210,background:C.navy,border:`1px solid ${(cheapest!==null&&r&&r.grandTotal===cheapest)?C.green:C.line}`,borderRadius:12,padding:14,position:"relative"}}>
+              {(cheapest!==null&&r&&r.grandTotal===cheapest)&&<div style={{position:"absolute",top:-9,left:14,background:C.green,color:C.navy,fontSize:9,fontWeight:800,padding:"2px 8px",borderRadius:999,letterSpacing:1,textTransform:"uppercase"}}>Best value</div>}
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
+                <span style={{fontSize:9,fontWeight:800,letterSpacing:1,textTransform:"uppercase",color:cfg.mode==="curved"?C.amber:C.lavender}}>{cfg.mode}</span>
+                <button onClick={()=>onRemove(i)} title="Remove" style={{background:"transparent",border:"none",color:C.lavender,opacity:.6,fontSize:16,cursor:"pointer",lineHeight:1}}>×</button>
+              </div>
+              {r ? (<>
+                <div style={{fontFamily:FR,fontSize:22,color:C.magenta,marginBottom:8}}>{E.fmtINR(r.grandTotal)}</div>
+                <Line k="Product" v={r.product.series.split(" ").slice(-1)[0]}/>
+                <Line k="Pitch" v={"P"+r.pitch}/>
+                <Line k="Built" v={`${r.builtWft.toFixed(1)}×${r.builtHft.toFixed(1)}ft`}/>
+                <Line k="Area" v={`${r.areaSqft.toFixed(0)} sqft`}/>
+                <Line k="Resolution" v={`${r.pxW}×${r.pxH}`}/>
+                <Line k="Cabinets" v={`${r.totalCabs}`}/>
+                <Line k="Ports" v={`${r.ports}`}/>
+                {r.curve && <Line k="Curve" v={r.curve.verdict} accent={verdictColor(r.curve.verdict)}/>}
+                <Line k="Subtotal" v={E.fmtINR(r.subtotal)}/>
+                <Line k="GST" v={E.fmtINR(r.totalGst)}/>
+                <Line k="Grand Total" v={E.fmtINR(r.grandTotal)} accent={C.magenta} strong/>
+                <button onClick={()=>onLoad(cfg)} style={{width:"100%",marginTop:12,background:`linear-gradient(135deg, ${C.purple}, ${C.magenta})`,border:"none",color:C.cream,borderRadius:8,padding:"8px 0",fontWeight:700,fontSize:12,cursor:"pointer"}}>Load &amp; edit</button>
+              </>) : <div style={{color:C.red,fontSize:12,padding:"20px 0"}}>Invalid config</div>}
+            </div>
+          ))}
+        </div>
+        {items.length>0 && <button onClick={onClear} style={{marginTop:16,background:"transparent",border:`1px solid ${C.line}`,color:C.lavender,borderRadius:8,padding:"7px 14px",fontSize:12,cursor:"pointer"}}>Clear all</button>}
+      </div>
+    </div>
+  );
+}
+
+function App(){
+  // Inject the bundled stylesheet once on mount.
+  useEffect(()=>{
+    const id = "pqm-style"; if (document.getElementById(id)) return;
+    const tag = document.createElement("style"); tag.id = id; tag.textContent = STYLE_CSS;
+    document.head.appendChild(tag);
+    const f = document.createElement("link");
+    f.rel = "stylesheet";
+    f.href = "https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Manrope:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap";
+    document.head.appendChild(f);
+  },[]);
+
+  const [db,setDb]=useState(null);
+  const [dbErr,setDbErr]=useState("");
+  const [agreed,setAgreed]=useState(()=>{ try{ return localStorage.getItem("pqm_agreed")===POLICY_VERSION; }catch{ return false; } });
+  const [mode,setMode]=useState(qDef("mode",sDef("mode","flat"))==="curved"?"curved":"flat");
+  const [productId,setProductId]=useState(qDef("product",sDef("product","outdoor")));
+  const [pitch,setPitch]=useState(parseFloat(qDef("p",sDef("pitch",4)))||4);
+  const [cabIndex,setCabIndex]=useState(parseInt(qDef("cab",sDef("cabIndex",0)))||0);
+  const [widthFt,setWidthFt]=useState(parseFloat(qDef("w",sDef("widthFt",12)))||12);
+  const [heightFt,setHeightFt]=useState(parseFloat(qDef("h",sDef("heightFt",8)))||8);
+  const [curveMode,setCurveMode]=useState(qDef("cm",sDef("curveMode","preset")));
+  const [preset,setPreset]=useState(qDef("pr",sDef("preset","signature")));
+  const [sagittaMm,setSagittaMm]=useState(parseFloat(qDef("sag",sDef("sagittaMm",457)))||457);
+  const [radiusMm,setRadiusMm]=useState(parseFloat(qDef("rad",sDef("radiusMm",8000)))||8000);
+  const [curveType,setCurveType]=useState(qDef("ct",sDef("curveType","outer")));
+  const [cabWeightKg,setCabWeightKg]=useState(parseFloat(qDef("cw",sDef("cabWeightKg",14)))||14);
+  const [stageTab,setStageTab]=useState("elevation");
+  const [project,setProject]=useState(qDef("proj",sDef("project","")));
+  const [client,setClient]=useState(qDef("cl",sDef("client","")));
+  const [exportFlash,setExportFlash]=useState(false);
+  const [orientation,setOrientation]=useState(qDef("o",sDef("orientation","native"))==="rotated"?"rotated":"native");
+  const [manualCab,setManualCab]=useState(qDef("mcab",sDef("manualCab",false))===true||qDef("mcab",sDef("manualCab","false"))==="true");
+  const [fitMode,setFitMode]=useState(qDef("ft",sDef("fitMode","optimal"))==="nearest"?"nearest":"optimal");
+  const [historyOpen,setHistoryOpen]=useState(false);
+  const [history,setHistory]=useState(()=>{ try{ return JSON.parse(localStorage.getItem("pqm_history")||"[]"); }catch{ return []; } });
+  const [compareSet,setCompareSet]=useState(()=>{ try{ return JSON.parse(localStorage.getItem("pqm_compare")||"[]"); }catch{ return []; } });
+  const [compareOpen,setCompareOpen]=useState(false);
+  const [linkCopied,setLinkCopied]=useState(false);
+
+  // remember last-used inputs to restore on return
+  useEffect(()=>{
+    try{ localStorage.setItem("pqm_session", JSON.stringify({ mode,product:productId,pitch,cabIndex,orientation,manualCab,fitMode,widthFt,heightFt,curveMode,preset,sagittaMm,radiusMm,curveType,cabWeightKg,project,client })); }catch{}
+  },[mode,productId,pitch,cabIndex,orientation,manualCab,fitMode,widthFt,heightFt,curveMode,preset,sagittaMm,radiusMm,curveType,cabWeightKg,project,client]);
+
+  const acceptPolicy = ()=>{ try{ localStorage.setItem("pqm_agreed",POLICY_VERSION); }catch{} setAgreed(true); };
+
+  // inline DB parsed once on mount (bundled XML, no fetch)
+  useEffect(()=>{
+    try{ setDb(E.parseDbXml(FALLBACK_DB_XML)); }
+    catch(e){ setDbErr("DB parse failed: "+e.message); }
+  },[]);
+
+  const product = db ? E.getProduct(db,productId) : null;
+
+  // keep pitch / cabinet / module valid when product changes
+  useEffect(()=>{
+    if(!product) return;
+    if(!product.pitches.find(p=>Math.abs(p.pp-pitch)<1e-9)) setPitch(product.pitches[0].pp);
+    if(cabIndex>product.cabinets.length-1) setCabIndex(0);
+  },[productId,db]);
+
+  const fits = useMemo(()=>{
+    if(!db||!product) return null;
+    try{ return E.findFits({ productId, widthFt:Number(widthFt)||0, heightFt:Number(heightFt)||0 }, db); }catch{ return null; }
+  },[db,product,productId,widthFt,heightFt]);
+
+  // auto-apply chosen fit to cabIndex+orientation (unless manual override)
+  useEffect(()=>{
+    if(manualCab || !fits) return;
+    const f = fits[fitMode] || fits.optimal;
+    if(!f) return;
+    if(f.cabIndex !== cabIndex) setCabIndex(f.cabIndex);
+    if(f.orientation !== orientation) setOrientation(f.orientation);
+  },[fits,fitMode,manualCab]);
+
+  const result = useMemo(()=>{
+    if(!db||!product) return null;
+    try{
+      return E.computeQuote({
+        mode,productId,pitch,
+        widthFt:Number(widthFt)||0,heightFt:Number(heightFt)||0,cabIndex,orientation,
+        curveMode,preset,sagittaMm:Number(sagittaMm)||0,radiusMm:Number(radiusMm)||0,
+        curveType,cabWeightKg:Number(cabWeightKg)||14,
+      },db);
+    }catch(e){return null;}
+  },[db,product,mode,productId,pitch,widthFt,heightFt,cabIndex,orientation,curveMode,preset,sagittaMm,radiusMm,curveType,cabWeightKg]);
+
+  const meta = useMemo(()=>({project,client,ref:E.quoteRef(),date:new Date().toLocaleDateString("en-IN",{day:"2-digit",month:"short",year:"numeric"})}),[project,client,result]);
+
+  const fitResults = useMemo(()=>{
+    if(!db||!product||!fits) return { nearest:null, optimal:null };
+    const opts = { mode, productId, pitch, widthFt:Number(widthFt)||0, heightFt:Number(heightFt)||0, curveMode, preset, sagittaMm:Number(sagittaMm)||0, radiusMm:Number(radiusMm)||0, curveType, cabWeightKg:Number(cabWeightKg)||14 };
+    const safe = (f)=>{ if(!f) return null; try{ return E.computeQuote({...opts,cabIndex:f.cabIndex,orientation:f.orientation},db); }catch{ return null; } };
+    return { nearest: safe(fits.nearest), optimal: safe(fits.optimal) };
+  },[db,product,fits,mode,pitch,widthFt,heightFt,curveMode,preset,sagittaMm,radiusMm,curveType,cabWeightKg]);
+
+  // usage-policy gate — must accept to enter (QC/print contexts bypass)
+  if(!agreed && Q.get("forceprint")!=="1" && Q.get("sheet")!=="1") return <Gate onAgree={acceptPolicy}/>;
+
+  if(!db) return <div style={{padding:40,fontFamily:MN,color:C.lavender}}>{dbErr&&dbErr!=="offline"?("⚠ "+dbErr):"Loading product database…"}</div>;
+  if(!result) return <div style={{padding:40,color:C.red}}>Enter a valid size to compute.</div>;
+
+  // on-screen A4 preview of the print/PDF sheet — for QC and quick visual check
+  if(Q.get("sheet")==="1"){
+    return <div style={{background:"#9a9a9a",minHeight:"100vh",padding:24}}>
+      <div style={{maxWidth:794,margin:"0 auto",background:"#fff",padding:"13mm",boxShadow:"0 10px 40px rgba(0,0,0,.4)"}}>
+        <PrintSheet r={result} meta={meta} preview/>
+      </div>
+    </div>;
+  }
+  const cv=result.curve;
+  const valid = (Number(widthFt)>0 && Number(heightFt)>0);
+
+  const stageTabs = mode==="curved" ? [{k:"plan",l:"Plan"},{k:"elevation",l:"Elevation"},{k:"section",l:"Section"}] : [{k:"elevation",l:"Elevation"}];
+  const presets=[{key:"subtle",l:"Subtle",d:"R = 5× width"},{key:"signature",l:"Signature",d:"R = 2.5× width"},{key:"wrap",l:"Wrap",d:"R = 1.3× width"},{key:"cylinder",l:"Cylinder",d:"R = 0.8× width"}];
+
+  const assistantApi = {
+    setMode:(m)=>{ setMode(m); setStageTab(m==="curved"?"plan":"elevation"); },
+    setSize:(w,h)=>{ setWidthFt(w); setHeightFt(h); },
+    flashExport:()=>{ setExportFlash(true); setTimeout(()=>setExportFlash(false),2800); },
+    context:()=>({ mode, product:result.product.series, pitch:result.pitch, sizeFt:`${widthFt}×${heightFt}`, grandTotal:result.grandTotal, ref:meta.ref }),
+  };
+
+  // ----- quote history (saved on Export) -----
+  const saveHistory = (arr)=>{ setHistory(arr); try{ localStorage.setItem("pqm_history",JSON.stringify(arr)); }catch{} };
+  const recordQuote = ()=>{
+    const rec={ ref:meta.ref, date:meta.date, savedAt:new Date().toISOString(),
+      series:result.product.series, sizeFt:`${result.builtWft.toFixed(1)}×${result.builtHft.toFixed(1)} ft`,
+      grandTotal:result.grandTotal,
+      mode,productId,pitch,cabIndex,orientation,widthFt,heightFt,curveMode,preset,sagittaMm,radiusMm,curveType,cabWeightKg,project,client };
+    saveHistory([rec, ...history.filter(h=>h.ref!==rec.ref)].slice(0,50));
+  };
+  const openQuote = (h)=>{
+    setManualCab(true); // restoring exact config — disable auto-pick
+    setMode(h.mode); setProductId(h.productId); setPitch(h.pitch); setCabIndex(h.cabIndex);
+    setOrientation(h.orientation||"native");
+    setWidthFt(h.widthFt); setHeightFt(h.heightFt); setCurveMode(h.curveMode); setPreset(h.preset);
+    setSagittaMm(h.sagittaMm); setRadiusMm(h.radiusMm); setCurveType(h.curveType); setCabWeightKg(h.cabWeightKg);
+    setProject(h.project||""); setClient(h.client||""); setStageTab(h.mode==="curved"?"plan":"elevation");
+    setHistoryOpen(false);
+  };
+  const deleteQuote = (ref)=> saveHistory(history.filter(h=>h.ref!==ref));
+
+  // ----- comparison set -----
+  const saveCompare = (arr)=>{ setCompareSet(arr); try{ localStorage.setItem("pqm_compare",JSON.stringify(arr)); }catch{} };
+  const addToCompare = ()=>{ saveCompare([...compareSet,{ mode,productId,pitch,cabIndex,orientation,widthFt,heightFt,curveMode,preset,sagittaMm,radiusMm,curveType,cabWeightKg,project,client }].slice(-3)); setCompareOpen(true); };
+  const removeCompare = (i)=> saveCompare(compareSet.filter((_,j)=>j!==i));
+
+  // ----- share helpers -----
+  const buildShareLink = ()=>{
+    const p = new URLSearchParams({
+      mode, product:productId, w:widthFt, h:heightFt, p:pitch, cab:cabIndex, o:orientation, mcab:manualCab, ft:fitMode,
+      cm:curveMode, pr:preset, sag:sagittaMm, rad:radiusMm, ct:curveType, cw:cabWeightKg,
+    });
+    if(project) p.set("proj",project);
+    if(client)  p.set("cl",client);
+    return location.origin + location.pathname + "?" + p.toString();
+  };
+  const copyLink = ()=>{
+    const url = buildShareLink();
+    const done = ()=>{ setLinkCopied(true); setTimeout(()=>setLinkCopied(false),1800); };
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(url).then(done).catch(()=>window.prompt("Copy this link:",url));
+    } else { window.prompt("Copy this link:", url); }
+  };
+  const shareWhatsApp = ()=>{
+    const r = result, link = buildShareLink();
+    const txt = `*Pixel Quote Max — ${meta.ref}*%0A${meta.date}` +
+      `%0A${mode==="curved"?"Curved":"Flat"} · ${r.product.series} · P${r.pitch}` +
+      `%0ASize: ${r.builtWft.toFixed(2)}×${r.builtHft.toFixed(2)} ft (${r.areaSqft.toFixed(0)} sqft)` +
+      `%0AResolution: ${r.pxW}×${r.pxH}px` +
+      `%0A*Grand Total: ${E.fmtINR(r.grandTotal).replace("₹","Rs.")}* (incl. GST)` +
+      `%0A%0AConfigure / share: ${encodeURIComponent(link)}` +
+      `%0A%0A— Visual Rhyme Pvt. Ltd.`;
+    window.open("https://wa.me/?text="+txt,"_blank");
+  };
+
+  return (
+    <div className="pqm-root">
+    {Q.get("forceprint")==="1" && <style>{".vr-screen{display:none!important}.vr-print{display:block!important}"}</style>}
+    <div className="vr-screen" style={{minHeight:"100vh",background:C.navy}}>
+      {/* top bar */}
+      <div className="vr-sweep" style={{position:"sticky",top:0,zIndex:50,background:`linear-gradient(90deg, ${C.navy}EE 0%, ${C.navyLight}EE 50%, ${C.navy}EE 100%)`,backdropFilter:"blur(10px)",borderBottom:`1px solid ${C.line}`}}>
+        <div style={{maxWidth:1500,margin:"0 auto",padding:"12px 22px",display:"flex",alignItems:"center",gap:16,flexWrap:"wrap"}}>
+          <div style={{marginRight:"auto",display:"flex",alignItems:"center",gap:12}}>
+            <VRLogo size={36}/>
+            <div>
+              <div style={{fontSize:10,letterSpacing:3,color:C.magenta,fontWeight:700,textTransform:"uppercase"}}>Visual Rhyme</div>
+              <div style={{fontFamily:FR,fontSize:23,fontWeight:600,lineHeight:1,marginTop:2}}>Pixel Quote <em style={{color:C.lavender}}>Max</em></div>
+            </div>
+          </div>
+          <div style={{display:"flex",gap:8}}>
+            <button onClick={()=>{setMode("flat");setStageTab("elevation");}} style={headerBtn(mode==="flat")}>▭ Flat</button>
+            <button onClick={()=>{setMode("curved");setStageTab("plan");}} style={headerBtn(mode==="curved")}>◠ Curved</button>
+          </div>
+          <input value={project} onChange={e=>setProject(e.target.value)} placeholder="Project name"
+            style={{background:C.navyLight,border:`1px solid ${C.line}`,color:C.cream,padding:"9px 12px",fontFamily:MN,fontSize:13,borderRadius:8,outline:"none",width:160}}/>
+          <input value={client} onChange={e=>setClient(e.target.value)} placeholder="Client (optional)"
+            style={{background:C.navyLight,border:`1px solid ${C.line}`,color:C.cream,padding:"9px 12px",fontFamily:MN,fontSize:13,borderRadius:8,outline:"none",width:150}}/>
+          {compareSet.length>0 && <button onClick={()=>setCompareOpen(true)} style={headerBtn(false)}>⊞ Compare ({compareSet.length})</button>}
+          <button onClick={()=>setHistoryOpen(true)} style={headerBtn(false)}>🕘 History{history.length?` (${history.length})`:""}</button>
+          <button onClick={()=>{recordQuote();window.print();}} disabled={!valid} style={{...headerBtn(false),background:C.purple,borderColor:exportFlash?C.amber:C.purple,color:C.cream,opacity:valid?1:.5,boxShadow:exportFlash?`0 0 0 3px ${C.amber}, 0 0 22px ${C.amber}`:"none",transition:"box-shadow .3s, border-color .3s"}}>⤓ Export PDF</button>
+        </div>
+      </div>
+
+      <div style={{maxWidth:1500,margin:"0 auto",padding:22}}>
+        <div className="vr-cockpit">
+
+          {/* INPUTS */}
+          <div className="vr-sticky vr-scroll vr-rise vr-rise-1" style={{position:"sticky",top:80,maxHeight:"calc(100vh - 104px)",overflowY:"auto",paddingRight:4}}>
+            <Panel>
+              <h2 style={{fontFamily:FR,fontSize:19,margin:"0 0 2px"}}>Inputs</h2>
+              <div style={{fontSize:11,color:C.lavender,opacity:.7,marginBottom:16}}>Screen size in feet · cabinet/curve in mm</div>
+
+              <div style={{fontSize:10,letterSpacing:2,color:C.magenta,textTransform:"uppercase",fontWeight:700,marginBottom:10}}>1 · Product</div>
+              <Field label="Series">
+                <select value={productId} onChange={e=>{setProductId(e.target.value);}} style={{background:C.navy,border:`1px solid ${C.line}`,color:C.cream,padding:"10px 12px",fontFamily:MN,fontSize:13,borderRadius:6,width:"100%"}}>
+                  {db.products.map(p=><option key={p.id} value={p.id} style={{background:C.navyLight}}>{p.series} ({p.type})</option>)}
+                </select>
+              </Field>
+              <div style={{marginTop:12}}>
+                <Field label="Pixel pitch" unit="mm">
+                  <div style={{display:"flex",flexWrap:"wrap",gap:6}}>
+                    {product.pitches.map(p=><button key={p.pp} onClick={()=>setPitch(p.pp)} style={{padding:"7px 12px",background:pitch===p.pp?C.purple:C.navy,border:`1px solid ${pitch===p.pp?C.purple:C.line}`,borderRadius:8,color:C.cream,fontSize:11,fontWeight:700,cursor:"pointer",fontFamily:MO}}>P{p.pp}</button>)}
+                  </div>
+                </Field>
+              </div>
+              <div style={{marginTop:12}}>
+                <Field label="Cabinet" hint={manualCab?"manual override":"auto-picked best fit"}>
+                  {!manualCab ? (
+                    <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"10px 12px",background:C.navy,border:`1px solid ${C.line}`,borderRadius:8}}>
+                      <div>
+                        <span style={{color:C.green,fontWeight:700,letterSpacing:1,fontSize:10,marginRight:8}}>AUTO</span>
+                        <span style={{fontFamily:MO,fontSize:13,color:C.cream}}>{result.cabW}×{result.cabH}mm</span>
+                        {orientation==="rotated" && <span style={{marginLeft:6,fontSize:9,color:C.amber,fontWeight:700,letterSpacing:1}}>↺ ROT</span>}
+                      </div>
+                      <button onClick={()=>setManualCab(true)} style={{fontSize:10,padding:"4px 10px",background:"transparent",border:`1px solid ${C.line}`,color:C.lavender,borderRadius:6,cursor:"pointer"}}>Manual</button>
+                    </div>
+                  ) : (<>
+                    <div style={{display:"flex",flexWrap:"wrap",gap:6}}>
+                      {product.cabinets.map((c,i)=><button key={i} onClick={()=>{setCabIndex(i);setOrientation("native");}} style={{padding:"7px 11px",background:cabIndex===i?C.purple:C.navy,border:`1px solid ${cabIndex===i?C.purple:C.line}`,borderRadius:8,color:C.cream,fontSize:10,fontWeight:600,cursor:"pointer",fontFamily:MO}}>{c.label}</button>)}
+                    </div>
+                    {(()=>{ const cur=product.cabinets[cabIndex]; if(!cur||cur.w===cur.h) return null; return (
+                      <div style={{display:"flex",gap:6,marginTop:8}}>
+                        <button onClick={()=>setOrientation("native")} style={{flex:1,padding:"6px 10px",background:orientation==="native"?C.purple:C.navy,border:`1px solid ${orientation==="native"?C.purple:C.line}`,borderRadius:8,color:C.cream,fontSize:10,fontWeight:600,cursor:"pointer",fontFamily:MO}}>Native {cur.w}×{cur.h}</button>
+                        <button onClick={()=>setOrientation("rotated")} style={{flex:1,padding:"6px 10px",background:orientation==="rotated"?C.purple:C.navy,border:`1px solid ${orientation==="rotated"?C.purple:C.line}`,borderRadius:8,color:C.cream,fontSize:10,fontWeight:600,cursor:"pointer",fontFamily:MO}}>↺ Rotated {cur.h}×{cur.w}</button>
+                      </div>
+                    );})()}
+                    <button onClick={()=>setManualCab(false)} style={{marginTop:8,fontSize:10,padding:"4px 10px",background:"transparent",border:`1px solid ${C.green}`,color:C.green,borderRadius:6,cursor:"pointer"}}>← Back to Auto</button>
+                  </>)}
+                </Field>
+              </div>
+
+              <div style={{fontSize:10,letterSpacing:2,color:C.magenta,textTransform:"uppercase",fontWeight:700,margin:"22px 0 10px"}}>2 · Screen Size</div>
+              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
+                <Field label="Width" unit="ft" hint={`${num(Number(widthFt)*304.8,0)} mm`}><NumInput value={widthFt} onChange={setWidthFt} min={0.5} max={200} step={0.5}/></Field>
+                <Field label="Height" unit="ft" hint={`${num(Number(heightFt)*304.8,0)} mm`}><NumInput value={heightFt} onChange={setHeightFt} min={0.5} max={100} step={0.5}/></Field>
+              </div>
+
+              <UnitConverter/>
+
+              {mode==="curved"&&(
+                <div>
+                  <div style={{fontSize:10,letterSpacing:2,color:C.magenta,textTransform:"uppercase",fontWeight:700,margin:"22px 0 10px"}}>3 · Curve</div>
+                  <div style={{display:"flex",gap:8,marginBottom:12}}>
+                    <button onClick={()=>setCurveType("outer")} style={headerBtn(curveType==="outer")}>Outer</button>
+                    <button onClick={()=>setCurveType("inner")} style={headerBtn(curveType==="inner")}>Inner</button>
+                  </div>
+                  <div style={{display:"flex",gap:8,marginBottom:12,flexWrap:"wrap"}}>
+                    <Pill active={curveMode==="preset"} onClick={()=>setCurveMode("preset")}>Preset</Pill>
+                    <Pill active={curveMode==="sagitta"} onClick={()=>setCurveMode("sagitta")}>Sagitta</Pill>
+                    <Pill active={curveMode==="radius"} onClick={()=>setCurveMode("radius")}>Radius</Pill>
+                  </div>
+                  {curveMode==="preset"&&(
+                    <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
+                      {presets.map(p=><button key={p.key} onClick={()=>setPreset(p.key)} style={{background:preset===p.key?C.purple:C.navy,color:preset===p.key?C.cream:C.lavender,border:`1px solid ${preset===p.key?C.purple:C.line}`,borderRadius:6,padding:"9px 8px",cursor:"pointer",textAlign:"left"}}><div style={{fontWeight:700,fontSize:13}}>{p.l}</div><div style={{fontSize:10,opacity:.7,fontFamily:MO,marginTop:2}}>{p.d}</div></button>)}
+                    </div>
+                  )}
+                  {curveMode==="sagitta"&&<Field label={`Sagitta (${curveType==="outer"?"bulge out":"depth in"})`} unit="mm" hint={`= ${num(Number(sagittaMm)/304.8,2)} ft`}><NumInput value={sagittaMm} onChange={setSagittaMm} min={10} step={5}/></Field>}
+                  {curveMode==="radius"&&<Field label="Radius" unit="mm" hint={`= ${num(Number(radiusMm)/1000,2)} m`}><NumInput value={radiusMm} onChange={setRadiusMm} min={500} step={50}/></Field>}
+                  <div style={{marginTop:12}}>
+                    <Field label="Cabinet weight" unit="kg" hint="outdoor diecast 12–18 kg"><NumInput value={cabWeightKg} onChange={setCabWeightKg} min={3} max={50} step={0.5}/></Field>
+                  </div>
+                </div>
+              )}
+            </Panel>
+          </div>
+
+          {/* STAGE */}
+          <div className="vr-rise vr-rise-2" style={{display:"flex",flexDirection:"column",gap:16,minWidth:0}}>
+
+            {/* Smart fit cards — nearest vs optimal */}
+            {fits && (fits.nearest || fits.optimal) && (() => {
+              const pickFit = (which, fit) => {
+                if (!fit) return;
+                setFitMode(which);
+                setManualCab(false);
+                setCabIndex(fit.cabIndex);
+                setOrientation(fit.orientation);
+              };
+              const card = (which, fit, fitR, label, sub, rec) => {
+                if (!fit) return (
+                  <div style={{flex:1,padding:14,background:C.navyLight,border:`1px dashed ${C.line}`,borderRadius:12,color:C.lavender,opacity:.5,fontSize:12,textAlign:"center"}}>
+                    No nearest-smaller fit<br/><span style={{fontSize:10}}>(input is below any single cabinet)</span>
+                  </div>
+                );
+                const active = !manualCab && fitMode === which;
+                return (
+                  <button onClick={()=>pickFit(which,fit)} style={{flex:1,textAlign:"left",cursor:"pointer",padding:14,background:active?`linear-gradient(135deg,${C.navy} 0%,${C.purple}33 100%)`:C.navy,border:`1.5px solid ${active?C.magenta:C.line}`,borderRadius:12,color:C.cream,position:"relative",transition:"border-color .2s, background .2s",fontFamily:MN}}>
+                    {rec && <div style={{position:"absolute",top:-8,left:12,background:C.magenta,color:C.cream,fontSize:8.5,fontWeight:800,padding:"2px 8px",borderRadius:999,letterSpacing:1,textTransform:"uppercase"}}>Recommended</div>}
+                    <div style={{fontSize:9,letterSpacing:2,color:C.lavender,opacity:.7,textTransform:"uppercase",fontWeight:700}}>{label}</div>
+                    <div style={{fontFamily:MO,fontSize:12,color:C.amber,marginTop:4,fontWeight:600}}>{fit.cabLabel} {fit.orientation==="rotated"?<span style={{color:C.magenta}}>↺ rot</span>:""}</div>
+                    <div style={{display:"flex",justifyContent:"space-between",alignItems:"baseline",marginTop:6}}>
+                      <span style={{fontFamily:MO,fontSize:11,color:C.cream}}>{fit.cabCountW}×{fit.cabCountH} = {fit.cabCountW*fit.cabCountH} cab</span>
+                      <span style={{fontFamily:MO,fontSize:11,color:C.lavender}}>{(fit.builtWmm/304.8).toFixed(2)}×{(fit.builtHmm/304.8).toFixed(2)}ft</span>
+                    </div>
+                    <div style={{fontSize:8.5,color:C.lavender,opacity:.6,marginTop:2}}>{sub}</div>
+                    {fitR && <div style={{fontFamily:FR,fontSize:17,color:active?C.magenta:C.cream,marginTop:8,fontWeight:600}}>{E.fmtINR(fitR.grandTotal)}</div>}
+                  </button>
+                );
+              };
+              return (
+                <div style={{display:"flex",gap:10,flexWrap:"wrap"}}>
+                  {card("nearest", fits.nearest, fitResults.nearest, "Nearest fit (≤ input)", `built smaller than ${(Number(widthFt)).toFixed(1)}×${(Number(heightFt)).toFixed(1)}ft`, false)}
+                  {card("optimal", fits.optimal, fitResults.optimal, "Optimal fit (≥ input)", `built ≥ your request`, true)}
+                </div>
+              );
+            })()}
+
+            <div style={{position:"relative",borderRadius:16,overflow:"hidden",border:`1px solid ${C.line}`,background:C.navyLight}}>
+              <div style={{position:"absolute",inset:0,background:`radial-gradient(circle at 50% 40%, ${C.magenta}22 0%, transparent 60%)`,pointerEvents:"none"}}/>
+              <div style={{position:"relative",display:"flex",gap:8,padding:"14px 16px 0",flexWrap:"wrap"}}>
+                {stageTabs.map(t=><button key={t.k} onClick={()=>setStageTab(t.k)} style={headerBtn(stageTab===t.k)}>{t.l}</button>)}
+                <div style={{marginLeft:"auto",alignSelf:"center",fontFamily:MO,fontSize:11,color:C.lavender,opacity:.7}}>{mode==="curved"?(curveType==="outer"?"OUTER · CONVEX":"INNER · CONCAVE"):"FLAT PANEL"}</div>
+              </div>
+              <div key={mode+"-"+stageTab} className="vr-fade" style={{position:"relative",padding:16}}>
+                {stageTab==="elevation"&&<ElevationDrawing wmm={result.builtWmm} hmm={result.builtHmm} cabCountW={result.cabCountW} cabCountH={result.cabCountH} modPerCabW={result.modPerCabW} modPerCabH={result.modPerCabH}/>}
+                {stageTab==="plan"&&cv&&<PlanDrawing chord={cv.chordMm} R={cv.R} sag={cv.sag} cabCountW={result.cabCountW} curveType={cv.curveType}/>}
+                {stageTab==="section"&&cv&&<div style={{maxWidth:380,margin:"0 auto"}}><SectionDrawing sag={cv.sag} curveType={cv.curveType}/></div>}
+              </div>
+            </div>
+
+            {mode==="curved"&&cv&&(
+              <div style={{background:`linear-gradient(90deg, ${verdictColor(cv.verdict)}22 0%, transparent 100%)`,border:`1px solid ${verdictColor(cv.verdict)}`,borderRadius:12,padding:16,display:"flex",gap:18,alignItems:"center",flexWrap:"wrap"}}>
+                <div style={{minWidth:110}}>
+                  <div style={{fontSize:11,letterSpacing:1.5,color:C.lavender,textTransform:"uppercase"}}>Curve Verdict</div>
+                  <div style={{fontFamily:FR,fontSize:26,fontWeight:600,color:verdictColor(cv.verdict),marginTop:2}}>{cv.verdict}</div>
+                </div>
+                <div style={{flex:1,minWidth:220,fontSize:13,lineHeight:1.5}}>
+                  <strong style={{color:verdictColor(cv.verdict)}}>Per-joint gap: {num(cv.gapPerJoint,1)} mm</strong> · Wedge: {num(cv.cabAngleDeg,2)}°<br/>
+                  <span style={{opacity:.85}}>{cv.advice}</span>
+                </div>
+              </div>
+            )}
+
+            {mode==="curved"&&cv&&(
+              <Panel accent={C.amber}>
+                <div style={{fontSize:10,letterSpacing:2,color:C.amber,textTransform:"uppercase",fontWeight:700,marginBottom:6}}>Mounting Strategy · {cv.curveType==="outer"?"Outer Curve":"Inner Curve"}</div>
+                <h3 style={{fontFamily:FR,fontSize:21,margin:"0 0 12px",fontWeight:500}}>{cv.structuralStrategy}</h3>
+                <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(130px,1fr))",gap:10}}>
+                  <div style={{padding:12,background:C.navy,borderRadius:6}}><div style={{fontSize:10,color:C.lavender,opacity:.7,letterSpacing:1.2,textTransform:"uppercase"}}>Cantilever @ centre</div><div style={{fontFamily:FR,fontSize:20,color:C.green,marginTop:4}}>{num(cv.cantileverAtCenter,0)} mm</div></div>
+                  <div style={{padding:12,background:C.navy,borderRadius:6}}><div style={{fontSize:10,color:C.lavender,opacity:.7,letterSpacing:1.2,textTransform:"uppercase"}}>Steel weight</div><div style={{fontFamily:FR,fontSize:20,color:C.cream,marginTop:4}}>~{num(cv.steelWeightKg,0)} kg</div></div>
+                  <div style={{padding:12,background:C.navy,borderRadius:6}}><div style={{fontSize:10,color:C.lavender,opacity:.7,letterSpacing:1.2,textTransform:"uppercase"}}>Recommended supply</div><div style={{fontFamily:FR,fontSize:20,color:C.magenta,marginTop:4}}>{num(cv.recommendedSupply)} kW</div></div>
+                </div>
+                <p style={{fontSize:11,lineHeight:1.5,color:C.amber,opacity:.7,marginTop:12,fontStyle:"italic",borderTop:`1px dashed ${C.line}`,paddingTop:10}}>
+                  Pre-engineering estimates for scoping only. Final structural design, anchor specification and wind-load verification must be stamped by a licensed structural engineer (IS 875 Part 3 for wind in India).
+                </p>
+              </Panel>
+            )}
+
+            {/* price card */}
+            <Panel>
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10,flexWrap:"wrap",gap:8}}>
+                <span style={{fontSize:10,letterSpacing:2,color:C.magenta,textTransform:"uppercase",fontWeight:700}}>Quotation</span>
+                <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
+                  <button onClick={copyLink} style={{background:"transparent",border:`1px solid ${linkCopied?C.green:C.line}`,color:linkCopied?C.green:C.lavender,borderRadius:999,padding:"5px 12px",fontSize:11,fontWeight:600,cursor:"pointer",transition:"all .2s"}}>{linkCopied?"✓ Copied":"🔗 Copy link"}</button>
+                  <button onClick={shareWhatsApp} style={{background:"transparent",border:`1px solid #25D366`,color:"#25D366",borderRadius:999,padding:"5px 12px",fontSize:11,fontWeight:600,cursor:"pointer"}}>💬 WhatsApp</button>
+                  <button onClick={addToCompare} style={{background:"transparent",border:`1px solid ${C.magenta}`,color:C.lavender,borderRadius:999,padding:"5px 12px",fontSize:11,fontWeight:600,cursor:"pointer"}}>＋ Compare</button>
+                </div>
+              </div>
+              <PriceTable r={result}/>
+            </Panel>
+          </div>
+
+          {/* METRICS */}
+          <div className="vr-sticky vr-scroll vr-rise vr-rise-3" style={{position:"sticky",top:80,maxHeight:"calc(100vh - 104px)",overflowY:"auto",paddingRight:4}}>
+            <Panel>
+              <h2 style={{fontFamily:FR,fontSize:19,margin:"0 0 2px"}}>Computed</h2>
+              <div style={{fontSize:11,color:C.lavender,opacity:.7,marginBottom:6}}>{result.product.series} · P{result.pitch}</div>
+              <Metric label="Built screen" value={`${num(result.builtWft,2)} × ${num(result.builtHft,2)}`} unit="ft" accent={C.amber} sub={`${num(result.builtWmm)} × ${num(result.builtHmm)} mm · snapped to whole cabinets`}/>
+              <Metric label="Cabinets (W × H)" value={`${result.cabCountW} × ${result.cabCountH}`} sub={`${result.totalCabs} cabinets · ${num(result.totalMods)} modules`}/>
+              <Metric label="Pixel resolution" value={`${num(result.pxW)} × ${num(result.pxH)}`} sub={`${num(result.totalPixels)} px · pitch ${result.pitch}mm`}/>
+              <Metric label="Diagonal · Aspect" value={`${num(result.diagInches,1)}″ · ${result.aspectRatio}`} sub={`${num(result.pixelDensitySqm)} px/sqm · min view ${num(result.minViewingDistanceM,1)} m`}/>
+              <Metric label="Active area" value={num(result.areaSqft,1)} unit="sqft" sub={`${result.ports} controller port(s)`}/>
+              <Metric label="Brightness · Refresh" value={`${num(result.tech.brightnessNits)} nits · ${num(result.tech.refreshHz)} Hz`} sub={`${result.tech.displayTech||""} · ${result.tech.ipRating||""}`}/>
+              <Metric label="Weight · Supply" value={`${num(result.screenWeightKg)} kg · ${num(result.recommendedSupplyKw)} kW`} sub={`avg ${num(result.avgPowerW/1000,2)} kW · max ${num(result.maxPowerW/1000,2)} kW`}/>
+              {mode==="curved"&&cv&&(<>
+                <Metric label="Radius (R)" value={num(cv.R/1000,2)} unit="m" accent={C.amber} sub={`= ${num(cv.R,0)} mm`}/>
+                <Metric label={cv.curveType==="outer"?"Sagitta · cantilever":"Sagitta · depth"} value={num(cv.sag,0)} unit="mm" sub={`arc length ${num(cv.arcLen,0)} mm`}/>
+                <Metric label="Per-joint back gap" value={num(cv.gapPerJoint,1)} unit="mm" accent={verdictColor(cv.verdict)} sub={`wedge ${num(cv.cabAngleDeg,2)}° · ${cv.verdict}`}/>
+              </>)}
+              <Metric label="Grand Total" value={<AnimatedNumber value={result.grandTotal} format={E.fmtINR}/>} accent={C.magenta} sub={`incl. GST · subtotal ${E.fmtINR(result.subtotal)}`}/>
+              <div style={{marginTop:14,padding:12,background:C.navy,borderRadius:8,fontSize:11,color:C.lavender,opacity:.7,fontFamily:MO,lineHeight:1.5}}>
+                {dbErr==="offline"?"⚠ Using built-in price fallback (open via a web server to read pixel-data.xml). ":""}
+                Export PDF generates a clean spec + quote sheet with drawings.
+              </div>
+            </Panel>
+          </div>
+
+        </div>
+        <div style={{padding:"22px 0 8px",borderTop:`1px solid ${C.line}`,marginTop:22,position:"relative"}}>
+          <div style={{textAlign:"center"}}>
+            <div style={{fontSize:10.5,color:C.lavender,opacity:.55,marginBottom:5}}>⚠ This is a tool — it can make mistakes. Verify every quote before sharing or ordering.</div>
+            <div style={{fontFamily:MO,fontSize:10,color:C.lavender,opacity:.5,letterSpacing:1.2}}>© {new Date().getFullYear()} Visual Rhyme Pvt. Ltd. · Kathan Mehta · All rights reserved.</div>
+          </div>
+          <div style={{position:"absolute",right:8,bottom:6,fontSize:9.5,color:C.lavender,opacity:.4,letterSpacing:.6,fontStyle:"italic"}}>Powered by Microtronix Solution</div>
+        </div>
+      </div>
+
+      <Assistant api={assistantApi}/>
+      {historyOpen && <HistoryPanel history={history} onOpen={openQuote} onDelete={deleteQuote} onClose={()=>setHistoryOpen(false)}/>}
+      {compareOpen && <ComparePanel items={compareSet} db={db} onLoad={(cfg)=>{openQuote(cfg);setCompareOpen(false);}} onRemove={removeCompare} onClear={()=>saveCompare([])} onClose={()=>setCompareOpen(false)}/>}
+    </div>
+    <PrintSheet r={result} meta={meta}/>
+    </div>
+  );
+}
+
+
+
+export default App;

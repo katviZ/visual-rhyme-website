@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import PixelQuotePro from './PixelQuotePro';
+import PixelQuoteMax from './PixelQuoteMax';
 
 export default function QuoteModal({ isOpen, onClose }) {
   useEffect(() => {
@@ -37,7 +37,7 @@ export default function QuoteModal({ isOpen, onClose }) {
           aria-label="Pixel Quote Pro"
         >
           <motion.div
-            className="quote-modal-content"
+            className="quote-modal-content quote-modal-content--max"
             data-lenis-prevent
             initial={{ opacity: 0, scale: 0.95, y: 30 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -53,7 +53,7 @@ export default function QuoteModal({ isOpen, onClose }) {
                 <path d="M18 6L6 18M6 6l12 12" />
               </svg>
             </button>
-            <PixelQuotePro />
+            <PixelQuoteMax />
           </motion.div>
         </motion.div>
       )}

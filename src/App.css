@@ -2907,6 +2907,13 @@ a.footer-v2__contact-item:hover .footer-v2__contact-value {
               #06040a;
   border: 1px solid rgba(123, 45, 142, 0.2);
   border-radius: 20px;
+}
+
+.quote-modal-content--max {
+  max-width: 1500px;
+  width: 96vw;
+  max-height: 94vh;
+  padding: 0;
   box-shadow: 0 25px 80px rgba(123, 45, 142, 0.15), 0 0 0 1px rgba(123, 45, 142, 0.08);
 }
 
