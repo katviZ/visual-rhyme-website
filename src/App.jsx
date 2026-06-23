@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react';
+import { SpeedInsights } from '@vercel/speed-insights/react';
 import CustomCursor from './components/ui/CustomCursor';
 import SmoothScroll from './components/ui/SmoothScroll';
 import Preloader from './components/ui/Preloader';
@@ -57,6 +58,7 @@ export default function App() {
       <Footer onOpenGuide={openGuide} />
       <QuoteModal isOpen={quoteOpen} onClose={closeQuote} />
       <LeadCaptureModal isOpen={guideOpen} onClose={closeGuide} />
+      <SpeedInsights />
     </>
   );
 }
