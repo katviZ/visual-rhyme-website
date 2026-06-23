@@ -1,8 +1,10 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import PixelQuoteMax from './PixelQuoteMax';
 
 export default function QuoteModal({ isOpen, onClose }) {
+  const historyPushedRef = useRef(false);
+
   useEffect(() => {
     document.body.style.overflow = isOpen ? 'hidden' : '';
     const lenis = typeof window !== 'undefined' ? window.__lenis : null;
@@ -16,11 +18,37 @@ export default function QuoteModal({ isOpen, onClose }) {
     };
   }, [isOpen]);
 
+  // Browser back-button handling: push a history state when modal opens so
+  // pressing "back" closes the modal instead of navigating off the site.
   useEffect(() => {
-    const handleEsc = (e) => { if (e.key === 'Escape') onClose(); };
+    if (isOpen) {
+      window.history.pushState({ modal: 'pqm' }, '');
+      historyPushedRef.current = true;
+      const onPop = () => {
+        historyPushedRef.current = false;
+        onClose();
+      };
+      window.addEventListener('popstate', onPop);
+      return () => window.removeEventListener('popstate', onPop);
+    }
+  }, [isOpen, onClose]);
+
+  // If user closes via X / Esc / overlay click, consume our pushed history entry
+  // so the URL doesn't keep a stale modal state.
+  const handleClose = () => {
+    if (historyPushedRef.current && window.history.state && window.history.state.modal === 'pqm') {
+      historyPushedRef.current = false;
+      window.history.back();
+    } else {
+      onClose();
+    }
+  };
+
+  useEffect(() => {
+    const handleEsc = (e) => { if (e.key === 'Escape') handleClose(); };
     if (isOpen) window.addEventListener('keydown', handleEsc);
     return () => window.removeEventListener('keydown', handleEsc);
-  }, [isOpen, onClose]);
+  }, [isOpen]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <AnimatePresence>
@@ -31,10 +59,10 @@ export default function QuoteModal({ isOpen, onClose }) {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.3 }}
-          onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+          onClick={(e) => { if (e.target === e.currentTarget) handleClose(); }}
           role="dialog"
           aria-modal="true"
-          aria-label="Pixel Quote Pro"
+          aria-label="Pixel Quote Max"
         >
           <motion.div
             className="quote-modal-content quote-modal-content--max"
@@ -46,7 +74,7 @@ export default function QuoteModal({ isOpen, onClose }) {
           >
             <button
               className="quote-modal-close"
-              onClick={onClose}
+              onClick={handleClose}
               aria-label="Close quote tool"
             >
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">

@@ -42,7 +42,7 @@ const companyLinks = [
   { label: 'Contact', href: '#contact' },
 ];
 const supportLinks = [
-  { label: 'Pixel Quote Pro', href: '#hero' },
+  { label: 'Pixel Quote Max', href: '#hero' },
   { label: 'Warranty', href: '#technology' },
   { label: 'Pan-India Install', href: '#process' },
   { label: 'Spare Modules', href: '#technology' },

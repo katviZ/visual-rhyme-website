@@ -64,7 +64,7 @@ export default function Navbar({ onOpenQuote }) {
           ))}
           <MagneticWrapper>
             <button className="btn btn--primary btn--nav" onClick={() => { setMenuOpen(false); onOpenQuote(); }}>
-              Pixel Quote Pro
+              Pixel Quote Max
             </button>
           </MagneticWrapper>
         </div>

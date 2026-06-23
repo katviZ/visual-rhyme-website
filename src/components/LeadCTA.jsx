@@ -46,7 +46,7 @@ export default function LeadCTA({ onOpenQuote }) {
         <div className="lead-cta-pin__buttons">
           <MagneticWrapper>
             <button className="btn btn--primary btn--lg" onClick={onOpenQuote}>
-              <span>Pixel Quote Pro</span>
+              <span>Pixel Quote Max</span>
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
             </button>
           </MagneticWrapper>
