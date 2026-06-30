@@ -14,3 +14,6 @@ dist
 __pycache__/
 *.pyc
 scripts/__pycache__/
+
+# Local scratch hosts (LED Wall Planner integration sandbox, etc.)
+_planner_host/

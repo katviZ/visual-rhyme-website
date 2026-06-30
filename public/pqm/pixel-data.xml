@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  PIXEL QUOTE MAX — Product & Pricing Database
+  ============================================
+  This file is the SINGLE SOURCE OF TRUTH for all prices and product specs.
+  Edit values here and refresh the app — no code changes needed.
+
+  • rate   = INR per square foot of LED
+  • gst    = GST % for that pitch
+  • controllers / installTiers = priced in INR
+  • meta/curveSurchargePct = extra % added to LED cost for curved fabrication
+  • module W/H and cabinet W/H are in millimetres (mm)
+-->
+<pixelData>
+
+  <meta currency="INR"
+        curveSurchargePct="15"
+        pixelsPerPortMini="650000"
+        pixelsPerPortMicro="500000"
+        controllerGst="18"
+        installGst="18" />
+
+  <!-- Installation rate (INR/sqft) by total built area -->
+  <installTiers>
+    <tier maxArea="50"     rate="300" />
+    <tier maxArea="150"    rate="200" />
+    <tier maxArea="999999" rate="150" />
+  </installTiers>
+
+  <!-- Video controller price (INR) by required port count -->
+  <controllers type="mini">
+    <tier maxPorts="1"   price="15000" />
+    <tier maxPorts="2"   price="25000" />
+    <tier maxPorts="3"   price="45000" />
+    <tier maxPorts="5"   price="75000" />
+    <tier maxPorts="7"   price="125000" />
+    <tier maxPorts="999" price="150000" />
+  </controllers>
+  <controllers type="micro">
+    <tier maxPorts="3"   price="125000" />
+    <tier maxPorts="7"   price="150000" />
+    <tier maxPorts="12"  price="200000" />
+    <tier maxPorts="20"  price="250000" />
+    <tier maxPorts="999" price="350000" />
+  </controllers>
+
+  <!-- Product catalogue. moduleW/H and cabinet W/H in mm. -->
+  <products>
+
+    <product id="outdoor" series="Reyansh Outdoor" type="MiniLED" env="outdoor" moduleW="320" moduleH="160"
+             displayTech="SMD MiniLED" ledType="TrueHue SMD1921 (Nationstar/Kinglight)"
+             brightnessNits="5500" refreshHz="3840" bitDepth="14"
+             viewingAngleDeg="155" contrastStatic="6000" contrastDynamic="200000"
+             colorGamutSrgbPct="110" colorGamutRec2020Pct="85"
+             ipRating="IP65" maxPowerSqm="800" avgPowerSqm="500"
+             warrantyYears="5" cabinetDepthMm="75" moduleDepthMm="16"
+             lifespanHours="100000" opTempMin="-10" opTempMax="50" vdMultiplier="1.0">
+      <cabinet w="320"  h="160"  label="320×160mm Module" weight="1.5" type="module" />
+      <cabinet w="640"  h="640"  label="640×640mm"   weight="8" />
+      <cabinet w="960"  h="960"  label="960×960mm"   weight="14" />
+      <cabinet w="960"  h="1280" label="960×1280mm"  weight="18" />
+      <cabinet w="1280" h="1280" label="1280×1280mm" weight="23" />
+      <pitch pp="6.67" rate="5000"  gst="18" sku="Reyansh Outdoor P6.67" />
+      <pitch pp="4"    rate="5500"  gst="18" sku="Reyansh Outdoor P4" />
+      <pitch pp="3"    rate="7250"  gst="18" sku="Reyansh Outdoor P3" />
+      <pitch pp="2.5"  rate="12500" gst="18" sku="Reyansh Outdoor P2.5" />
+    </product>
+
+    <product id="indoor" series="Reyansh Indoor" type="MiniLED" env="indoor" moduleW="320" moduleH="160"
+             displayTech="SMD MiniLED" ledType="Kinglight TrueHue MiniLED"
+             brightnessNits="700" refreshHz="7680" bitDepth="14"
+             viewingAngleDeg="160" contrastStatic="6000" contrastDynamic="200000"
+             colorGamutSrgbPct="120" colorGamutRec2020Pct="93"
+             ipRating="IP54" maxPowerSqm="400" avgPowerSqm="200"
+             warrantyYears="2" cabinetDepthMm="80" moduleDepthMm="16"
+             lifespanHours="100000" opTempMin="-10" opTempMax="50" vdMultiplier="1.0">
+      <cabinet w="320" h="160" label="320×160mm Module" weight="1.2" type="module" />
+      <cabinet w="640" h="480" label="640×480mm" weight="6" />
+      <cabinet w="640" h="640" label="640×640mm" weight="7" />
+      <pitch pp="2.5"  rate="7500"  gst="18" sku="Reyansh Indoor P2.5" />
+      <pitch pp="2"    rate="9500"  gst="18" sku="Reyansh Indoor P2 (SMD)" />
+      <pitch pp="1.86" rate="10500" gst="18" sku="Reyansh Indoor P1.86" />
+      <pitch pp="1.56" rate="23000" gst="28" sku="Reyansh Indoor P1.56" />
+    </product>
+
+    <product id="microled" series="Leynna Cosmo" type="MicroLED" env="indoor" moduleW="300" moduleH="168.75"
+             displayTech="COB MicroLED" ledType="Tejas MicroLED · Flip Chip COB · 3-in-1 card"
+             brightnessNits="800" refreshHz="3840" bitDepth="14"
+             viewingAngleDeg="175" contrastStatic="10000" contrastDynamic="350000"
+             colorGamutSrgbPct="130" colorGamutRec2020Pct="75"
+             ipRating="IP54" maxPowerSqm="350" avgPowerSqm="200"
+             warrantyYears="3" cabinetDepthMm="45" moduleDepthMm="14"
+             lifespanHours="100000" opTempMin="0" opTempMax="40" vdMultiplier="1.5">
+      <cabinet w="600"   h="337.5" label="600×337.5mm" weight="5" />
+      <cabinet w="609.6" h="342.9" label="609.6×342.9mm" weight="5" />
+      <pitch pp="1.56" rate="23000" gst="28" sku="Leynna Cosmo P1.56" />
+      <pitch pp="1.25" rate="25000" gst="28" sku="Leynna Cosmo P1.25" />
+      <pitch pp="1.17" rate="23500" gst="28" sku="Leynna Cosmo P1.17" />
+      <pitch pp="0.93" rate="35000" gst="28" sku="Leynna Cosmo P0.93 Virtual" />
+      <pitch pp="0.78" rate="60000" gst="28" sku="Leynna Cosmo P0.78" />
+    </product>
+
+    <product id="sapphire" series="Leynna Sapphire" type="MicroLED" env="indoor" moduleW="300" moduleH="168.75"
+             displayTech="Premium COB MicroLED" ledType="Tejas MicroLED 1-bin · Flip Chip COB · Sapphire substrate · Graviton Black"
+             brightnessNits="1800" refreshHz="7680" bitDepth="16"
+             viewingAngleDeg="175" contrastStatic="20000" contrastDynamic="1000000"
+             colorGamutSrgbPct="145" colorGamutRec2020Pct="90"
+             ipRating="IP65" maxPowerSqm="380" avgPowerSqm="220"
+             warrantyYears="3" cabinetDepthMm="44.5" moduleDepthMm="12"
+             lifespanHours="100000" opTempMin="0" opTempMax="40" vdMultiplier="1.5">
+      <cabinet w="600"   h="337.5" label="600×337.5mm"   weight="5" />
+      <cabinet w="609.6" h="342.9" label="609.6×342.9mm" weight="5" />
+      <pitch pp="1.53" rate="37800" gst="28" sku="Leynna Sapphire P1.53" />
+      <pitch pp="1.23" rate="42000" gst="28" sku="Leynna Sapphire P1.23" />
+      <pitch pp="0.95" rate="66000" gst="28" sku="Leynna Sapphire P0.95" />
+    </product>
+
+  </products>
+</pixelData>

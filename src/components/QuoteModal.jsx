@@ -1,6 +1,5 @@
 import { useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import PixelQuoteMax from './PixelQuoteMax';
 
 export default function QuoteModal({ isOpen, onClose }) {
   const historyPushedRef = useRef(false);
@@ -81,7 +80,12 @@ export default function QuoteModal({ isOpen, onClose }) {
                 <path d="M18 6L6 18M6 6l12 12" />
               </svg>
             </button>
-            <PixelQuoteMax />
+            <iframe
+              src="/pqm/index.html"
+              title="Pixel Quote Max"
+              className="quote-modal-iframe"
+              loading="lazy"
+            />
           </motion.div>
         </motion.div>
       )}

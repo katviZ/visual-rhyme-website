@@ -108,7 +108,7 @@ export default function Contact() {
             </div>
             <div className="contact__detail">
               <span className="contact__detail-label">Experience Centre</span>
-              <address className="contact__detail-address">193, 9th Floor, Silver Radiance 4, off SG Highway, Gota, Ahmedabad – 382481</address>
+              <address className="contact__detail-address">913, 9th Floor, Silver Radiance 4, off SG Highway, Gota, Ahmedabad – 382481</address>
             </div>
           </div>
 
