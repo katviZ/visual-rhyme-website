@@ -21,6 +21,7 @@ import Footer from './components/Footer';
 import QuoteModal from './components/QuoteModal';
 import BuyersGuideCTA from './components/BuyersGuideCTA';
 import LeadCaptureModal from './components/LeadCaptureModal';
+import QuoteStudioStrip from './components/QuoteStudioStrip';
 
 export default function App() {
   const [quoteOpen, setQuoteOpen] = useState(false);
@@ -46,6 +47,7 @@ export default function App() {
         <StatsMarquee />
         <About />
         <Products onOpenQuote={openQuote} />
+        <QuoteStudioStrip onOpenQuote={openQuote} />
         <Technology />
         <Applications />
         <Showcase />

@@ -42,7 +42,7 @@ const companyLinks = [
   { label: 'Contact', href: '#contact' },
 ];
 const supportLinks = [
-  { label: 'Pixel Quote Max', href: '#hero' },
+  { label: 'Quote Studio', href: '/quote' },
   { label: 'Warranty', href: '#technology' },
   { label: 'Pan-India Install', href: '#process' },
   { label: 'Spare Modules', href: '#technology' },
@@ -59,7 +59,7 @@ export default function Footer({ onOpenGuide }) {
       <div className="footer-v2__inner">
         <div className="footer-v2__brand">
           <a href="#hero" className="footer-v2__logo">
-            <LogoIcon size={32} color="#A855F7" />
+            <LogoIcon size={32} color="#BB50EE" />
             <span className="logo-text">Visual<span className="logo-accent">Rhyme</span></span>
           </a>
           <p className="footer-v2__tagline">

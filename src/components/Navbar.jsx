@@ -40,7 +40,7 @@ export default function Navbar({ onOpenQuote }) {
     >
       <div className="navbar__inner">
         <a href="#hero" className="navbar__logo" aria-label="Visual Rhyme - Home">
-          <LogoIcon size={32} color="#A855F7" />
+          <LogoIcon size={32} color="#BB50EE" />
           <span className="logo-text">Visual<span className="logo-accent">Rhyme</span></span>
         </a>
 
@@ -64,7 +64,7 @@ export default function Navbar({ onOpenQuote }) {
           ))}
           <MagneticWrapper>
             <button className="btn btn--primary btn--nav" onClick={() => { setMenuOpen(false); onOpenQuote(); }}>
-              Pixel Quote Max
+              Quote Studio
             </button>
           </MagneticWrapper>
         </div>

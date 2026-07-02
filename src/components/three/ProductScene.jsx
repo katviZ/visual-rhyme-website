@@ -144,12 +144,12 @@ function DisplayUnit({ moduleType, gradient }) {
         {/* Top bezel accent strip */}
         <mesh position={[0, m.height / 2 + 0.015, 0.042]}>
           <boxGeometry args={[m.width + 0.06, 0.015, 0.004]} />
-          <meshBasicMaterial color="#A855F7" transparent opacity={0.75} toneMapped={false} />
+          <meshBasicMaterial color="#BB50EE" transparent opacity={0.75} toneMapped={false} />
         </mesh>
         {/* Bottom bezel accent strip */}
         <mesh position={[0, -m.height / 2 - 0.015, 0.042]}>
           <boxGeometry args={[m.width + 0.06, 0.015, 0.004]} />
-          <meshBasicMaterial color="#7C3AED" transparent opacity={0.45} toneMapped={false} />
+          <meshBasicMaterial color="#9D20D6" transparent opacity={0.45} toneMapped={false} />
         </mesh>
       </Float>
     </group>
@@ -157,7 +157,7 @@ function DisplayUnit({ moduleType, gradient }) {
 }
 
 /* ─── Product Scene ─── */
-export default function ProductScene({ gradient = ['#9333EA', '#A855F7'], moduleType = 'indoor' }) {
+export default function ProductScene({ gradient = ['#9D20D6', '#BB50EE'], moduleType = 'indoor' }) {
   return (
     <div style={{ width: '100%', height: '300px' }}>
       <Canvas
@@ -167,8 +167,8 @@ export default function ProductScene({ gradient = ['#9333EA', '#A855F7'], module
         style={{ background: 'transparent' }}
       >
         <ambientLight intensity={0.35} />
-        <pointLight position={[3, 2, 4]} intensity={1.2} color="#A855F7" />
-        <pointLight position={[-3, -1, 3]} intensity={0.5} color="#7C3AED" />
+        <pointLight position={[3, 2, 4]} intensity={1.2} color="#BB50EE" />
+        <pointLight position={[-3, -1, 3]} intensity={0.5} color="#9D20D6" />
         <pointLight position={[0, 0, 2.5]} intensity={0.8} color={gradient[1]} />
         <DisplayUnit moduleType={moduleType} gradient={gradient} />
         <OrbitControls

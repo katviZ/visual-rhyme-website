@@ -61,7 +61,7 @@ export default function QuoteModal({ isOpen, onClose }) {
           onClick={(e) => { if (e.target === e.currentTarget) handleClose(); }}
           role="dialog"
           aria-modal="true"
-          aria-label="Pixel Quote Max"
+          aria-label="Quote Studio — Pixel Quote Max"
         >
           <motion.div
             className="quote-modal-content quote-modal-content--max"
@@ -82,7 +82,7 @@ export default function QuoteModal({ isOpen, onClose }) {
             </button>
             <iframe
               src="/pqm/index.html"
-              title="Pixel Quote Max"
+              title="Quote Studio — Pixel Quote Max"
               className="quote-modal-iframe"
               loading="lazy"
             />

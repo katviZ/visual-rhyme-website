@@ -58,7 +58,7 @@ export default function Preloader() {
               animate={{ scale: [1, 1.06, 1], opacity: [0.85, 1, 0.85] }}
               transition={{ duration: 1.8, repeat: Infinity, ease: 'easeInOut' }}
             >
-              <LogoIcon size={64} color="#C084FC" />
+              <LogoIcon size={64} color="#BB50EE" />
             </motion.div>
 
             <div className="preloader__brand">

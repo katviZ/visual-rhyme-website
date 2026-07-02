@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#0A0010" />
+
+  <title>Quote Studio · Instant LED Wall Quote in 90 seconds — Visual Rhyme</title>
+  <meta name="description" content="Get an engineered LED wall quote in 90 seconds — interactive 3D preview, structural load calculations, pricing per SKU, and a downloadable PDF spec. Built by Visual Rhyme (Ahmedabad). No salesperson required." />
+  <meta name="keywords" content="LED wall quote, MicroLED calculator, MiniLED pricing, structural PDF, LED display India, Visual Rhyme, Leynna Sapphire, Reyansh Outdoor, curved LED, pixel pitch calculator" />
+  <meta name="author" content="Visual Rhyme Pvt. Ltd." />
+  <meta name="robots" content="index, follow" />
+  <link rel="canonical" href="https://visualrhyme.digital/quote" />
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Visual Rhyme" />
+  <meta property="og:title" content="Quote Studio — Instant LED Wall Quote in 90 seconds" />
+  <meta property="og:description" content="Interactive 3D preview, structural load math, per-SKU pricing, downloadable PDF. Engineered by Visual Rhyme." />
+  <meta property="og:url" content="https://visualrhyme.digital/quote" />
+  <meta property="og:image" content="https://visualrhyme.digital/pqm/logo.png" />
+  <meta property="og:locale" content="en_IN" />
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Quote Studio — Instant LED Wall Quote" />
+  <meta name="twitter:description" content="Get an engineered LED wall quote in 90 seconds — 3D preview, structural PDF, pricing." />
+  <meta name="twitter:image" content="https://visualrhyme.digital/pqm/logo.png" />
+
+  <!-- Structured data: SoftwareApplication + Offer -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "Visual Rhyme Quote Studio",
+    "alternateName": "Pixel Quote Max",
+    "applicationCategory": "BusinessApplication",
+    "operatingSystem": "Web",
+    "url": "https://visualrhyme.digital/quote",
+    "description": "Instant LED wall configurator with 3D preview, structural load math, and engineered pricing for MicroLED and MiniLED installations across India.",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "INR",
+      "availability": "https://schema.org/InStock"
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "Visual Rhyme Pvt. Ltd.",
+      "url": "https://visualrhyme.digital",
+      "logo": "https://visualrhyme.digital/pqm/logo.png",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "913, 9th Floor, Silver Radiance 4, off SG Highway, Gota",
+        "addressLocality": "Ahmedabad",
+        "postalCode": "382481",
+        "addressCountry": "IN"
+      }
+    }
+  }
+  </script>
+
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+  <style>
+    :root {
+      --brand: #9D20D6;
+      --brand-glow: #BB50EE;
+      --brand-void: #0A0010;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      height: 100%;
+      background: var(--brand-void);
+      color: #FFF;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      overflow: hidden;
+    }
+    .qs-topbar {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      background: linear-gradient(180deg, rgba(10,0,16,0.95) 0%, rgba(10,0,16,0.60) 100%);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(157, 32, 214, 0.15);
+      z-index: 10;
+    }
+    .qs-back {
+      color: rgba(255,255,255,0.75);
+      text-decoration: none;
+      font-size: 13px;
+      letter-spacing: 0.04em;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 14px;
+      border-radius: 8px;
+      transition: all 0.2s ease;
+    }
+    .qs-back:hover {
+      color: #FFF;
+      background: rgba(157, 32, 214, 0.12);
+    }
+    .qs-title {
+      font-size: 12px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--brand-glow);
+      font-weight: 600;
+      margin: 0;
+    }
+    .qs-badge {
+      font-size: 10px;
+      letter-spacing: 0.10em;
+      color: rgba(255,255,255,0.45);
+      font-weight: 500;
+    }
+    .qs-frame {
+      position: fixed;
+      top: 56px;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      width: 100%;
+      border: 0;
+      display: block;
+      background: var(--brand-void);
+    }
+    /* Visually-hidden but crawlable — real content for search engines and
+       screen readers, invisible to sighted users. */
+    .qs-crawl {
+      position: absolute;
+      left: -9999px;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+    }
+    @media (max-width: 640px) {
+      .qs-topbar { padding: 0 14px; height: 52px; }
+      .qs-frame { top: 52px; }
+      .qs-title { font-size: 11px; letter-spacing: 0.14em; }
+      .qs-badge { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="qs-topbar">
+    <a class="qs-back" href="/" aria-label="Back to Visual Rhyme homepage">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <path d="M19 12H5M12 19l-7-7 7-7"/>
+      </svg>
+      Back to Visual Rhyme
+    </a>
+    <h1 class="qs-title">Visual Rhyme · Quote Studio</h1>
+    <span class="qs-badge">v3 · 96 tests green</span>
+  </header>
+
+  <!-- Crawlable content for search engines -->
+  <div class="qs-crawl">
+    <h2>Visual Rhyme Quote Studio — Instant Engineered LED Wall Quote</h2>
+    <p>
+      Configure any Visual Rhyme LED wall (Leynna Sapphire MicroLED TVs, Leynna Cosmo
+      panels, Reyansh Indoor MiniLED, Reyansh Outdoor MiniLED, or Reyansh Flexible)
+      in 90 seconds. The tool gives you a real interactive 3D preview, structural
+      load calculations, per-SKU pricing, viewing-distance recommendations based on
+      the pixel × 3.438 arc-minute formula, and a downloadable PDF spec you can
+      hand to your architect or MEP consultant.
+    </p>
+    <p>
+      Built and calibrated by Visual Rhyme Pvt. Ltd., Ahmedabad. Powered by
+      Microtronix Solution. 96 automated engineering tests passing.
+    </p>
+    <ul>
+      <li>Flat and curved LED walls</li>
+      <li>Indoor and outdoor pixel pitches from P0.78 to P6.67</li>
+      <li>Structural weight and MCB sizing</li>
+      <li>Peak power calculation</li>
+      <li>Downloadable PDF spec sheet</li>
+    </ul>
+  </div>
+
+  <iframe
+    class="qs-frame"
+    src="/pqm/index.html"
+    title="Visual Rhyme Quote Studio — Pixel Quote Max v3"
+    loading="eager"
+    allow="clipboard-write"
+  ></iframe>
+</body>
+</html>

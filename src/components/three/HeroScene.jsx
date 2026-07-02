@@ -164,7 +164,7 @@ function LEDPanel() {
       {/* Far glow halo — torus behind panel */}
       <mesh ref={haloRef} position={[0, 0, -0.6]}>
         <torusGeometry args={[3.0, 0.035, 24, 128]} />
-        <meshBasicMaterial color="#c084fc" transparent opacity={0} blending={THREE.AdditiveBlending} toneMapped={false} />
+        <meshBasicMaterial color="#BB50EE" transparent opacity={0} blending={THREE.AdditiveBlending} toneMapped={false} />
       </mesh>
       {/* Inner ring */}
       <mesh ref={ringRef} position={[0, 0, -0.4]}>
@@ -181,12 +181,12 @@ function LEDPanel() {
       {/* Bezel accent — top */}
       <mesh position={[0, 1.025, 0.041]}>
         <boxGeometry args={[3.62, 0.015, 0.003]} />
-        <meshBasicMaterial color="#9333EA" transparent opacity={0.7} />
+        <meshBasicMaterial color="#9D20D6" transparent opacity={0.7} />
       </mesh>
       {/* Bezel accent — bottom */}
       <mesh position={[0, -1.025, 0.041]}>
         <boxGeometry args={[3.62, 0.015, 0.003]} />
-        <meshBasicMaterial color="#9333EA" transparent opacity={0.4} />
+        <meshBasicMaterial color="#9D20D6" transparent opacity={0.4} />
       </mesh>
 
       {/* Seamless MicroLED screen with liquid shader */}
@@ -195,13 +195,13 @@ function LEDPanel() {
       {/* Soft background glow plane */}
       <mesh ref={glowRef} position={[0, 0, -0.25]}>
         <planeGeometry args={[8.5, 5.8]} />
-        <meshBasicMaterial color="#7C3AED" transparent opacity={0} side={THREE.DoubleSide} blending={THREE.AdditiveBlending} />
+        <meshBasicMaterial color="#9D20D6" transparent opacity={0} side={THREE.DoubleSide} blending={THREE.AdditiveBlending} />
       </mesh>
 
       {/* Logo dot */}
       <mesh position={[0, -0.97, 0.046]}>
         <circleGeometry args={[0.02, 16]} />
-        <meshBasicMaterial color="#A855F7" transparent opacity={0.8} />
+        <meshBasicMaterial color="#BB50EE" transparent opacity={0.8} />
       </mesh>
     </group>
   );
@@ -524,7 +524,7 @@ function BokehOrbs() {
         scale: 0.8 + Math.random() * 1.8,
         speed: 0.15 + Math.random() * 0.35,
         phase: Math.random() * Math.PI * 2,
-        color: i % 3 === 0 ? '#c084fc' : i % 3 === 1 ? '#7c3aed' : '#a855f7',
+        color: i % 3 === 0 ? '#BB50EE' : i % 3 === 1 ? '#9D20D6' : '#BB50EE',
       })),
     []
   );
@@ -606,7 +606,7 @@ function FloatingShapes() {
             {s.geo === 'icosahedron' && <icosahedronGeometry args={[1, 0]} />}
             {s.geo === 'dodecahedron' && <dodecahedronGeometry args={[1, 0]} />}
             {s.geo === 'tetrahedron' && <tetrahedronGeometry args={[1, 0]} />}
-            <MeshDistortMaterial color="#7C3AED" transparent opacity={0} wireframe distort={0.15} speed={1.5} />
+            <MeshDistortMaterial color="#9D20D6" transparent opacity={0} wireframe distort={0.15} speed={1.5} />
           </mesh>
         </Float>
       ))}
@@ -673,10 +673,10 @@ function Lighting() {
   return (
     <>
       <ambientLight intensity={0.25} />
-      <pointLight position={[0, 0, 4]} intensity={0.8} color="#A855F7" />
-      <pointLight position={[-4, 3, 2]} intensity={0.4} color="#7C3AED" />
-      <pointLight position={[4, -2, 3]} intensity={0.3} color="#9333EA" />
-      <spotLight position={[0, 5, 5]} angle={0.4} penumbra={1} intensity={0.6} color="#C084FC" />
+      <pointLight position={[0, 0, 4]} intensity={0.8} color="#BB50EE" />
+      <pointLight position={[-4, 3, 2]} intensity={0.4} color="#9D20D6" />
+      <pointLight position={[4, -2, 3]} intensity={0.3} color="#9D20D6" />
+      <spotLight position={[0, 5, 5]} angle={0.4} penumbra={1} intensity={0.6} color="#BB50EE" />
     </>
   );
 }

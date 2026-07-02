@@ -59,7 +59,7 @@ export default function About() {
         <motion.div className="about__visual" style={{ y: imgY }}>
           <div className="about__image-placeholder">
             <div className="about__image-glow" />
-            <LogoIcon size={120} color="rgba(147, 51, 234, 0.15)" />
+            <LogoIcon size={120} color="rgba(157, 32, 214, 0.15)" />
           </div>
         </motion.div>
       </div>

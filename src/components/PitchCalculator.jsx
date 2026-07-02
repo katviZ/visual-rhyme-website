@@ -2,16 +2,16 @@ import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const pitchOptions = [
-  { pitch: 0.78,  product: 'Leynna Real Pixel P0.78',  family: 'MicroLED · MCBP Pro S',       tag: 'Reference' },
-  { pitch: 0.93,  product: 'Leynna Real Pixel P0.93',  family: 'MicroLED · MCBP Pro S',       tag: 'Broadcast' },
-  { pitch: 1.17,  product: 'Leynna Real Pixel P1.17',  family: 'MicroLED · Custom COB',       tag: 'Premium' },
-  { pitch: 1.25,  product: 'Leynna Real Pixel P1.25',  family: 'MicroLED · MCBP Pro S',       tag: 'Entry Premium' },
-  { pitch: 1.56,  product: 'Leynna Real Pixel P1.56',  family: 'MicroLED · MCBP Pro S',       tag: 'Premium' },
-  { pitch: 1.86,  product: 'Leynna Real Pixel P1.86',  family: 'MicroLED · MCUP Pro S · 22-bit', tag: 'Flagship' },
-  { pitch: 2.5,   product: 'Reyansh Indoor P2.5',      family: 'MiniLED · SMD/GOB',           tag: 'Volume' },
-  { pitch: 3.076, product: 'Reyansh Outdoor P3',       family: 'Outdoor · SMD IP65',          tag: 'Premium DOOH' },
-  { pitch: 4,     product: 'Reyansh Outdoor P4',       family: 'Outdoor · SMD IP65',          tag: 'DOOH' },
-  { pitch: 6.67,  product: 'Reyansh Outdoor P6.67',    family: 'Outdoor · SMD IP65',          tag: 'Billboard' },
+  { pitch: 0.93, product: 'Leynna Cosmo P0.93 Ultra', family: 'MicroLED · Sapphire Pixel Engine', tag: 'Reference' },
+  { pitch: 1.17, product: 'Leynna Cosmo P1.17',       family: 'MicroLED · Boardroom-grade',       tag: 'Premium' },
+  { pitch: 1.25, product: 'Leynna Cosmo P1.25',       family: 'MicroLED · Executive lobby',       tag: 'Premium' },
+  { pitch: 1.56, product: 'Leynna Cosmo P1.56',       family: 'MicroLED · Volume premium',        tag: 'Entry MicroLED' },
+  { pitch: 1.86, product: 'Reyansh Indoor P1.86',     family: 'MiniLED · SMD / GOB',              tag: 'Mid-range' },
+  { pitch: 2,    product: 'Reyansh Indoor P2',        family: 'MiniLED · SMD / GOB',              tag: 'Corporate' },
+  { pitch: 2.5,  product: 'Reyansh Indoor P2.5',      family: 'MiniLED · SMD / GOB / GX',         tag: 'Workhorse' },
+  { pitch: 3.076,product: 'Reyansh Outdoor P3',       family: 'Outdoor · SMD IP65',               tag: 'Premium DOOH' },
+  { pitch: 4,    product: 'Reyansh Outdoor P4',       family: 'Outdoor · SMD IP65',               tag: 'DOOH Standard' },
+  { pitch: 6.67, product: 'Reyansh Outdoor P6.67 X',  family: 'Outdoor · Nationstar · Naked-eye 3D', tag: 'Billboard' },
 ];
 
 function recommend(distanceM) {
@@ -53,7 +53,7 @@ export default function PitchCalculator() {
             <motion.span
               key={distance}
               className="pitch-calc__distance-value"
-              initial={{ scale: 1.15, color: '#c084fc' }}
+              initial={{ scale: 1.15, color: '#BB50EE' }}
               animate={{ scale: 1, color: '#ffffff' }}
               transition={{ duration: 0.35 }}
             >

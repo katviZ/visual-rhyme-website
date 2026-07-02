@@ -41,10 +41,10 @@ const BrainIcon = () => (
 const PaletteIcon = () => (
   <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--purple-400)" strokeWidth="1.5" aria-hidden="true">
     <circle cx="12" cy="12" r="10"/>
-    <circle cx="8" cy="9" r="1.5" fill="#A855F7"/>
-    <circle cx="15" cy="8" r="1.5" fill="#C084FC"/>
-    <circle cx="16.5" cy="13" r="1.5" fill="#E9D5FF"/>
-    <circle cx="9" cy="14" r="1.5" fill="#7C3AED"/>
+    <circle cx="8" cy="9" r="1.5" fill="#BB50EE"/>
+    <circle cx="15" cy="8" r="1.5" fill="#BB50EE"/>
+    <circle cx="16.5" cy="13" r="1.5" fill="#EFD3FB"/>
+    <circle cx="9" cy="14" r="1.5" fill="#9D20D6"/>
     <path d="M6 18.5C8 21 14 21 17 17" strokeOpacity="0.3"/>
   </svg>
 );
